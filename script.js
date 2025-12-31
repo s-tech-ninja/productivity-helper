@@ -24,6 +24,29 @@ $(document).ready(function () {
             .replace(/'/g, "&#039;");
     }
 
+    // This funcion contains the core logic for making the checklist items sortable
+    function initChecklistSortable() {
+        $('#modal-checklist-buffer').sortable({
+            handle: ".checklist-drag-handle",
+            placeholder: "ui-sortable-placeholder",
+            axis: "y",
+            update: function (event, ui) {
+                const newBuffer = [];
+                $('#modal-checklist-buffer li').each(function () {
+                    const text = $(this).find('.checklist-text').text();
+                    const originalItem = checklistBuffer.find(item => item.text === text);
+                    newBuffer.push ({
+                        text: originalItem.text,
+                        done: originalItem?.done ?? false
+                    });
+                });
+                checklistBuffer = newBuffer;
+                $("#modal-checklist-buffer .btn-remove-buffer").each(function (index) {
+                    $(this).data('index', index);
+                });
+            }
+        });
+    }
     // NEW: Format milliseconds into a readable string (e.g., 1h 15m)
     function formatTime(ms) {
         if (!ms || ms < 0) return "0m";
@@ -325,11 +348,15 @@ $(document).ready(function () {
         checklistBuffer.forEach((item, index) => {
             $list.append(`
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${escapeHtml(item.text)}</span>
-                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-buffer" data-index="${index}">&times;</button>
+                    <i class="fas fa-grip-vertical checklist-drag-handle me-2" title="Drag to reorder"></i>
+                    <span class="flex-grow-1 checklist-text">${escapeHtml(item.text)}</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-buffer" data-index="${index}">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </li>
             `);
         });
+        initChecklistSortable();
     }
 
     $('#btn-save-task').click(function () {
@@ -346,6 +373,7 @@ $(document).ready(function () {
             id: id ? parseInt(id) : Date.now(),
             name: name,
             priority: priority,
+            createdAt: existingTask ? existingTask.createdAt : new Date().toLocaleString('sv-SE').slice(0, 16),
             dueDate: $('#taskDate').val(),
             dueTime: $('#taskTime').val(),
             description: $('#taskDesc').val(),
@@ -358,7 +386,10 @@ $(document).ready(function () {
             // NEW: Preserve existing time tracking data on edit
             timeSpent: existingTask ? existingTask.timeSpent : 0,
             isTimerRunning: existingTask ? existingTask.isTimerRunning : false,
-            currentSessionStartTime: existingTask ? existingTask.currentSessionStartTime : null
+            currentSessionStartTime: existingTask ? existingTask.currentSessionStartTime : null,
+            isCompleted: false,
+            completedAt: null,
+            focuScore: 0
         };
 
         if (id) {

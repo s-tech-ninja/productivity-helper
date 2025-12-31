@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focused Task Manager</title>
+    
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-fluid h-100 p-0">
+        <div class="row h-100 g-0">
+            
+            <!-- LEFT SIDEBAR (Master) -->
+            <div class="col-md-4 col-lg-3 sidebar d-flex flex-column h-100">
+                <div class="sidebar-header p-3 border-bottom">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-check-double me-2"></i>Task Manager</h5>
+                    <button class="btn btn-primary w-100 mt-3 shadow-sm" id="btn-create-task">
+                        <i class="fas fa-plus me-2"></i>New Task
+                    </button>
+                </div>
+                <div class="sidebar-content flex-grow-1 p-3 overflow-auto">
+                    <!-- Super Important Category -->
+                    <div class="task-category mb-4">
+                        <h6 class="text-uppercase fw-bold text-danger small border-bottom pb-1 mb-2">
+                            <i class="fas fa-fire me-1"></i> Super Important
+                        </h6>
+                        <div id="list-super-important" class="task-list" data-priority="Super Important">
+                            <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                    <!-- Important Category -->
+                    <div class="task-category mb-4">
+                        <h6 class="text-uppercase fw-bold text-warning small border-bottom pb-1 mb-2">
+                            <i class="fas fa-star me-1"></i> Important
+                        </h6>
+                        <div id="list-important" class="task-list" data-priority="Important">
+                             <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                    <!-- Not Important Category -->
+                    <div class="task-category mb-4">
+                        <h6 class="text-uppercase fw-bold text-info small border-bottom pb-1 mb-2">
+                            <i class="fas fa-coffee me-1"></i> Not Important
+                        </h6>
+                        <div id="list-not-important" class="task-list" data-priority="Not Important">
+                             <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- RIGHT PANEL (Detail) -->
+            <div class="col-md-8 col-lg-9 main-content h-100 overflow-auto bg-light">
+                <div id="empty-state" class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                    <i class="fas fa-tasks fa-3x mb-3 opacity-50"></i>
+                    <h4>Select a task to view details</h4>
+                </div>
+                <div id="task-detail-view" class="p-5 d-none">
+                    <!-- Detail Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <span id="detail-priority-badge" class="badge rounded-pill mb-2">Priority</span>
+                            <h2 id="detail-title" class="fw-bold mb-1">Task Title</h2>
+                            <div class="text-muted small">
+                                <i class="far fa-calendar me-1"></i> <span id="detail-date">No Date</span>
+                                <span class="mx-2">|</span>
+                                <i class="far fa-clock me-1"></i> <span id="detail-time">--:--</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <!-- Timer display and control for the main task -->
+                            <span class="badge bg-secondary me-2"><i class="fas fa-hourglass-start me-1"></i> Total Time: <span id="detail-total-time-spent">0m</span></span>
+                            <button id="btn-start-task-timer" class="btn btn-success btn-sm me-2 d-none"><i class="fas fa-play"></i> Start</button>
+                            <button id="btn-pause-task-timer" class="btn btn-warning btn-sm me-2 d-none"><i class="fas fa-pause"></i> Pause</button>
+                            <button class="btn btn-outline-secondary btn-sm" id="btn-edit-task"><i class="fas fa-edit"></i> Edit</button>
+                        </div>
+                    </div>
+                    <!-- New fields in detail view -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Project</h6>
+                            <div id="detail-project" class="p-2 bg-white border rounded shadow-sm small"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Estimated Time</h6>
+                            <div id="detail-time-estimate" class="p-2 bg-white border rounded shadow-sm small"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Energy Level</h6>
+                            <div id="detail-energy-level" class="p-2 bg-white border rounded shadow-sm small"></div>
+                        </div>
+                        <div class="col-12">
+                            <h6 class="fw-bold text-secondary text-uppercase small mb-1">Tags</h6>
+                            <div id="detail-tags" class="p-2 bg-white border rounded shadow-sm small"></div>
+                        </div>
+                    </div>
+
+
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                            <span>Progress</span>
+                            <span id="detail-progress-text">0%</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div id="detail-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-secondary text-uppercase small">Description</h6>
+                        <div id="detail-description" class="p-3 bg-white border rounded shadow-sm"></div>
+                    </div>
+                    <!-- Checklist -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-secondary text-uppercase small mb-3">Checklist</h6>
+                        <div id="detail-checklist" class="list-group">
+                            <!-- Checklist items injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Create/Edit Task Modal -->
+    <div class="modal fade" id="taskModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalTitle">Create Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm">
+                        <input type="hidden" id="taskId">
+                        <div class="row g-3">
+                            <!-- Task Name -->
+                            <div class="col-md-8">
+                                <label class="form-label fw-bold">Task Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="taskName" required placeholder="e.g., Fix Login Bug">
+                            </div>
+                            <!-- Priority -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Priority <span class="text-danger">*</span></label>
+                                <select class="form-select" id="taskPriority" required>
+                                    <option value="Super Important">Super Important</option>
+                                    <option value="Important">Important</option>
+                                    <option value="Not Important">Not Important</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Project -->
+                            <div class="col-md-6">
+                                <label class="form-label">Project / Category</label>
+                                <input type="text" class="form-control" id="taskProject" placeholder="e.g., Work, Personal, Learning">
+                            </div>
+                            <!-- Time Estimate -->
+                            <div class="col-md-6">
+                                <label class="form-label">Time Estimate (minutes)</label>
+                                <input type="number" class="form-control" id="taskTimeEstimate" min="0" placeholder="e.g., 60">
+                            </div>
+
+                            <!-- Date & Time -->
+                            <div class="col-md-6">
+                                <label class="form-label">Due Date</label>
+                                <input type="date" class="form-control" id="taskDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Due Time</label>
+                                <input type="time" class="form-control" id="taskTime">
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="taskDesc" rows="3" placeholder="Add details..."></textarea>
+                            </div>
+
+                            <!-- Tags -->
+                            <div class="col-md-6">
+                                <label class="form-label">Tags (comma separated)</label>
+                                <input type="text" class="form-control" id="taskTags" placeholder="e.g., #urgent, #bug, #review">
+                            </div>
+                            <!-- Energy Level -->
+                            <div class="col-md-6">
+                                <label class="form-label">Energy Level Required</label>
+                                <select class="form-select" id="taskEnergyLevel">
+                                    <option value="">Select...</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+
+                            <!-- Checklist Builder -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Checklist Items</label>
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" id="newChecklistItem" placeholder="Type an item and press Enter">
+                                    <button class="btn btn-outline-secondary" type="button" id="btnAddChecklist">Add</button>
+                                </div>
+                                <ul id="modal-checklist-buffer" class="list-group">
+                                    <!-- Buffer items injected here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-task">Save Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script> <!-- Required for Sortable -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

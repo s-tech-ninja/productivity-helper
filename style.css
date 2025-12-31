@@ -1,0 +1,170 @@
+
+/* General Layout & Typography */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #dee2e6;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+    z-index: 10;
+}
+
+.task-list {
+    min-height: 50px; /* Drop zone area */
+    padding-bottom: 20px;
+}
+
+/* Task Card Styling */
+.task-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-left: 4px solid transparent; /* Priority color holder */
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    cursor: default;
+    position: relative;
+}
+
+.task-card:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+.task-card.active {
+    background-color: #f0f8ff;
+    border-color: #cfe2ff;
+}
+
+/* Priority Colors (Left Border) */
+.task-card.priority-super-important { border-left-color: #dc3545; }
+.task-card.priority-important { border-left-color: #ffc107; }
+.task-card.priority-not-important { border-left-color: #0dcaf0; }
+
+/* Drag Handle */
+.drag-handle {
+    cursor: grab;
+    color: #adb5bd;
+    padding: 0 5px;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Hover Actions (View, Edit, Delete) */
+.task-actions {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.task-card:hover .task-actions {
+    opacity: 1;
+}
+
+/* Detail View */
+#detail-description {
+    white-space: pre-wrap; /* Preserve line breaks */
+    min-height: 60px;
+}
+
+/* Checklist Items */
+.checklist-item-done {
+    text-decoration: line-through;
+    color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar Progress Bar */
+.mini-progress {
+    height: 4px;
+    margin-top: 8px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+}
+.mini-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background-color: #20c997;
+    transition: width 0.3s ease;
+}
+
+
+
+/* Add this to your style.css */
+
+/* Modal Checklist Styling */
+#modal-checklist-buffer .list-group-item {
+    cursor: default; /* Default cursor for the item */
+}
+
+#modal-checklist-buffer .checklist-drag-handle {
+    cursor: grab;
+    color: #adb5bd;
+    margin-right: 10px;
+}
+
+#modal-checklist-buffer .checklist-drag-handle:active {
+    cursor: grabbing;
+    color: #6c757d;
+}
+
+/* Highlight drop target */
+.ui-sortable-placeholder {
+    background-color: #f8f9fa;
+    border: 1px dashed #ced4da;
+    visibility: visible !important;
+    height: 40px;
+}
+
+/* --- NEW CSS FOR FOCUS ANALYZER FEATURES --- */
+
+/* 
+** NECESSARY FIX: Make the timer icon in the sidebar always visible. **
+By default, it's inside .task-actions which is hidden. This rule overrides that.
+*/
+.task-card .timer-indicator {
+    opacity: 1 !important;
+}
+
+/* 
+** QOL: Add a pulsing animation to the active timer icon. **
+This helps draw the eye to the currently running task.
+*/
+.timer-indicator {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* 
+** QOL: Add a subtle transition for the Play/Pause buttons. **
+Makes their appearance/disappearance less jarring.
+*/
+#btn-start-task-timer,
+#btn-pause-task-timer {
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* 
+** QOL: Ensure new detail fields have a consistent height even when empty. **
+Prevents the layout from jumping around.
+*/
+#detail-project,
+#detail-time-estimate,
+#detail-energy-level,
+#detail-tags {
+    min-height: 38px; /* Matches the height of a standard input */
+}
+	
+
+

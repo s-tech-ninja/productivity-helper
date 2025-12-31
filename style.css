@@ -107,8 +107,11 @@ body {
     cursor: grab;
     color: #adb5bd;
     margin-right: 10px;
+    transition: color 0.2s;
 }
-
+#modal-checklist-buffer .checklist-drag-handle:hover {
+    color: #495057;
+}
 #modal-checklist-buffer .checklist-drag-handle:active {
     cursor: grabbing;
     color: #6c757d;
@@ -116,10 +119,12 @@ body {
 
 /* Highlight drop target */
 .ui-sortable-placeholder {
-    background-color: #f8f9fa;
-    border: 1px dashed #ced4da;
+    
+    background-color: #e9f5ff;
+    border: 1px dashed #007bff;
     visibility: visible !important;
     height: 40px;
+    margin-bottom: 4px;
 }
 
 /* --- NEW CSS FOR FOCUS ANALYZER FEATURES --- */

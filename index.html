@@ -185,7 +185,42 @@
                                 <label class="form-label">Due Time</label>
                                 <input type="time" class="form-control" id="taskTime">
                             </div>
-                            
+
+                            <div class="col-md-6">
+                                <label class="form-label">Completed Date</label>
+                                <input type="date" class="form-control" id="taskCompletedDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Completed Time</label>
+                                <input type="time" class="form-control" id="taskCompletedTime">
+                            </div>
+
+                            <div class="col-3">
+                                <label class="form-label">Completed Toggle</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="isCompleted">
+                                    <label class="form-check-label" for="isCompleted">Mark as Completed</label>
+                                </div>
+                            </div>
+
+                            <div class="col-3">
+                                <label class="form-label">Archive Toggle</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="isArchive">
+                                    <label class="form-check-label" for="isArchive">Mark as Archive</label>
+                                </div>
+                            </div>
+
+                            <!-- Focus Score -->
+                            <div class="col-6">
+                                <label class="form-label">Focus Score</label>
+                                <div class="d-flex align-items-center">
+                                    <input type="range" class="form-range" id="focusScoreSlider" min="0" max="5" step="1" value="0">
+                                    <span id="focusScoreValue" class="ms-3">5</span> <!-- Display the value -->
+                                </div>
+                            </div>
+
+
                             <!-- Description -->
                             <div class="col-12">
                                 <label class="form-label">Description</label>

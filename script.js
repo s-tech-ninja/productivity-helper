@@ -68,7 +68,11 @@ $(document).ready(function () {
 
     function loadTasks() {
         try {
-            const data = localStorage.getItem('tasks');
+            let data = '[]';
+            const data2 = localStorage.getItem('tasks');
+            if (data2) {
+                data = JSON.stringify((JSON.parse(data2)).filter((item) => item.isArchive == false));
+            }
             if (data) {
                 let loaded = JSON.parse(data);
 
@@ -80,8 +84,15 @@ $(document).ready(function () {
                     priority: task.priority,
                     dueDate: task.dueDate,
                     dueTime: task.dueTime,
+                    createdAt: task.createdAt,
+                    completedAt: task.completedAt,
+                    completedTime: task.completedTime,
+                    createdAt: task.createdAt,
+                    isCompleted: task.isCompleted || false,
+                    isArchive: task.isArchive || false,
                     description: task.description,
                     checklist: task.checklist || [],
+                    focusScore: task.focusScore || 0,
                     // Add new fields with defaults if they don't exist
                     project: task.project || '',
                     timeEstimate: task.timeEstimate || 0,
@@ -196,7 +207,16 @@ $(document).ready(function () {
         $('#task-detail-view').removeClass('d-none');
         $('#detail-title').text(task.name);
         $('#detail-date').text(task.dueDate || 'No Date');
+        $('#detail-completed-date').text(task.completedAt || 'No Date');
+        $('#detail-isCompleted').text(task.isCompleted || false);
+        $('#detail-isArchive').text(task.isArchive || false);
+        
+
+        $('#detail-focusScoreSlider').val(task.focusScore || 0);
+
+        
         $('#detail-time').text(task.dueTime || '--:--');
+        $('#detail-completed-time').text(task.completedTime || '--:--');
         
         // NEW: Populate new fields
         $('#detail-project').text(task.project || 'N/A');
@@ -256,6 +276,12 @@ $(document).ready(function () {
         $('#taskModal').modal('show');
     });
 
+    $('#focusScoreSlider').on('input', function() {
+        var value = $(this).val();
+        $('#focusScoreValue').text(value);
+    });
+
+
     $(document).on('click', '.btn-edit', function (e) {
         e.stopPropagation();
         const id = $(this).closest('.task-card').data('id');
@@ -267,6 +293,15 @@ $(document).ready(function () {
             $('#taskPriority').val(task.priority);
             $('#taskDate').val(task.dueDate);
             $('#taskTime').val(task.dueTime);
+            
+            $('#taskCompletedDate').val(task.completedAt);
+            $('#taskCompletedTime').val(task.completedTime);
+            $('#isCompleted').prop('checked', task.isCompleted || false);
+            $('#isArchive').prop('checked', task.isArchive || false);
+            
+            $('#focusScoreSlider').val(task.focusScore || 0);
+            $('#focusScoreValue').text(task.focusScore || 0);
+
             $('#taskDesc').val(task.description);
             // NEW: Populate new fields
             $('#taskProject').val(task.project);
@@ -373,8 +408,10 @@ $(document).ready(function () {
             id: id ? parseInt(id) : Date.now(),
             name: name,
             priority: priority,
-            createdAt: existingTask ? existingTask.createdAt : new Date().toLocaleString('sv-SE').slice(0, 16),
+            createdAt: existingTask && existingTask?.createdAt? existingTask.createdAt : new Date().toLocaleString('sv-SE').slice(0, 16),
             dueDate: $('#taskDate').val(),
+            completedAt: $('#taskCompletedDate').val(),
+            completedTime: $('#taskCompletedTime').val(),
             dueTime: $('#taskTime').val(),
             description: $('#taskDesc').val(),
             checklist: checklistBuffer,
@@ -384,12 +421,13 @@ $(document).ready(function () {
             tags: $('#taskTags').val(),
             energyLevel: $('#taskEnergyLevel').val(),
             // NEW: Preserve existing time tracking data on edit
-            timeSpent: existingTask ? existingTask.timeSpent : 0,
-            isTimerRunning: existingTask ? existingTask.isTimerRunning : false,
-            currentSessionStartTime: existingTask ? existingTask.currentSessionStartTime : null,
-            isCompleted: false,
-            completedAt: null,
-            focuScore: 0
+            timeSpent: existingTask && existingTask?.timeSpent ? existingTask.timeSpent : 0,
+            isTimerRunning: existingTask && existingTask?.isTimerRunning ? existingTask.isTimerRunning : false,
+            currentSessionStartTime: existingTask && existingTask?.currentSessionStartTime ? existingTask.currentSessionStartTime : null,
+            isCompleted: $('#isCompleted').prop('checked'),
+            isArchive: $('#isArchive').prop('checked'),
+            focusScore: $('#focusScoreSlider').val(),
+
         };
 
         if (id) {

@@ -44,6 +44,21 @@
             <h2>Analytics Dashboard</h2>
             <button id="refresh-data" class="btn btn-outline-primary btn-sm">Refresh Data</button>
         </div>
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <h6 class="text-muted">Task Completed Velocity</h6>
+                    <div id="m-task-velocity" class="stat-value">0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <h6 class="text-muted">Task Creation Velocity</h6>
+                    <div id="m-task-create-velocity" class="stat-value text-success">0</div>
+                </div>
+            </div>
+
+        </div>
 
         <div class="row g-4 mb-4">
             <div class="col-md-3">
@@ -60,7 +75,7 @@
             </div>
             <div class="col-md-3">
                 <div class="card p-3">
-                    <h6 class="text-muted">Accuracy Rate</h6>
+                    <h6 class="text-muted">Estimation Accuracy Rate</h6>
                     <div id="m-accuracy" class="stat-value text-warning">0%</div>
                 </div>
             </div>
@@ -122,12 +137,14 @@
 
 <script>
     // 1. DATA (Replacing with Mock for now)
-    const storedTasks = [
-        { name: "Fix Space RPG Bug", project: "GameDev", est: 60, actual: 95, p: 1, focus: 4, energy: "High" },
-        { name: "LinkedIn Profile Update", project: "JobSearch", est: 45, actual: 30, p: 2, focus: 5, energy: "Low" },
-        { name: "Server Setup RPi400", project: "GameDev", est: 120, actual: 110, p: 1, focus: 3, energy: "High" },
-        { name: "Yoga Session", project: "Health", est: 90, actual: 90, p: 2, focus: 5, energy: "High" }
-    ];
+    // const storedTasks = [
+    //     { name: "Fix Space RPG Bug", project: "GameDev", est: 60, actual: 95, p: 1, focus: 4, energy: "High" },
+    //     { name: "LinkedIn Profile Update", project: "JobSearch", est: 45, actual: 30, p: 2, focus: 5, energy: "Low" },
+    //     { name: "Server Setup RPi400", project: "GameDev", est: 120, actual: 110, p: 1, focus: 3, energy: "High" },
+    //     { name: "Yoga Session", project: "Health", est: 90, actual: 90, p: 2, focus: 5, energy: "High" }
+    // ];
+
+    const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
     $(document).ready(function() {
         renderDashboard(storedTasks);
@@ -139,18 +156,48 @@
 
     function renderDashboard(data) {
         let totalMins = 0, totalEst = 0, sumFocus = 0, highEnergyCount = 0;
+        let taskVelocity = {completedVelocity: 0, createdVelocity: 0};
         
         // Clear Table
         $("#task-table-body").empty();
 
         data.forEach(task => {
-            totalMins += task.actual;
-            totalEst += task.est;
-            sumFocus += task.focus;
-            if(task.energy === "High") highEnergyCount++;
+            totalMins += (task.timeSpent / 60000 || 0);
+            totalEst += task.timeEstimate;
+            sumFocus += parseInt(task.focusScore) || 0;
+            if(task.energyLevel === "High") highEnergyCount++;
+            if (task.createdAt) {
+                const startOfWeek = (createdAt) => {
+                    if (!createdAt) return null; // Return null if createdAt is falsy
+                    const date = new Date(createdAt);
+                    return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
+                };
+
+                const targetWeek = startOfWeek(new Date());
+                if (targetWeek) {  // Proceed only if targetWeek is valid
+                    const count = data.filter(t => startOfWeek(t.createdAt) === targetWeek).length;
+                    taskVelocity.createdVelocity = count;
+                }
+            }
+
+            if (task.completedAt && task.isCompleted) {
+                const startOfWeek = (completedAt) => {
+                    if (!completedAt) return null; // Return null if completedAt is falsy
+                    const date = new Date(completedAt);
+                    return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
+                };
+
+                const targetWeek = startOfWeek(new Date());
+                if (targetWeek) {  // Proceed only if targetWeek is valid
+                    const count = data.filter(t => startOfWeek(t.completedAt) === targetWeek).length;
+                    taskVelocity.completedVelocity = count;
+                } 
+            }
+            console.log(taskVelocity)
+
 
             // Calculate Delta for Table
-            let delta = task.actual - task.est;
+            let delta = (task.timeSpent / 60000 || 0) - task.timeEstimate;
             let deltaClass = delta > 0 ? "text-danger" : "text-success";
             
             // Inject Row via jQuery
@@ -158,18 +205,20 @@
                 <tr>
                     <td>${task.name}</td>
                     <td><span class="badge bg-secondary">${task.project}</span></td>
-                    <td>Tier ${task.p}</td>
-                    <td>${task.focus}/5</td>
-                    <td class="${deltaClass}">${delta > 0 ? '+' + delta : delta} min</td>
+                    <td>Tier ${task.energyLevel}</td>
+                    <td>${task.focusScore}/5</td>
+                    <td class="${deltaClass}">${Math.floor(delta > 0 ? '+' + delta : delta)} min</td>
                 </tr>
             `);
         });
 
         // Update Stat Cards
-        $("#m-total-time").text(`${Math.floor(totalMins/60)}h ${totalMins%60}m`);
-        $("#m-focus").text((sumFocus/data.length).toFixed(1));
+        $("#m-total-time").text(`${Math.floor(totalMins/60)}h ${Math.floor(totalMins%60)}m`);
+        $("#m-focus").text((sumFocus/data.filter((t) => t.isCompleted).length).toFixed(1));
         $("#m-accuracy").text(Math.round((totalEst/totalMins)*100) + "%");
         $("#m-energy").text(highEnergyCount);
+        $("#m-task-velocity").text(`${taskVelocity.completedVelocity} tasks/week`);
+        $("#m-task-create-velocity").text(`${taskVelocity.createdVelocity} tasks/week`);
 
         // Render Charts
         initCharts(data);
@@ -178,7 +227,7 @@
     function initCharts(data) {
         // Project Doughnut
         const projectMap = {};
-        data.forEach(t => projectMap[t.project] = (projectMap[t.project] || 0) + t.actual);
+        data.forEach(t => projectMap[t.project] = (projectMap[t.project] || 0) + Math.floor(t.timeSpent / 60000));
 
         new Chart(document.getElementById('projectPie'), {
             type: 'doughnut',
@@ -198,8 +247,8 @@
             data: {
                 labels: data.map(t => t.name),
                 datasets: [
-                    { label: 'Estimated', data: data.map(t => t.est), backgroundColor: '#e9ecef' },
-                    { label: 'Actual', data: data.map(t => t.actual), backgroundColor: '#0d6efd' }
+                    { label: 'Estimated', data: data.map(t => t.timeEstimate), backgroundColor: '#e9ecef' },
+                    { label: 'Actual', data: data.map(t => t.timeSpent / 60000 || 0), backgroundColor: '#0d6efd' }
                 ]
             },
             options: { maintainAspectRatio: false }

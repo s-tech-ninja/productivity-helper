@@ -173,7 +173,7 @@
             totalMins += (task?.timeSpent / 60000 || 0);
             totalEst += (task?.timeEstimate || 0);
             sumFocus += parseInt(task.focusScore) || 0;
-            if(task.energyLevel === "High") highEnergyCount = highEnergyCount + 1;
+            if(task.energyLevel === "High") highEnergyCount++;
             if (task.createdAt) {
                 const startOfWeek = (createdAt) => {
                     if (!createdAt) return null; // Return null if createdAt is falsy

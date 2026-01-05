@@ -58,6 +58,13 @@
                 </div>
             </div>
 
+            <div class="col-md-3">
+                <div class="card p-3">
+                    <h6 class="text-muted" title="Energy High / Medium / Low">Energy</h6>
+                    <div id="m-task-energy" class="stat-value">0</div>
+                </div>
+            </div>
+
         </div>
 
         <div class="row g-4 mb-4">
@@ -156,16 +163,17 @@
 
     function renderDashboard(data) {
         let totalMins = 0, totalEst = 0, sumFocus = 0, highEnergyCount = 0;
+        let energyTask = {low: 0, medium: 0, high: 0};
         let taskVelocity = {completedVelocity: 0, createdVelocity: 0};
         
         // Clear Table
         $("#task-table-body").empty();
 
         data.forEach(task => {
-            totalMins += (task.timeSpent / 60000 || 0);
-            totalEst += task.timeEstimate;
+            totalMins += (task?.timeSpent / 60000 || 0);
+            totalEst += (task?.timeEstimate || 0);
             sumFocus += parseInt(task.focusScore) || 0;
-            if(task.energyLevel === "High") highEnergyCount++;
+            if(task.energyLevel === "High") highEnergyCount = highEnergyCount + 1;
             if (task.createdAt) {
                 const startOfWeek = (createdAt) => {
                     if (!createdAt) return null; // Return null if createdAt is falsy
@@ -180,24 +188,31 @@
                 }
             }
 
-            if (task.completedAt && task.isCompleted) {
-                const startOfWeek = (completedAt) => {
-                    if (!completedAt) return null; // Return null if completedAt is falsy
-                    const date = new Date(completedAt);
+            if (task.isCompleted) {
+                if (task.energyLevel == 'High') {
+                    energyTask.high += 1;
+                } 
+                if (task.energyLevel == 'Medium') {
+                    energyTask.medium += 1;
+                }
+                if (task.energyLevel == 'Low') {
+                    energyTask.low += 1;
+                }
+                const startOfWeek = (completedTaskTime) => {
+                    if (!completedTaskTime) return null; // Return null if completedAt is falsy
+                    const date = new Date(completedTaskTime);
                     return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
                 };
 
                 const targetWeek = startOfWeek(new Date());
                 if (targetWeek) {  // Proceed only if targetWeek is valid
-                    const count = data.filter(t => startOfWeek(t.completedAt) === targetWeek).length;
+                    const count = data.filter(t => startOfWeek(t.completedTaskTime) === targetWeek).length;
                     taskVelocity.completedVelocity = count;
                 } 
             }
-            console.log(taskVelocity)
-
 
             // Calculate Delta for Table
-            let delta = (task.timeSpent / 60000 || 0) - task.timeEstimate;
+            let delta = (task.timeSpent / 60000 || 0) - (task.timeEstimate || 0);
             let deltaClass = delta > 0 ? "text-danger" : "text-success";
             
             // Inject Row via jQuery
@@ -214,11 +229,17 @@
 
         // Update Stat Cards
         $("#m-total-time").text(`${Math.floor(totalMins/60)}h ${Math.floor(totalMins%60)}m`);
-        $("#m-focus").text((sumFocus/data.filter((t) => t.isCompleted).length).toFixed(1));
-        $("#m-accuracy").text(Math.round((totalEst/totalMins)*100) + "%");
+        $("#m-focus").text((sumFocus/(data.filter(t => t.isCompleted).length || 1)).toFixed(1));
+        if (totalEst > 0 && totalMins > 0) {
+            $("#m-accuracy").text(Math.round((totalEst / totalMins) * 100) + "%");
+        } else {
+            $("#m-accuracy").text("0%");
+        }
+
         $("#m-energy").text(highEnergyCount);
         $("#m-task-velocity").text(`${taskVelocity.completedVelocity} tasks/week`);
         $("#m-task-create-velocity").text(`${taskVelocity.createdVelocity} tasks/week`);
+        $('#m-task-energy').html(`<span class="text-danger" title="High Energy Task Count">H: ${energyTask.high}</span> / <span class="text-warning" title="Medium Energy Task Count">M: ${energyTask.medium}</span> / <span class="text-success" title="Low Energy Task Count">L: ${energyTask.low}</span>`);
 
         // Render Charts
         initCharts(data);

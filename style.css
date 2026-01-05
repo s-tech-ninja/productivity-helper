@@ -183,3 +183,39 @@ Prevents the layout from jumping around.
     border-color: #80bdff;
     box-shadow: 0 0 0 0.25rem rgba(38, 143, 255, 0.5);
 }
+
+/* EDITOR ARIA */
+
+/* Style the contenteditable div to look like a text area */
+.editor {
+    border: 1px solid #ccc;
+    padding: 10px;
+    min-height: 150px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+/* Style the toolbar */
+.editor-toolbar {
+    margin-bottom: 10px;
+}
+
+/* Style the buttons in the toolbar */
+.editor-toolbar button {
+    margin-right: 5px;
+}
+
+/* Add some spacing between the buttons and make them more clickable */
+.editor-toolbar button {
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+
+/* Make the active button stand out */
+.editor-toolbar button.active {
+    background-color: #007bff;
+    color: white;
+}
+

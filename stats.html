@@ -188,7 +188,7 @@
                 }
             }
 
-            if (task.completedAt && task.isCompleted) {
+            if (task.isCompleted) {
                 if (task.energyLevel == 'High') {
                     energyTask.high += 1;
                 } 
@@ -198,15 +198,15 @@
                 if (task.energyLevel == 'Low') {
                     energyTask.low += 1;
                 }
-                const startOfWeek = (completedAt) => {
-                    if (!completedAt) return null; // Return null if completedAt is falsy
-                    const date = new Date(completedAt);
+                const startOfWeek = (completedTaskTime) => {
+                    if (!completedTaskTime) return null; // Return null if completedAt is falsy
+                    const date = new Date(completedTaskTime);
                     return new Date(date.setDate(date.getDate() - date.getDay())).toISOString().split('T')[0];
                 };
 
                 const targetWeek = startOfWeek(new Date());
                 if (targetWeek) {  // Proceed only if targetWeek is valid
-                    const count = data.filter(t => startOfWeek(t.completedAt) === targetWeek).length;
+                    const count = data.filter(t => startOfWeek(t.completedTaskTime) === targetWeek).length;
                     taskVelocity.completedVelocity = count;
                 } 
             }

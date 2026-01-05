@@ -484,6 +484,25 @@ const App = {
             UIRenderer.renderModalChecklist(State.checklistBuffer);
         });
 
+        $(document).on('change', '#focusScoreSlider', (e) => {
+            $('#focusScoreValue').text($(e.currentTarget).val());
+        });
+
+        // Inside App.bindModalActions
+        $('.editor-toolbar button').click(function() {
+            const command = $(this).data('command');
+            
+            if (command === 'createLink') {
+                const url = prompt("Enter URL:", "http://");
+                if (url) document.execCommand("createLink", false, url);
+            } else {
+                document.execCommand(command, false, null);
+            }
+            
+            // Keep focus on the editor after clicking a button
+            $('#taskDesc').focus();
+        });
+
         // Save Task
         $('#btn-save-task').click(() => {
             const id = $('#taskId').val();
@@ -517,7 +536,6 @@ const App = {
                 dueTime: $('#taskTime').val()
             };
 
-            console.log('taskData', taskData);
 
             if (isNew) State.tasks.push(taskData);
             else {
@@ -632,15 +650,6 @@ const App = {
 
 // INITIALIZE ON LOAD
 $(document).ready(() => App.init());
-
-function execCmd(command) {
-    document.execCommand(command, false, null);
-}
-
-function addLink() {
-    const url = prompt("Enter URL:", "http://");
-    if (url) document.execCommand("createLink", false, url);
-}
 
 function resetEditor() {
     $('#taskDesc').empty();

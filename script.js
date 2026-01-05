@@ -66,7 +66,7 @@ $(document).ready(function () {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    function loadTasks() {
+    function loadTasks(dataToSearch = '') {
         try {
             let data = '[]';
             const data2 = localStorage.getItem('tasks');
@@ -74,7 +74,16 @@ $(document).ready(function () {
                 data = JSON.stringify((JSON.parse(data2)).filter((item) => item.isArchive == false));
             }
             if (data) {
-                let loaded = JSON.parse(data);
+                let loadedFiltered = JSON.parse(data);
+
+                const columns = ["name", "description", "project", "tags", "priority", "energyLevel"];
+
+                const loaded = loadedFiltered.filter(item =>
+                columns.some(col =>
+                    String(item[col]).toLowerCase().includes(dataToSearch.toLowerCase())
+                )
+                );
+
 
                 // NEW: Data Migration for older tasks
                 // Ensure all tasks have the new fields to prevent errors
@@ -266,6 +275,13 @@ $(document).ready(function () {
     }
 
     // --- Interaction Logic ---
+
+    $(document).on('change', '#taskSearch', function (e) {
+        e.stopPropagation();
+        const searchTerm = $(this).val();
+        loadTasks(searchTerm);
+        renderSidebar();
+    });
 
     $('#btn-create-task').click(function () {
         $('#modalTitle').text('Create Task');

@@ -170,9 +170,7 @@
         $("#task-table-body").empty();
 
         data.forEach(task => {
-            totalMins += (task?.timeSpent / 60000 || 0);
-            totalEst += (task?.timeEstimate || 0);
-            sumFocus += parseInt(task.focusScore) || 0;
+
             if(task.energyLevel === "High") highEnergyCount++;
             if (task.createdAt) {
                 const startOfWeek = (createdAt) => {
@@ -189,6 +187,9 @@
             }
 
             if (task.isCompleted) {
+                totalMins += (task?.timeSpent / 60000 || 0);
+                totalEst += (task?.timeEstimate || 0);
+                sumFocus += parseInt(task.focusScore) || 0;
                 if (task.energyLevel == 'High') {
                     energyTask.high += 1;
                 } 

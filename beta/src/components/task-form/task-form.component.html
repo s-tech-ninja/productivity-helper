@@ -1,0 +1,426 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+  <!-- Backdrop -->
+  <div 
+    class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300"
+    (click)="cancel.emit()"
+  ></div>
+
+  <!-- Modal Container -->
+  <div class="relative w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] transition-all duration-300 border border-slate-100 dark:border-slate-800 overflow-hidden">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm z-20">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+          {{ taskToEdit() ? 'Edit Task' : 'New Task' }}
+        </h2>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+             {{ taskToEdit() ? 'Update Mode' : 'Planning Mode' }}
+          </span>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            {{ taskToEdit() ? 'Refine your strategy or log progress.' : 'Define your intent and desired outcomes.' }}
+          </p>
+        </div>
+      </div>
+      <button (click)="cancel.emit()" class="group p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all duration-200">
+        <app-icon name="x" [size]="24" class="group-hover:rotate-90 transition-transform duration-200"></app-icon>
+      </button>
+    </div>
+
+    <!-- Form Content (Scrollable) -->
+    <div class="flex-1 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/50 p-8 custom-scrollbar">
+      <form [formGroup]="taskForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
+        
+        <!-- Section 1: Core Identity (Full Width) -->
+        <div class="col-span-1 md:col-span-2 lg:col-span-6">
+           <div class="flex items-center gap-3 mb-6">
+             <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <app-icon name="target" [size]="18"></app-icon>
+             </div>
+             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Core Identity</h3>
+             <div class="h-px flex-1 bg-slate-200 dark:border-slate-800"></div>
+           </div>
+
+           <div class="grid grid-cols-1 lg:grid-cols-6 gap-6">
+              <!-- Title -->
+              <div class="lg:col-span-4 space-y-2">
+                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Task Title <span class="text-rose-500">*</span></label>
+                 <input formControlName="title" type="text" [class]="inputClass + ' text-lg font-medium'" placeholder="What needs to be done?">
+                 @if (taskForm.get('title')?.touched && taskForm.get('title')?.invalid) {
+                   <p class="text-rose-500 text-xs mt-1.5 flex items-center gap-1">
+                     <app-icon name="x" [size]="12"></app-icon> Title is required
+                   </p>
+                 }
+              </div>
+              
+              <!-- Category -->
+              <div class="lg:col-span-2 space-y-2">
+                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Category <span class="text-rose-500">*</span></label>
+                 <div class="relative group">
+                   <select formControlName="category" [class]="inputClass + ' appearance-none cursor-pointer'">
+                     <option value="" disabled>Select Impact Level</option>
+                     <option value="Super Important">Super Important 🔥</option>
+                     <option value="Important">Important ⚡</option>
+                     <option value="Less Important">Less Important ☕</option>
+                   </select>
+                   <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
+                     <app-icon name="chevron-right" [size]="16" class="rotate-90"></app-icon>
+                   </div>
+                 </div>
+              </div>
+
+              <!-- Description Editor -->
+              <div class="lg:col-span-6 space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Description & Context</label>
+                <div 
+                  class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden transition-all duration-200 ease-in-out hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10"
+                >
+                  <!-- Toolbar -->
+                  <div class="flex items-center gap-1 p-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('bold')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Bold">
+                      <app-icon name="bold" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('italic')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Italic">
+                      <app-icon name="italic" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('underline')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Underline">
+                      <app-icon name="underline" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('strikeThrough')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Strikethrough">
+                      <app-icon name="strikethrough" [size]="16"></app-icon>
+                    </button>
+                    <div class="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('insertUnorderedList')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Bullet List">
+                      <app-icon name="list" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('insertOrderedList')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Ordered List">
+                      <app-icon name="list-ordered" [size]="16"></app-icon>
+                    </button>
+                    <div class="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('justifyLeft')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Align Left">
+                      <app-icon name="align-left" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('justifyCenter')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Align Center">
+                      <app-icon name="align-center" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('justifyRight')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Align Right">
+                      <app-icon name="align-right" [size]="16"></app-icon>
+                    </button>
+                    <div class="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('createLink')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Insert Link">
+                      <app-icon name="link" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('unlink')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Remove Link">
+                      <app-icon name="unlink" [size]="16"></app-icon>
+                    </button>
+                    <div class="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-2"></div>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('undo')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Undo">
+                      <app-icon name="undo" [size]="16"></app-icon>
+                    </button>
+                    <button type="button" (mousedown)="$event.preventDefault()" (click)="execCmd('redo')" class="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors" title="Redo">
+                      <app-icon name="redo" [size]="16"></app-icon>
+                    </button>
+                  </div>
+                  <!-- Editable Area -->
+                  <div 
+                    #editor
+                    contenteditable="true"
+                    class="editor-content w-full px-5 py-4 min-h-[140px] text-sm text-slate-700 dark:text-slate-300 focus:outline-none leading-relaxed"
+                    (input)="updateDescription($event)"
+                  ></div>
+                </div>
+              </div>
+              
+              <!-- Project -->
+              <div class="lg:col-span-3 space-y-2">
+                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Project / Workstream</label>
+                 <div class="relative group">
+                    <app-icon name="layout-dashboard" [size]="18" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-indigo-500 transition-colors pointer-events-none"></app-icon>
+                    <!-- !pl-10 ensures padding works despite inputClass -->
+                    <input formControlName="project" type="text" [class]="inputClass + ' !pl-10'" placeholder="e.g., Q4 Marketing">
+                 </div>
+              </div>
+
+               <!-- Context / Tags -->
+               <div class="lg:col-span-3 space-y-2">
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Context / Tags</label>
+                  <div class="relative group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2 flex flex-wrap gap-2 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all min-h-[46px]">
+                    <app-icon name="tag" [size]="16" class="absolute left-[0.35rem] top-[0.475rem] text-slate-400"></app-icon>
+                    <div class="pl-7 flex flex-wrap gap-2 w-full">
+                       @for (tag of tags(); track tag) {
+                         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 animate-in fade-in zoom-in duration-200">
+                           {{ tag }}
+                           <button type="button" (click)="removeTag(tag)" class="hover:text-indigo-800 dark:hover:text-indigo-200 transition-colors"><app-icon name="x" [size]="12"></app-icon></button>
+                         </span>
+                       }
+                       <input #tagInput type="text" class="flex-1 min-w-[80px] bg-transparent text-sm outline-none placeholder-slate-400 text-slate-700 dark:text-slate-200" placeholder="Add tag..." (keydown.enter)="$event.preventDefault(); addTag(tagInput.value); tagInput.value = ''" (blur)="tagInput.value && addTag(tagInput.value); tagInput.value = ''">
+                    </div>
+                  </div>
+               </div>
+           </div>
+        </div>
+
+        <!-- Section 2: Logistics & Attributes -->
+        <div class="col-span-1 md:col-span-2 lg:col-span-6">
+           <div class="flex items-center gap-3 mb-6 mt-2">
+             <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <app-icon name="clock" [size]="18"></app-icon>
+             </div>
+             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Logistics & Attributes</h3>
+             <div class="h-px flex-1 bg-slate-200 dark:border-slate-800"></div>
+           </div>
+
+           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <!-- Start Date -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Start Date</label>
+                <input formControlName="startDate" type="datetime-local" [class]="inputClass">
+              </div>
+              <!-- Deadline -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Deadline <span class="text-rose-500">*</span></label>
+                <input formControlName="deadline" type="datetime-local" [class]="inputClass">
+              </div>
+              <!-- Effort (Time Input) -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Est. Effort</label>
+                <div class="flex gap-2">
+                   <div class="relative flex-1">
+                      <input 
+                        type="number" 
+                        min="0"
+                        [(ngModel)]="effortHours" 
+                        [ngModelOptions]="{standalone: true}"
+                        (change)="updateEffortString()"
+                        [class]="inputClass + ' pr-8'"
+                        placeholder="0"
+                      >
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">h</span>
+                   </div>
+                   <div class="relative flex-1">
+                      <input 
+                        type="number" 
+                        min="0"
+                        max="59"
+                        [(ngModel)]="effortMinutes" 
+                        [ngModelOptions]="{standalone: true}"
+                        (change)="updateEffortString()"
+                        [class]="inputClass + ' pr-8'"
+                        placeholder="0"
+                      >
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">m</span>
+                   </div>
+                </div>
+                <!-- Hidden input to store actual value for submission if needed, though we patch manually -->
+                <input type="hidden" formControlName="estimatedEffort">
+              </div>
+              <!-- Energy -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Energy Level</label>
+                <div class="relative group">
+                  <select formControlName="energyLevel" [class]="inputClass + ' appearance-none cursor-pointer'">
+                    <option value="High">High ⚡</option>
+                    <option value="Medium">Medium 🌊</option>
+                    <option value="Low">Low 🐢</option>
+                  </select>
+                  <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
+                     <app-icon name="chevron-right" [size]="16" class="rotate-90"></app-icon>
+                  </div>
+                </div>
+              </div>
+              <!-- Recurrence -->
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Recurrence</label>
+                <div class="relative group">
+                   <select formControlName="recurrence" [class]="inputClass + ' appearance-none cursor-pointer'">
+                     <option value="None">One-time</option>
+                     <option value="Daily">Daily</option>
+                     <option value="Weekly">Weekly</option>
+                     <option value="Bi-Weekly">Bi-Weekly</option>
+                     <option value="Monthly">Monthly</option>
+                   </select>
+                   <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
+                     <app-icon name="chevron-right" [size]="16" class="rotate-90"></app-icon>
+                   </div>
+                </div>
+              </div>
+              <!-- Status -->
+              <div class="space-y-2">
+                 <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Status</label>
+                 <div class="relative group">
+                   <select formControlName="status" [class]="inputClass + ' appearance-none cursor-pointer'">
+                      <option value="Backlog">Backlog</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Paused">Paused</option>
+                      <option value="Completed">Completed</option>
+                   </select>
+                   <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
+                     <app-icon name="chevron-right" [size]="16" class="rotate-90"></app-icon>
+                   </div>
+                 </div>
+               </div>
+               
+               <!-- Archive Toggle -->
+               <div class="space-y-2 flex flex-col justify-end">
+                  <label class="inline-flex items-center cursor-pointer mt-auto py-2.5">
+                    <input type="checkbox" formControlName="archived" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                    <span class="ms-3 text-sm font-medium text-slate-700 dark:text-slate-300">Archive Task</span>
+                  </label>
+               </div>
+           </div>
+        </div>
+
+        <!-- Section 3: Subtasks -->
+        <div class="col-span-1 md:col-span-2 lg:col-span-6">
+           <div class="flex items-center gap-3 mb-6 mt-2">
+             <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <app-icon name="list-todo" [size]="18"></app-icon>
+             </div>
+             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Action Plan</h3>
+             <div class="h-px flex-1 bg-slate-200 dark:border-slate-800"></div>
+           </div>
+
+           <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+             <div class="flex justify-between items-center mb-4">
+               <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1 !mb-0">Checklist Items & Notes</label>
+               <span class="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">Drag to reorder</span>
+             </div>
+             
+             <!-- Input Row -->
+             <div class="flex gap-3 mb-4">
+               <div class="relative flex-1">
+                  <input 
+                    #subtaskInput
+                    type="text" 
+                    [class]="inputClass" 
+                    placeholder="Add a subtask step..."
+                    (keydown.enter)="$event.preventDefault(); addSubtask(subtaskInput)"
+                  >
+               </div>
+               <button 
+                 type="button"
+                 (click)="addSubtask(subtaskInput)"
+                 class="px-5 py-3 bg-slate-900 dark:bg-indigo-600 hover:bg-slate-800 dark:hover:bg-indigo-500 rounded-xl transition-all shadow-lg shadow-slate-900/10 dark:shadow-indigo-500/20 text-white font-medium flex items-center gap-2"
+               >
+                 <app-icon name="plus" [size]="18"></app-icon> Add
+               </button>
+             </div>
+
+             <!-- List -->
+             <div class="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+               @for (item of subtasksList(); track item.id) {
+                 <div 
+                   draggable="true"
+                   (dragstart)="onDragStart($event, $index)"
+                   (dragover)="onDragOver($event)"
+                   (drop)="onDrop($event, $index)"
+                   class="group flex flex-col gap-2 p-3 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-move active:cursor-grabbing shadow-sm hover:shadow"
+                 >
+                   <div class="flex items-start gap-3">
+                       <div class="mt-1 text-slate-300 dark:text-slate-600 cursor-grab hover:text-slate-500">
+                         <app-icon name="grip-vertical" [size]="16"></app-icon>
+                       </div>
+                       
+                       <div 
+                         class="mt-1 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer"
+                         [class.bg-indigo-500]="item.completed"
+                         [class.border-indigo-500]="item.completed"
+                         [class.border-slate-300]="!item.completed"
+                         [class.dark:border-slate-600]="!item.completed"
+                         (click)="toggleItemChecked($index)"
+                       >
+                         @if (item.completed) {
+                            <app-icon name="check" [size]="14" class="text-white"></app-icon>
+                         }
+                       </div>
+
+                       <div class="flex-1">
+                          <span class="text-sm font-medium text-slate-700 dark:text-slate-200 break-words block" [class.line-through]="item.completed" [class.opacity-50]="item.completed">
+                            {{ item.text }}
+                          </span>
+                       </div>
+                       
+                       <button 
+                         type="button"
+                         (click)="removeSubtask($index)"
+                         class="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-lg transition-all"
+                       >
+                         <app-icon name="x" [size]="16"></app-icon>
+                       </button>
+                   </div>
+                   
+                   <!-- Subtask Note Input -->
+                   <div class="pl-11 pr-2">
+                      <input 
+                        type="text" 
+                        [value]="item.notes || ''"
+                        (input)="updateSubtaskNote($index, $any($event.target).value)"
+                        class="w-full text-xs px-2 py-1 bg-transparent border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 focus:outline-none focus:border-indigo-400 placeholder-slate-300 dark:placeholder-slate-600 transition-colors"
+                        placeholder="Add notes..."
+                      >
+                   </div>
+                 </div>
+               }
+               @if (subtasksList().length === 0) {
+                 <div class="flex flex-col items-center justify-center py-8 text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
+                   <app-icon name="list-todo" [size]="32" class="mb-2 opacity-50"></app-icon>
+                   <p class="text-sm">No action items yet. Break it down!</p>
+                 </div>
+               }
+             </div>
+           </div>
+        </div>
+
+        <!-- Section 4: Phase 2 Execution (Log Analysis) -->
+        <div class="col-span-1 md:col-span-2 lg:col-span-6">
+           <div class="flex items-center gap-3 mb-6 mt-2">
+             <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                <app-icon name="layout-dashboard" [size]="18"></app-icon>
+             </div>
+             <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Post-Game Analysis</h3>
+             <div class="h-px flex-1 bg-slate-200 dark:border-slate-800"></div>
+           </div>
+
+           <div class="grid grid-cols-1 md:grid-cols-4 gap-6 bg-slate-50 dark:bg-slate-800/30 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Focus Score (1-5)</label>
+                <input formControlName="focusScore" type="number" min="1" max="5" [class]="inputClass" placeholder="-">
+              </div>
+              <div class="space-y-2 md:col-span-3">
+                <div class="flex justify-between items-center mb-1">
+                  <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Interruptions / Sessions</label>
+                  @if (taskToEdit()) {
+                     <span class="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/20 px-2 py-0.5 rounded">
+                       Recorded Timer Sessions: {{ taskToEdit()?.timerSessionCount || 0 }}
+                     </span>
+                  }
+                </div>
+                <input formControlName="interruptions" type="text" [class]="inputClass" placeholder="e.g., 2 calls, 1 slack ping, or manual session count">
+              </div>
+              <div class="col-span-1 md:col-span-4 space-y-2">
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Reflection / Notes</label>
+                <textarea formControlName="reflection" rows="2" [class]="inputClass" placeholder="What went well? What didn't?"></textarea>
+              </div>
+           </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-8 py-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-4 bg-white dark:bg-slate-900 z-20">
+      <button (click)="cancel.emit()" class="px-6 py-3 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+        Cancel
+      </button>
+      <button (click)="onSubmit()" [disabled]="taskForm.invalid" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+        @if (taskToEdit()) {
+           <app-icon name="check" [size]="18"></app-icon> Save Changes
+        } @else {
+           <app-icon name="plus" [size]="18"></app-icon> Create Task
+        }
+      </button>
+    </div>
+  </div>
+</div>

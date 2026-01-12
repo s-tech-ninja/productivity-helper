@@ -1,0 +1,265 @@
+<div class="p-4 md:p-8 max-w-[1600px] mx-auto h-full overflow-y-auto custom-scrollbar">
+  
+  <!-- Header & Controls -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Analytics Suite</h2>
+      <p class="text-slate-500 dark:text-slate-400">Deep dive into your productivity metrics.</p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+      <!-- Range Selector -->
+      <div class="flex bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+        <button 
+          (click)="setRange('daily')"
+          class="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+          [class.bg-indigo-100]="analytics.range() === 'daily'"
+          [class.text-indigo-700]="analytics.range() === 'daily'"
+          [class.dark:bg-indigo-900/40]="analytics.range() === 'daily'"
+          [class.dark:text-indigo-300]="analytics.range() === 'daily'"
+          [class.text-slate-500]="analytics.range() !== 'daily'"
+        >
+          Daily
+        </button>
+        <button 
+          (click)="setRange('weekly')"
+          class="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+          [class.bg-indigo-100]="analytics.range() === 'weekly'"
+          [class.text-indigo-700]="analytics.range() === 'weekly'"
+          [class.dark:bg-indigo-900/40]="analytics.range() === 'weekly'"
+          [class.dark:text-indigo-300]="analytics.range() === 'weekly'"
+          [class.text-slate-500]="analytics.range() !== 'weekly'"
+        >
+          Weekly
+        </button>
+        <button 
+          (click)="setRange('monthly')"
+          class="px-3 py-1.5 text-xs font-medium rounded-md transition-all"
+          [class.bg-indigo-100]="analytics.range() === 'monthly'"
+          [class.text-indigo-700]="analytics.range() === 'monthly'"
+          [class.dark:bg-indigo-900/40]="analytics.range() === 'monthly'"
+          [class.dark:text-indigo-300]="analytics.range() === 'monthly'"
+          [class.text-slate-500]="analytics.range() !== 'monthly'"
+        >
+          Monthly
+        </button>
+      </div>
+
+      <!-- Visibility Toggles -->
+      <div class="flex flex-wrap gap-2">
+        <button 
+          (click)="toggleVelocity()"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors flex items-center gap-2"
+          [class.bg-indigo-50]="showVelocity()"
+          [class.border-indigo-200]="showVelocity()"
+          [class.text-indigo-700]="showVelocity()"
+          [class.bg-white]="!showVelocity()"
+          [class.border-slate-200]="!showVelocity()"
+          [class.text-slate-500]="!showVelocity()"
+          [class.dark:bg-indigo-900/30]="showVelocity()"
+          [class.dark:border-indigo-800]="showVelocity()"
+          [class.dark:text-indigo-300]="showVelocity()"
+          [class.dark:bg-slate-800]="!showVelocity()"
+          [class.dark:border-slate-700]="!showVelocity()"
+        >
+          <app-icon name="trending-up" [size]="14"></app-icon> Velocity
+        </button>
+        <button 
+          (click)="toggleAccuracy()"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors flex items-center gap-2"
+          [class.bg-indigo-50]="showAccuracy()"
+          [class.border-indigo-200]="showAccuracy()"
+          [class.text-indigo-700]="showAccuracy()"
+          [class.bg-white]="!showAccuracy()"
+          [class.border-slate-200]="!showAccuracy()"
+          [class.text-slate-500]="!showAccuracy()"
+          [class.dark:bg-indigo-900/30]="showAccuracy()"
+          [class.dark:border-indigo-800]="showAccuracy()"
+          [class.dark:text-indigo-300]="showAccuracy()"
+          [class.dark:bg-slate-800]="!showAccuracy()"
+          [class.dark:border-slate-700]="!showAccuracy()"
+        >
+          <app-icon name="target" [size]="14"></app-icon> Accuracy
+        </button>
+        <button 
+          (click)="toggleDistribution()"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors flex items-center gap-2"
+          [class.bg-indigo-50]="showDistribution()"
+          [class.border-indigo-200]="showDistribution()"
+          [class.text-indigo-700]="showDistribution()"
+          [class.bg-white]="!showDistribution()"
+          [class.border-slate-200]="!showDistribution()"
+          [class.text-slate-500]="!showDistribution()"
+          [class.dark:bg-indigo-900/30]="showDistribution()"
+          [class.dark:border-indigo-800]="showDistribution()"
+          [class.dark:text-indigo-300]="showDistribution()"
+          [class.dark:bg-slate-800]="!showDistribution()"
+          [class.dark:border-slate-700]="!showDistribution()"
+        >
+          <app-icon name="pie-chart" [size]="14"></app-icon> Distribution
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards Row -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+     <!-- Total Time -->
+     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center gap-3 mb-2">
+           <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-lg">
+             <app-icon name="clock" [size]="20"></app-icon>
+           </div>
+           <span class="text-sm text-slate-500 font-medium">Total Time</span>
+        </div>
+        <div class="text-3xl font-bold text-slate-900 dark:text-white">{{ formattedTotalTime() }}</div>
+     </div>
+
+     <!-- Avg Focus -->
+     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden">
+        <div class="flex justify-between items-start z-10 relative">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <div class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-lg">
+                <app-icon name="zap" [size]="20"></app-icon>
+              </div>
+              <span class="text-sm text-slate-500 font-medium">Avg Focus</span>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-white">{{ analytics.focusMetrics().avgFocusScore }} <span class="text-base font-normal text-slate-400">/5</span></div>
+          </div>
+          <div class="h-20 w-20 -mt-2 -mr-2">
+            <canvas #focusChart></canvas>
+          </div>
+        </div>
+     </div>
+
+     <!-- Context Switching -->
+     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center gap-3 mb-2">
+           <div class="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 rounded-lg">
+             <app-icon name="shuffle" [size]="20"></app-icon>
+           </div>
+           <span class="text-sm text-slate-500 font-medium">Avg Sessions/Task</span>
+        </div>
+        <div class="text-3xl font-bold text-slate-900 dark:text-white">{{ analytics.leaksMetrics().avgSessions }}</div>
+        <div class="text-xs text-rose-500 mt-2 font-medium" *ngIf="analytics.leaksMetrics().contextSwitchingScore > 0">
+           {{ analytics.leaksMetrics().contextSwitchingScore }} tasks flagged for high interruptions
+        </div>
+     </div>
+
+     <!-- Completion Velocity -->
+     <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+        <div class="flex items-center gap-3 mb-2">
+           <div class="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-lg">
+             <app-icon name="activity" [size]="20"></app-icon>
+           </div>
+           <span class="text-sm text-slate-500 font-medium">Velocity ({{analytics.range()}})</span>
+        </div>
+        <div class="text-3xl font-bold text-slate-900 dark:text-white">
+           {{ totalCompletedVelocity() }}
+           <span class="text-base font-normal text-slate-400">tasks</span>
+        </div>
+     </div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+     
+     <!-- Velocity Chart -->
+     @if(showVelocity()) {
+       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-[350px]">
+          <h3 class="font-bold text-slate-800 dark:text-white mb-4">Task Velocity (Creation vs Completion)</h3>
+          <div class="h-[280px]">
+            <canvas #velocityChart></canvas>
+          </div>
+       </div>
+     }
+
+     <!-- Accuracy Chart -->
+     @if(showAccuracy()) {
+       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-[350px]">
+          <h3 class="font-bold text-slate-800 dark:text-white mb-4">Planning Accuracy (Last 10)</h3>
+          <div class="h-[280px]">
+            <canvas #accuracyChart></canvas>
+          </div>
+       </div>
+     }
+  </div>
+
+  <!-- Distribution Grid -->
+  @if(showDistribution()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-[300px]">
+          <h3 class="font-bold text-slate-800 dark:text-white mb-4">Energy Distribution</h3>
+          <div class="h-[230px]">
+            <canvas #energyChart></canvas>
+          </div>
+       </div>
+       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm h-[300px]">
+          <h3 class="font-bold text-slate-800 dark:text-white mb-4">Time Allocation by Project</h3>
+          <div class="h-[230px]">
+            <canvas #projectChart></canvas>
+          </div>
+       </div>
+    </div>
+  }
+
+  <!-- Recent Activity Table -->
+  <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden mb-12">
+    <div class="p-6 border-b border-slate-100 dark:border-slate-700">
+       <h3 class="font-bold text-slate-800 dark:text-white">Recent Activity Log</h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-700/50">
+           <tr>
+             <th class="px-6 py-3">Task</th>
+             <th class="px-6 py-3">Completed</th>
+             <th class="px-6 py-3">Focus</th>
+             <th class="px-6 py-3">Energy</th>
+             <th class="px-6 py-3 text-right">Time Delta</th>
+           </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+           @for(task of analytics.recentActivity(); track task.id) {
+             <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+               <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">{{ task.title }}</td>
+               <td class="px-6 py-4 text-slate-500">{{ task.completionTime | date:'MMM d, h:mm a' }}</td>
+               <td class="px-6 py-4">
+                 @if(task.focusScore) {
+                   <div class="flex text-amber-400">
+                      @for(_ of [].constructor(task.focusScore); track $index) { <app-icon name="zap" [size]="12"></app-icon> }
+                   </div>
+                 } @else { <span class="text-slate-400">-</span> }
+               </td>
+               <td class="px-6 py-4">
+                  <span class="px-2 py-0.5 rounded text-xs font-medium"
+                    [class.bg-rose-100]="task.energyLevel === 'High'"
+                    [class.text-rose-600]="task.energyLevel === 'High'"
+                    [class.bg-blue-100]="task.energyLevel === 'Medium'"
+                    [class.text-blue-600]="task.energyLevel === 'Medium'"
+                    [class.bg-slate-100]="task.energyLevel === 'Low'"
+                    [class.text-slate-600]="task.energyLevel === 'Low'"
+                  >
+                    {{ task.energyLevel }}
+                  </span>
+               </td>
+               <td class="px-6 py-4 text-right font-mono" 
+                   [class.text-emerald-500]="task.delta < 0" 
+                   [class.text-rose-500]="task.delta > 0"
+               >
+                  {{ task.delta > 0 ? '+' : '' }}{{ task.delta }}m
+               </td>
+             </tr>
+           }
+           @if(analytics.recentActivity().length === 0) {
+             <tr>
+               <td colspan="5" class="px-6 py-8 text-center text-slate-400">No completed tasks yet.</td>
+             </tr>
+           }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

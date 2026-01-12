@@ -1,0 +1,417 @@
+<div class="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-300">
+  
+  <!-- Hidden File Input for Import -->
+  <input #fileInput type="file" accept=".json" class="hidden" (change)="onFileSelected($event)">
+
+  <!-- Mobile Sidebar Overlay -->
+  @if (isSidebarOpen()) {
+    <div 
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 md:hidden"
+      (click)="isSidebarOpen.set(false)"
+    ></div>
+  }
+
+  <!-- Sidebar -->
+  <aside 
+    class="fixed md:static inset-y-0 left-0 z-30 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300 ease-in-out w-64 transform"
+    [class.-translate-x-full]="!isSidebarOpen()"
+    [class.translate-x-0]="isSidebarOpen()"
+    [class.md:translate-x-0]="true"
+    [class.md:w-64]="true"
+  >
+    <!-- Sidebar Header -->
+    <div class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-slate-700">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-600/30">
+          <app-icon name="zap" [size]="20"></app-icon>
+        </div>
+        <span class="font-bold text-xl text-slate-800 dark:text-white tracking-tight">ProdFlow</span>
+      </div>
+    </div>
+
+    <!-- Nav Items -->
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <button 
+        (click)="setView('dashboard')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group text-left"
+        [class.bg-indigo-50]="currentView() === 'dashboard'"
+        [class.text-indigo-600]="currentView() === 'dashboard'"
+        [class.dark:bg-indigo-900/30]="currentView() === 'dashboard'"
+        [class.dark:text-indigo-400]="currentView() === 'dashboard'"
+        [class.text-slate-600]="currentView() !== 'dashboard'"
+        [class.dark:text-slate-300]="currentView() !== 'dashboard'"
+        [class.hover:bg-slate-50]="currentView() !== 'dashboard'"
+        [class.dark:hover:bg-slate-700/50]="currentView() !== 'dashboard'"
+      >
+        <app-icon name="layout-dashboard" [size]="20" 
+          [class.text-indigo-600]="currentView() === 'dashboard'"
+          [class.dark:text-indigo-400]="currentView() === 'dashboard'"
+        ></app-icon>
+        <span class="font-medium">Dashboard</span>
+      </button>
+
+      <!-- Analytics Link -->
+      <button 
+        (click)="setView('analytics')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left"
+        [class.bg-indigo-50]="currentView() === 'analytics'"
+        [class.text-indigo-600]="currentView() === 'analytics'"
+        [class.dark:bg-indigo-900/30]="currentView() === 'analytics'"
+        [class.dark:text-indigo-400]="currentView() === 'analytics'"
+        [class.text-slate-600]="currentView() !== 'analytics'"
+        [class.dark:text-slate-300]="currentView() !== 'analytics'"
+        [class.hover:bg-slate-50]="currentView() !== 'analytics'"
+        [class.dark:hover:bg-slate-700/50]="currentView() !== 'analytics'"
+      >
+        <app-icon name="bar-chart" [size]="20"
+          [class.group-hover:text-indigo-600]="currentView() !== 'analytics'"
+          [class.dark:group-hover:text-indigo-400]="currentView() !== 'analytics'"
+        ></app-icon>
+        <span class="font-medium">Analytics</span>
+      </button>
+
+      <!-- Tasks Group -->
+      <div class="pt-2">
+        <button 
+          (click)="toggleTasksSubmenu()"
+          class="w-full flex items-center justify-between px-3 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors group"
+        >
+          <div class="flex items-center gap-3">
+            <app-icon name="list-todo" [size]="20" class="group-hover:text-indigo-600 dark:group-hover:text-indigo-400"></app-icon>
+            <span class="font-medium">Tasks</span>
+          </div>
+          <div class="transition-transform duration-200" [class.rotate-90]="isTasksExpanded()">
+            <app-icon name="chevron-right" [size]="16" class="text-slate-400"></app-icon>
+          </div>
+        </button>
+
+        @if (isTasksExpanded()) {
+          <div class="mt-1 ml-4 pl-4 border-l-2 border-slate-100 dark:border-slate-700 space-y-1">
+             <button 
+               (click)="setView('tasks')"
+               class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
+               [class.text-indigo-600]="currentView() === 'tasks'"
+               [class.dark:text-indigo-400]="currentView() === 'tasks'"
+               [class.font-medium]="currentView() === 'tasks'"
+               [class.text-slate-500]="currentView() !== 'tasks'"
+               [class.dark:text-slate-400]="currentView() !== 'tasks'"
+               [class.hover:text-slate-900]="currentView() !== 'tasks'"
+               [class.dark:hover:text-white]="currentView() !== 'tasks'"
+             >
+               <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+               All Tasks
+             </button>
+             <button
+                (click)="setView('tasks-not-completed')"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
+                [class.text-indigo-600]="currentView() === 'tasks-not-completed'"
+                [class.dark:text-indigo-400]="currentView() === 'tasks-not-completed'"
+                [class.font-medium]="currentView() === 'tasks-not-completed'"
+                [class.text-slate-500]="currentView() !== 'tasks-not-completed'"
+                [class.dark:text-slate-400]="currentView() !== 'tasks-not-completed'"
+                [class.hover:text-slate-900]="currentView() !== 'tasks-not-completed'"
+                [class.dark:hover:text-white]="currentView() !== 'tasks-not-completed'"
+              >
+               <app-icon name="circle" [size]="16" class="text-slate-400"></app-icon>
+               Not Completed
+             </button>
+             <button
+                (click)="setView('tasks-completed')"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
+                [class.text-indigo-600]="currentView() === 'tasks-completed'"
+                [class.dark:text-indigo-400]="currentView() === 'tasks-completed'"
+                [class.font-medium]="currentView() === 'tasks-completed'"
+                [class.text-slate-500]="currentView() !== 'tasks-completed'"
+                [class.dark:text-slate-400]="currentView() !== 'tasks-completed'"
+                [class.hover:text-slate-900]="currentView() !== 'tasks-completed'"
+                [class.dark:hover:text-white]="currentView() !== 'tasks-completed'"
+              >
+               <app-icon name="check-circle" [size]="16" class="text-green-500"></app-icon>
+               Completed
+             </button>
+             <button
+                (click)="setView('history')"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
+                [class.text-indigo-600]="currentView() === 'history'"
+                [class.dark:text-indigo-400]="currentView() === 'history'"
+                [class.font-medium]="currentView() === 'history'"
+                [class.text-slate-500]="currentView() !== 'history'"
+                [class.dark:text-slate-400]="currentView() !== 'history'"
+                [class.hover:text-slate-900]="currentView() !== 'history'"
+                [class.dark:hover:text-white]="currentView() !== 'history'"
+              >
+               <app-icon name="history" [size]="16" class="text-slate-400"></app-icon>
+               History
+             </button>
+          </div>
+        }
+      </div>
+
+      <button 
+        (click)="setView('calendar')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left"
+        [class.bg-indigo-50]="currentView() === 'calendar'"
+        [class.text-indigo-600]="currentView() === 'calendar'"
+        [class.text-slate-600]="currentView() !== 'calendar'"
+        [class.dark:text-slate-300]="currentView() !== 'calendar'"
+        [class.hover:bg-slate-50]="currentView() !== 'calendar'"
+        [class.dark:hover:bg-slate-700/50]="currentView() !== 'calendar'"
+      >
+        <app-icon name="calendar" [size]="20"
+          [class.group-hover:text-indigo-600]="currentView() !== 'calendar'"
+          [class.dark:group-hover:text-indigo-400]="currentView() !== 'calendar'"
+        ></app-icon>
+        <span class="font-medium">Calendar</span>
+      </button>
+
+      <!-- Help Menu -->
+      <button 
+        (click)="isHelpOpen.set(true)"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+      >
+        <div class="flex items-center justify-center w-5 h-5">
+            <app-icon name="zap" [size]="18" class="text-slate-400 group-hover:text-amber-500 transition-colors"></app-icon>
+        </div>
+        <span class="font-medium">Help / Guide</span>
+      </button>
+
+    </nav>
+
+    <!-- Sidebar Footer (User & Theme & Data) -->
+    <div class="p-4 border-t border-slate-100 dark:border-slate-700">
+      
+      <!-- Data Management -->
+      <div class="flex gap-2 mb-4">
+         <button 
+           (click)="exportData()"
+           class="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors"
+           title="Export Data"
+         >
+           <app-icon name="download" [size]="14"></app-icon> Export
+         </button>
+         <button 
+           (click)="triggerImport()"
+           class="flex-1 flex items-center justify-center gap-2 py-2 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 transition-colors"
+           title="Import Data"
+         >
+           <app-icon name="upload" [size]="14"></app-icon> Import
+         </button>
+      </div>
+
+      <button 
+        (click)="toggleTheme()"
+        class="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors mb-4"
+      >
+        <div class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+          @if (themeService.isDarkMode()) {
+            <app-icon name="moon" [size]="18"></app-icon>
+            <span class="text-sm font-medium">Dark Mode</span>
+          } @else {
+            <app-icon name="sun" [size]="18"></app-icon>
+            <span class="text-sm font-medium">Light Mode</span>
+          }
+        </div>
+        <!-- Toggle Switch Visual -->
+        <div class="w-10 h-5 bg-slate-200 dark:bg-slate-600 rounded-full relative transition-colors">
+          <div class="absolute top-1 left-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-200"
+               [class.translate-x-5]="themeService.isDarkMode()"
+          ></div>
+        </div>
+      </button>
+
+      <!-- <div class="flex items-center gap-3 px-2">
+        <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-bold border-2 border-white dark:border-slate-600 shadow-sm">
+          JD
+        </div>
+        <div class="flex-1 min-w-0">
+           <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">John Doe</p>
+           <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Pro Member</p>
+        </div>
+      </div> -->
+    </div>
+  </aside>
+
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300">
+    
+    <!-- Top Header -->
+    <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 h-20 px-4 md:px-8 flex items-center justify-between sticky top-0 z-40 transition-colors">
+      <div class="flex items-center gap-4">
+        <!-- Mobile Sidebar Toggle -->
+        <button (click)="isSidebarOpen.set(true)" class="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+          <app-icon name="menu" [size]="24"></app-icon>
+        </button>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white hidden sm:block tracking-tight">
+           @switch (currentView()) {
+             @case ('dashboard') { Dashboard }
+             @case ('tasks') { Tasks }
+             @case ('tasks-completed') { Tasks }
+             @case ('tasks-not-completed') { Tasks }
+             @case ('history') { Tasks }
+             @case ('analytics') { Analytics Suite }
+             @case ('calendar') { Calendar }
+           }
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Create Task Button (Styled to match modal inputs) -->
+        <button 
+          (click)="openCreateTask()"
+          class="hidden sm:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all active:scale-95"
+        >
+          <app-icon name="plus" [size]="20"></app-icon>
+          <span>Create Task</span>
+        </button>
+
+        <!-- Notification Bell -->
+        <div class="relative group" (mouseleave)="closeNotificationDropdown()">
+           <button 
+             (click)="showNotifications.set(!showNotifications())"
+             (mouseenter)="openNotificationDropdown()"
+             class="p-2.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-indigo-600 rounded-full transition-colors relative"
+           >
+             <app-icon name="bell" [size]="20"></app-icon>
+             @if (taskService.notificationCount() > 0) {
+               <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+             }
+           </button>
+
+           <!-- Dropdown -->
+           @if (showNotifications()) {
+             <div 
+               (mouseenter)="openNotificationDropdown()"
+               class="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right"
+             >
+               <div class="p-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                 <h3 class="font-bold text-sm text-slate-800 dark:text-white">Notifications</h3>
+                 <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">{{ taskService.notificationCount() }}</span>
+               </div>
+               
+               <div class="max-h-[320px] overflow-y-auto custom-scrollbar p-2 space-y-2">
+                 @if (taskService.notifications().overdue.length > 0) {
+                   <div class="px-2 py-1 text-[10px] font-bold text-rose-500 uppercase tracking-wider">Overdue</div>
+                   @for (task of taskService.notifications().overdue; track task.id) {
+                     <button (click)="openEditTask(task); showNotifications.set(false)" class="w-full text-left p-2 hover:bg-rose-50 dark:hover:bg-rose-900/10 rounded-lg transition-colors group">
+                       <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-rose-600 dark:group-hover:text-rose-400">{{ task.title }}</div>
+                       <div class="text-xs text-rose-500 mt-0.5">Due {{ task.deadline | date:'MMM d, h:mm a' }}</div>
+                     </button>
+                   }
+                 }
+
+                 @if (taskService.notifications().endingToday.length > 0) {
+                   <div class="px-2 py-1 text-[10px] font-bold text-amber-500 uppercase tracking-wider mt-2">Scheduled Today</div>
+                   @for (task of taskService.notifications().endingToday; track task.id) {
+                     <button (click)="openEditTask(task); showNotifications.set(false)" class="w-full text-left p-2 hover:bg-amber-50 dark:hover:bg-amber-900/10 rounded-lg transition-colors group">
+                       <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-600 dark:group-hover:text-amber-400">{{ task.title }}</div>
+                       @if (task.startDate) {
+                         <div class="text-xs text-amber-500 mt-0.5">Starts {{ task.startDate | date:'shortTime' }}</div>
+                       } @else {
+                         <div class="text-xs text-amber-500 mt-0.5">Due {{ task.deadline | date:'shortTime' }}</div>
+                       }
+                     </button>
+                   }
+                 }
+
+                 @if (taskService.notificationCount() === 0) {
+                   <div class="py-8 text-center text-slate-400">
+                     <app-icon name="check-circle" [size]="24" class="mx-auto mb-2 text-emerald-500 opacity-50"></app-icon>
+                     <p class="text-sm">No urgent tasks</p>
+                   </div>
+                 }
+               </div>
+               
+             </div>
+           }
+        </div>
+        
+        <!-- Sign In -->
+        <!-- <button 
+          (click)="isAuthModalOpen.set(true)"
+          class="text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+        >
+          Sign In
+        </button> -->
+      </div>
+    </header>
+
+    <!-- Scrollable Content Area -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-50 dark:bg-slate-900/50">
+      @if (currentView().startsWith('tasks') || currentView() === 'dashboard' || currentView() === 'history') {
+         <app-dashboard-view 
+            [view]="currentView()"
+            (triggerEdit)="openEditTask($event)"
+            (triggerComplete)="openCompletionModal($event)"
+            (triggerDelete)="openDeleteModal($event)"
+            (triggerDetail)="openTaskDetail($event)"
+         ></app-dashboard-view>
+      } @else if (currentView() === 'analytics') {
+         <app-analytics-view></app-analytics-view>
+      } @else if (currentView() === 'calendar') {
+         <app-calendar-view (triggerDetail)="openTaskDetail($event)"></app-calendar-view>
+      }
+      
+      <!-- FAB for Mobile Task Creation (Updated Style) -->
+      <button 
+        (click)="openCreateTask()"
+        class="sm:hidden fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-500/40 flex items-center justify-center z-40 active:scale-95 transition-transform"
+      >
+        <app-icon name="plus" [size]="28"></app-icon>
+      </button>
+
+      <!-- Footer -->
+      <footer class="mt-auto border-t border-slate-200 dark:border-slate-700 py-6 px-6 text-center text-sm text-slate-400 dark:text-slate-600">
+        &copy; {{ currentYear }} ProductivityFlow. All rights reserved.
+      </footer>
+    </main>
+
+  </div>
+
+  <!-- Modals -->
+  @if (isAuthModalOpen()) {
+    <app-auth-modal (close)="isAuthModalOpen.set(false)"></app-auth-modal>
+  }
+  
+  @if (isHelpOpen()) {
+    <app-help-modal (close)="isHelpOpen.set(false)"></app-help-modal>
+  }
+
+  @if (taskToComplete()) {
+    <app-completion-modal 
+       [task]="taskToComplete()!" 
+       (cancel)="closeCompletionModal()"
+       (confirm)="onCompleteTask($event)"
+    ></app-completion-modal>
+  }
+
+  @if (isDeleteModalOpen() && taskToDelete()) {
+    <app-confirmation-modal
+      [title]="'Delete Task?'"
+      [message]="'Are you sure you want to delete \'' + taskToDelete()?.title + '\'? This action cannot be undone.'"
+      [actionText]="'Delete Forever'"
+      (cancel)="isDeleteModalOpen.set(false)"
+      (confirm)="confirmDelete()"
+    ></app-confirmation-modal>
+  }
+
+  <!-- Task Detail Panel -->
+  @if (activeTask()) {
+    <app-task-detail 
+      [task]="activeTask()!" 
+      (close)="openTaskDetail(null)"
+      (edit)="openEditTask($event)"
+      (complete)="openCompletionModal($event)"
+      (delete)="openDeleteModal($event)"
+    ></app-task-detail>
+  }
+
+  <!-- Task Form Modal (Placed last to ensure it overlays everything) -->
+  @if (isTaskFormOpen()) {
+    <app-task-form 
+       [taskToEdit]="taskToEdit()"
+       (cancel)="closeTaskForm()"
+    ></app-task-form>
+  }
+
+</div>

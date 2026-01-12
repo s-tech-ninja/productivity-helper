@@ -1,0 +1,345 @@
+<div class="fixed inset-0 z-50 overflow-hidden">
+  <!-- Backdrop -->
+  <div 
+    class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
+    (click)="close.emit()"
+  ></div>
+
+  <!-- Slide-over panel -->
+  <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+    <div class="pointer-events-auto w-screen max-w-2xl transform transition-transform duration-300 ease-in-out bg-white dark:bg-slate-800 shadow-2xl flex flex-col h-full">
+      
+      <!-- Header -->
+      <div class="flex items-start justify-between px-6 py-6 border-b border-slate-100 dark:border-slate-700">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+             <span 
+                class="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide border"
+                [class.bg-rose-50]="task().category === 'Super Important'"
+                [class.text-rose-600]="task().category === 'Super Important'"
+                [class.border-rose-200]="task().category === 'Super Important'"
+                [class.bg-amber-50]="task().category === 'Important'"
+                [class.text-amber-600]="task().category === 'Important'"
+                [class.border-amber-200]="task().category === 'Important'"
+                [class.bg-slate-50]="task().category === 'Less Important'"
+                [class.text-slate-600]="task().category === 'Less Important'"
+                [class.border-slate-200]="task().category === 'Less Important'"
+             >
+               {{ task().category }}
+             </span>
+             <span class="text-xs text-slate-400 dark:text-slate-500">ID: {{ task().id.substring(0,6) }}</span>
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white leading-tight" [class.line-through]="task().status === 'Completed'" [class.text-slate-400]="task().status === 'Completed'">{{ task().title }}</h2>
+        </div>
+        <button (click)="close.emit()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+          <app-icon name="x" [size]="24"></app-icon>
+        </button>
+      </div>
+
+      <!-- Scrollable Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+        
+        <!-- Completion Banner -->
+        @if (task().status === 'Completed') {
+           <div class="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800 flex items-center gap-3">
+             <div class="p-2 bg-emerald-100 dark:bg-emerald-800 rounded-full text-emerald-600 dark:text-emerald-100">
+                <app-icon name="check" [size]="20"></app-icon>
+             </div>
+             <div>
+                <h3 class="font-bold text-emerald-900 dark:text-emerald-100">Task Completed!</h3>
+                <p class="text-sm text-emerald-700 dark:text-emerald-300">Great job finishing this task.</p>
+             </div>
+           </div>
+        }
+
+        <!-- Focus Timer Section -->
+        @if (task().status !== 'Completed') {
+          <section>
+             <div class="bg-slate-900 dark:bg-slate-950 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+               <!-- Ambient Glow -->
+               @if (isTimerRunning()) {
+                 <div class="absolute inset-0 bg-indigo-500/10 animate-pulse"></div>
+               }
+               
+               <div class="relative z-10 flex flex-col items-center">
+                 <span class="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Focus Timer</span>
+                 
+                 <!-- Digital Clock -->
+                 <div class="text-5xl font-mono font-bold tracking-tight mb-4 tabular-nums">
+                   {{ liveTimeDisplay() }}
+                 </div>
+                 
+                 <div class="flex items-center gap-6 w-full justify-center">
+                    <div class="text-center">
+                      <span class="block text-xl font-bold">{{ task().timerSessionCount || 0 }}</span>
+                      <span class="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Sessions</span>
+                    </div>
+
+                    <button 
+                      (click)="toggleTimer()"
+                      [disabled]="isOtherTimerRunning()"
+                      [title]="isOtherTimerRunning() ? 'Another task is already running. Stop it to start this one.' : (isTimerRunning() ? 'Pause Timer' : 'Start Timer')"
+                      class="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                      [class.bg-emerald-500]="!isTimerRunning() && !isOtherTimerRunning()"
+                      [class.hover:bg-emerald-400]="!isTimerRunning() && !isOtherTimerRunning()"
+                      [class.bg-rose-500]="isTimerRunning()"
+                      [class.hover:bg-rose-400]="isTimerRunning()"
+                      [class.bg-slate-300]="isOtherTimerRunning()"
+                      [class.dark:bg-slate-700]="isOtherTimerRunning()"
+                    >
+                      @if (isTimerRunning()) {
+                         <app-icon name="pause" [size]="28" class="fill-current"></app-icon>
+                      } @else {
+                         <app-icon name="play" [size]="28" class="ml-1 fill-current"></app-icon>
+                      }
+                    </button>
+                    
+                    <div class="text-center">
+                       <span class="block text-xl font-bold text-slate-400">
+                         {{ task().estimatedEffort || 'N/A' }}
+                       </span>
+                       <span class="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Estimate</span>
+                    </div>
+                 </div>
+                 
+                 @if (isTimerRunning()) {
+                    <div class="mt-4 flex items-center gap-2 text-xs text-indigo-300 animate-pulse">
+                      <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                      Recording time...
+                    </div>
+                 }
+               </div>
+             </div>
+          </section>
+        }
+
+        <!-- Description (Rich Text) -->
+        @if (task().description) {
+          <section>
+            <div class="rich-text-content text-sm text-slate-700 dark:text-slate-300 leading-relaxed" [innerHTML]="task().description"></div>
+          </section>
+        }
+
+        <!-- Section: Logistics -->
+        <section>
+          <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <app-icon name="clock" [size]="16"></app-icon> Logistics
+          </h3>
+          <div class="grid grid-cols-2 gap-4">
+             <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Project</p>
+               <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().project || 'N/A' }}</p>
+             </div>
+             <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Created</p>
+               <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().createdAt | date:'MMM d, y' }}</p>
+             </div>
+             <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Deadline</p>
+               <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().deadline | date:'MMM d, h:mm a' }}</p>
+             </div>
+             <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Est. Effort</p>
+               <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().estimatedEffort || '-' }}</p>
+             </div>
+             @if (task().startDate) {
+               <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg col-span-2">
+                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Start Date</p>
+                 <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().startDate | date:'MMM d, h:mm a' }}</p>
+               </div>
+             }
+             <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg col-span-2">
+               <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">Context / Tags</p>
+               <div class="flex flex-wrap gap-2">
+                 @for (tag of task().tags; track tag) {
+                   <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                     {{ tag }}
+                   </span>
+                 }
+                 @if (!task().tags?.length) { <span class="text-sm text-slate-400 italic">No tags</span> }
+               </div>
+             </div>
+          </div>
+        </section>
+
+         <!-- Section: Attributes -->
+        <section>
+           <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <app-icon name="zap" [size]="16"></app-icon> Attributes
+          </h3>
+          <div class="space-y-3">
+             <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+               <span class="text-slate-600 dark:text-slate-400">Energy Level</span>
+               <span class="font-medium text-slate-900 dark:text-slate-100">{{ task().energyLevel }}</span>
+             </div>
+             <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+               <span class="text-slate-600 dark:text-slate-400">Recurrence</span>
+               <span class="font-medium text-slate-900 dark:text-slate-100">{{ task().recurrence }}</span>
+             </div>
+             <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-700">
+               <span class="text-slate-600 dark:text-slate-400">Status</span>
+               <span class="font-medium text-slate-900 dark:text-slate-100 px-2 py-0.5 bg-slate-100 dark:bg-slate-600 rounded">{{ task().status }}</span>
+             </div>
+          </div>
+        </section>
+
+        <!-- Section: Subtasks / Checklist -->
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <app-icon name="list-todo" [size]="16"></app-icon> Details / Checklist
+            </h3>
+          </div>
+          
+          <div class="mb-4">
+             @if (sortedSubtasks().length > 0) {
+               
+               <!-- Progress Bar -->
+               <div class="mb-4 bg-slate-100 dark:bg-slate-700/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div class="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-2">
+                    <span class="font-medium">Progress</span>
+                    <span class="font-bold text-slate-700 dark:text-slate-200">{{ completedCount() }} / {{ sortedSubtasks().length }}</span>
+                  </div>
+                  <div class="w-full bg-slate-200 dark:bg-slate-600 h-2 rounded-full overflow-hidden">
+                    <div 
+                      class="bg-emerald-500 h-full rounded-full transition-all duration-300 ease-out shadow-[0_0_8px_rgba(16,185,129,0.4)]" 
+                      [style.width.%]="progressPercentage()"
+                    ></div>
+                  </div>
+               </div>
+
+               <!-- Checklist Items -->
+               <div class="bg-slate-50 dark:bg-slate-700/30 rounded-xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+                 @for (item of sortedSubtasks(); track item.id) {
+                   <div 
+                     class="flex flex-col p-3 border-b border-slate-100 dark:border-slate-700 last:border-0 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group"
+                   >
+                     <div class="flex items-start gap-3 cursor-pointer" (click)="toggleSubtask(item.id)">
+                       <div 
+                         class="mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-all shadow-sm"
+                         [class.bg-indigo-500]="item.completed"
+                         [class.border-indigo-500]="item.completed"
+                         [class.border-slate-300]="!item.completed"
+                         [class.dark:border-slate-500]="!item.completed"
+                         [class.group-hover:border-indigo-400]="!item.completed"
+                       >
+                          @if (item.completed) {
+                            <app-icon name="check" [size]="14" class="text-white"></app-icon>
+                          }
+                       </div>
+                       
+                       <div class="flex-1 min-w-0">
+                         <span 
+                           class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed transition-opacity block break-words"
+                           [class.line-through]="item.completed"
+                           [class.text-slate-400]="item.completed"
+                           [class.dark:text-slate-500]="item.completed"
+                         >
+                           {{ item.text }}
+                         </span>
+                         
+                         @if (item.completedAt) {
+                            <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                               <app-icon name="check" [size]="10"></app-icon>
+                               Completed {{ item.completedAt | date:'MMM d, h:mm a' }}
+                            </div>
+                         }
+                       </div>
+                     </div>
+                     
+                     <!-- Inline Notes Edit -->
+                     <div class="pl-8 mt-2 w-full">
+                       <textarea 
+                         [ngModel]="item.notes" 
+                         (change)="updateSubtaskNotes(item.id, $any($event.target).value)"
+                         class="w-full bg-transparent text-xs text-slate-600 dark:text-slate-300 placeholder-slate-300 dark:placeholder-slate-600 border-b border-transparent focus:border-indigo-300 focus:outline-none py-1 transition-colors resize-y"
+                         placeholder="Add notes..."
+                         rows="2"
+                       ></textarea>
+                     </div>
+                   </div>
+                 }
+               </div>
+             } @else {
+               <p class="text-sm text-slate-400 italic">No subtasks defined.</p>
+             }
+          </div>
+        </section>
+        
+        <!-- Section: Analysis (Phase 2) -->
+        @if (task().focusScore || task().reflection) {
+           <section>
+            <h3 class="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <app-icon name="layout-dashboard" [size]="16"></app-icon> Post-Task Analysis
+            </h3>
+            <div class="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700 space-y-3">
+               @if(task().focusScore) {
+                 <div class="flex justify-between">
+                   <span class="text-sm text-slate-500 dark:text-slate-400">Focus Score</span>
+                   <div class="flex gap-1 text-amber-400">
+                     @for(_ of [].constructor(task().focusScore); track $index) {
+                        <app-icon name="zap" [size]="14"></app-icon>
+                     }
+                   </div>
+                 </div>
+               }
+               @if(task().reflection) {
+                 <div>
+                   <span class="text-sm text-slate-500 dark:text-slate-400 block mb-1">Reflection</span>
+                   <p class="text-sm text-slate-800 dark:text-slate-200 italic">"{{ task().reflection }}"</p>
+                 </div>
+               }
+               @if(task().completionTime) {
+                  <div class="pt-2 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 text-right">
+                    Completed: {{ task().completionTime | date:'short' }}
+                  </div>
+               }
+               @if(task().totalTimeElapsed) {
+                 <div class="pt-2 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 flex justify-between">
+                   <span>Total Time Logged:</span>
+                   <span class="font-mono font-bold text-slate-600 dark:text-slate-300">{{ formatTotalTime(task().totalTimeElapsed) }}</span>
+                 </div>
+               }
+            </div>
+           </section>
+        }
+
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mt-auto flex flex-col gap-3">
+         
+         @if (task().status !== 'Completed') {
+            @if (canComplete()) {
+               <button 
+                 (click)="onMarkCompleted()"
+                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.98] flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-200"
+               >
+                 <app-icon name="check" [size]="20"></app-icon> Mark as Completed
+               </button>
+            } @else {
+               <div class="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 py-3 rounded-xl text-center text-xs font-medium border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2">
+                  <app-icon name="list-todo" [size]="14"></app-icon>
+                  <span>Complete {{ (task().subtasks || []).length - completedCount() }} remaining subtask(s) to finish</span>
+               </div>
+            }
+         }
+
+         <div class="grid grid-cols-2 gap-4">
+            <button 
+              (click)="onDelete()"
+              class="flex items-center justify-center gap-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 px-4 py-3 rounded-xl transition-colors font-medium border border-rose-200 dark:border-rose-900/30"
+            >
+              <app-icon name="x" [size]="18"></app-icon> Delete
+            </button>
+            <button 
+              (click)="edit.emit(task())"
+              class="bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 font-medium py-3 rounded-xl transition-colors hover:bg-slate-50 dark:hover:bg-slate-600"
+            >
+              Edit Task
+            </button>
+         </div>
+      </div>
+    </div>
+  </div>
+</div>

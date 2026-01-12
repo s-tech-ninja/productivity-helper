@@ -51,3 +51,14 @@ firebase-debug.log
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+
+src/
+.github/
+angular.json
+meta_data.json
+package.json
+package-lock.json
+tsconfig.json
+README.md
+LICENSE

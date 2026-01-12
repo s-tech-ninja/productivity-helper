@@ -1,1 +1,0 @@
-// File removed. Replaced by src/components/icons/icon.component.ts

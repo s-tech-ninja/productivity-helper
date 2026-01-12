@@ -62,7 +62,7 @@
           [class.dark:bg-slate-800]="!showVelocity()"
           [class.dark:border-slate-700]="!showVelocity()"
         >
-          <app-icon name="trending-up" [size]="14"></app-icon> Velocity
+          <app-icon name="trending-up" [size]="14"></app-icon> Velocity 1
         </button>
         <button 
           (click)="toggleAccuracy()"
@@ -248,7 +248,7 @@
                    [class.text-emerald-500]="task.delta < 0" 
                    [class.text-rose-500]="task.delta > 0"
                >
-                  {{ task.delta > 0 ? '+' : '' }}{{ task.delta }}m
+                  {{ task.delta < 0 ? '+' : '' }}{{ -task.delta }}m
                </td>
              </tr>
            }

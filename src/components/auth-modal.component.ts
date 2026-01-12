@@ -1,1 +1,0 @@
-// File removed. Replaced by src/components/auth-modal/auth-modal.component.ts

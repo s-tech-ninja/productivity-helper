@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Angular app
         run: |
-          npm run build -- --configuration production --base-href /productivity-helper/beta/
+          npm run build -- --configuration production --base-href /productivity-helper/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

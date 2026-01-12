@@ -1,0 +1,53 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Angular build output
+/dist/
+/out-tsc/
+/tmp/
+
+# Compiled files
+*.js
+*.js.map
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Angular cache
+.angular/
+.cache/
+
+# Coverage
+/coverage/
+
+# Logs
+logs/
+*.log
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# Optional: ignore lock files if desired (usually NOT recommended)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

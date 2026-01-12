@@ -1,0 +1,37 @@
+<div class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+  <!-- Backdrop -->
+  <div 
+    class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+    (click)="cancel.emit()"
+  ></div>
+
+  <!-- Modal -->
+  <div class="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 border border-slate-100 dark:border-slate-700">
+    
+    <div class="p-6 text-center">
+      <div class="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+        <app-icon name="x" [size]="32" class="text-rose-600 dark:text-rose-400"></app-icon>
+      </div>
+      
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">{{ title() }}</h2>
+      <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
+        {{ message() }}
+      </p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button 
+          (click)="cancel.emit()"
+          class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium rounded-xl transition-colors"
+        >
+          Cancel
+        </button>
+        <button 
+          (click)="confirm.emit()"
+          class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20 transition-all active:scale-95"
+        >
+          {{ actionText() }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

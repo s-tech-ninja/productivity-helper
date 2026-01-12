@@ -1,0 +1,639 @@
+<div class="p-4 md:p-8 max-w-[1600px] mx-auto h-full flex flex-col">
+  
+  <!-- Top Controls / View Switcher (Visible in Dashboard Mode) -->
+  @if (view() === 'dashboard') {
+    <div class="flex items-center justify-between mb-6">
+       
+       <div>
+         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Performance Overview</h2>
+         
+         <!-- Search Input (Desktop) -->
+         <div class="mt-2 hidden md:block">
+            <div class="relative">
+            <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+            <input 
+              type="text" 
+              placeholder="Search tasks..." 
+              class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
+              (input)="searchQuery.set($any($event.target).value)"
+            >
+            </div>
+            
+            <!-- Date Filters -->
+            <div class="flex gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar">
+              @for (filter of ['All', 'Today', 'This Week', 'This Month']; track filter) {
+                <button 
+                  (click)="setDateFilter($any(filter))"
+                  class="px-3 py-1 text-xs font-medium rounded-full border transition-colors whitespace-nowrap"
+                  [class.bg-indigo-600]="dateFilter() === filter"
+                  [class.text-white]="dateFilter() === filter"
+                  [class.border-indigo-600]="dateFilter() === filter"
+                  [class.bg-white]="dateFilter() !== filter"
+                  [class.dark:bg-slate-800]="dateFilter() !== filter"
+                  [class.text-slate-600]="dateFilter() !== filter"
+                  [class.dark:text-slate-300]="dateFilter() !== filter"
+                  [class.border-slate-200]="dateFilter() !== filter"
+                  [class.dark:border-slate-700]="dateFilter() !== filter"
+                >
+                  {{ filter }}
+                </button>
+              }
+            </div>
+         </div>
+       </div>
+       
+       <div class="flex flex-col items-end gap-2">
+          <div class="flex bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+            <button 
+              (click)="dashboardTab.set('board')"
+              class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-2"
+              [class.bg-indigo-50]="dashboardTab() === 'board'"
+              [class.text-indigo-600]="dashboardTab() === 'board'"
+              [class.dark:bg-indigo-900/30]="dashboardTab() === 'board'"
+              [class.dark:text-indigo-400]="dashboardTab() === 'board'"
+              [class.text-slate-600]="dashboardTab() !== 'board'"
+              [class.dark:text-slate-400]="dashboardTab() !== 'board'"
+            >
+              <app-icon name="layout-dashboard" [size]="16"></app-icon> Board
+            </button>
+            <button 
+              (click)="dashboardTab.set('list')"
+              class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-2"
+              [class.bg-indigo-50]="dashboardTab() === 'list'"
+              [class.text-indigo-600]="dashboardTab() === 'list'"
+              [class.dark:bg-indigo-900/30]="dashboardTab() === 'list'"
+              [class.dark:text-indigo-400]="dashboardTab() === 'list'"
+              [class.text-slate-600]="dashboardTab() !== 'list'"
+              [class.dark:text-slate-400]="dashboardTab() !== 'list'"
+            >
+              <app-icon name="list-todo" [size]="16"></app-icon> List
+            </button>
+          </div>
+          
+          <!-- Search Input (Mobile) -->
+          <div class="relative md:hidden w-full">
+            <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+            <input 
+              type="text" 
+              placeholder="Search tasks..." 
+              class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-full transition-all"
+              (input)="searchQuery.set($any($event.target).value)"
+            >
+         </div>
+       </div>
+    </div>
+
+    <!-- Extended Analysis Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8 shrink-0">
+      
+      <!-- 1. Streak -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group">
+         <div class="absolute right-0 top-0 w-24 h-24 bg-rose-50 dark:bg-rose-900/10 rounded-full -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+         <div class="relative">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-rose-100 dark:bg-rose-900/30 text-rose-600 rounded-lg">
+              <app-icon name="flame" [size]="20"></app-icon>
+            </div>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Daily Streak</span>
+          </div>
+          <div class="flex items-end gap-2">
+            <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ streak() }}</span>
+            <span class="text-xs text-slate-400 mb-1.5">days</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3">Consistency is key!</p>
+        </div>
+       </div>
+
+      <!-- 2. Completion Rate -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/10 rounded-full -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+        <div class="relative">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg">
+              <app-icon name="check" [size]="20"></app-icon>
+            </div>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Completion Rate</span>
+          </div>
+          <div class="flex items-end gap-2">
+            <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats().completionRate }}%</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full mt-3 overflow-hidden">
+            <div class="bg-emerald-500 h-full rounded-full" [style.width.%]="stats().completionRate"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 3. Focus Breakdown -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
+         <div class="flex items-center justify-between mb-2">
+           <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Focus Breakdown</span>
+           <app-icon name="list-todo" [size]="18" class="text-slate-400"></app-icon>
+         </div>
+         <div class="space-y-2">
+           <div class="flex items-center gap-2 text-xs">
+             <app-icon name="flame" [size]="14" class="text-rose-500"></app-icon>
+             <span class="flex-1 text-slate-600 dark:text-slate-300">Super</span>
+             <span class="font-bold text-slate-900 dark:text-white">{{ stats().superImportant }}</span>
+           </div>
+           <div class="flex items-center gap-2 text-xs">
+             <app-icon name="star" [size]="14" class="text-amber-500"></app-icon>
+             <span class="flex-1 text-slate-600 dark:text-slate-300">Important</span>
+             <span class="font-bold text-slate-900 dark:text-white">{{ stats().important }}</span>
+           </div>
+           <div class="flex items-center gap-2 text-xs">
+             <app-icon name="coffee" [size]="14" class="text-blue-500"></app-icon>
+             <span class="flex-1 text-slate-600 dark:text-slate-300">Less</span>
+             <span class="font-bold text-slate-900 dark:text-white">{{ stats().lessImportant }}</span>
+           </div>
+         </div>
+       </div>
+
+      <!-- 4. High Energy Tasks -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group">
+        <div class="absolute right-0 top-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/10 rounded-full -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+         <div class="relative">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
+              <app-icon name="zap" [size]="20"></app-icon>
+            </div>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">High Energy Tasks</span>
+          </div>
+          <div class="flex items-end gap-2">
+            <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats().highEnergy }}</span>
+            <span class="text-xs text-slate-400 mb-1.5">tasks pending</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3">Requires deep focus sessions.</p>
+        </div>
+      </div>
+
+      <!-- 5. Total Tasks -->
+      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group">
+         <div class="absolute right-0 top-0 w-24 h-24 bg-amber-50 dark:bg-amber-900/10 rounded-full -mr-6 -mt-6 transition-transform group-hover:scale-110"></div>
+         <div class="relative">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-lg">
+              <app-icon name="target" [size]="20"></app-icon>
+            </div>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Tasks</span>
+          </div>
+          <div class="flex items-end gap-2">
+            <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats().total }}</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-3">Across all categories.</p>
+        </div>
+       </div>
+
+       <!-- 6. Energy Breakdown -->
+       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
+         <div class="flex items-center justify-between mb-2">
+           <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Energy Breakdown</span>
+           <app-icon name="activity" [size]="18" class="text-slate-400"></app-icon>
+         </div>
+         <div class="space-y-2">
+           <div class="flex items-center gap-2 text-xs">
+             <app-icon name="zap" [size]="14" class="text-rose-500"></app-icon>
+             <span class="flex-1 text-slate-600 dark:text-slate-300">High</span>
+             <span class="font-bold text-slate-900 dark:text-white">{{ stats().highEnergy }}</span>
+           </div>
+           <div class="flex items-center gap-2 text-xs">
+             <app-icon name="activity" [size]="14" class="text-blue-500"></app-icon>
+             <span class="flex-1 text-slate-600 dark:text-slate-300">Medium</span>
+             <span class="font-bold text-slate-900 dark:text-white">{{ stats().mediumEnergy }}</span>
+           </div>
+           <div class="flex items-center gap-2 text-xs">
+             <app-icon name="coffee" [size]="14" class="text-slate-500"></app-icon>
+             <span class="flex-1 text-slate-600 dark:text-slate-300">Low</span>
+             <span class="font-bold text-slate-900 dark:text-white">{{ stats().lowEnergy }}</span>
+           </div>
+         </div>
+       </div>
+    </div>
+
+    <!-- Urgent Tasks Section -->
+    @if (notifications().overdue.length > 0 || notifications().endingToday.length > 0) {
+      <div class="mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          <app-icon name="alert-circle" [size]="20" class="text-rose-500"></app-icon>
+          Attention Required
+        </h3>
+        
+        <div class="grid grid-cols-1 gap-6" [ngClass]="{'lg:grid-cols-2': notifications().overdue.length > 0 && notifications().endingToday.length > 0}">
+           <!-- Overdue Column -->
+           @if (notifications().overdue.length > 0) {
+             <div class="bg-rose-50/50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/30 overflow-hidden">
+                <div class="px-4 py-3 border-b border-rose-200/50 dark:border-rose-800/30 bg-rose-100/50 dark:bg-rose-900/20 flex justify-between items-center">
+                   <span class="font-bold text-rose-700 dark:text-rose-300 text-sm">Overdue</span>
+                   <span class="bg-rose-200 dark:bg-rose-800 text-rose-800 dark:text-rose-200 text-xs font-bold px-2 py-0.5 rounded-full">{{ notifications().overdue.length }}</span>
+                </div>
+                <div class="divide-y divide-rose-100 dark:divide-rose-800/30">
+                   @for (task of notifications().overdue; track task.id) {
+                      <div 
+                        (click)="openTaskDetail(task.id)"
+                        class="p-4 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-colors cursor-pointer flex items-center gap-3"
+                      >
+                         <div class="mt-0.5 text-rose-500 shrink-0">
+                           <app-icon name="alert-circle" [size]="16"></app-icon>
+                         </div>
+                         <div class="flex-1 min-w-0">
+                           <div class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{{ task.title }}</div>
+                           <div class="text-xs text-rose-600 dark:text-rose-400">Due {{ task.deadline | date:'MMM d, h:mm a' }}</div>
+                         </div>
+                         <app-icon name="chevron-right" [size]="14" class="text-rose-400"></app-icon>
+                      </div>
+                   }
+                </div>
+             </div>
+           }
+
+           <!-- Ending Today Column -->
+           @if (notifications().endingToday.length > 0) {
+             <div class="bg-amber-50/50 dark:bg-amber-900/10 rounded-2xl border border-amber-100 dark:border-amber-900/30 overflow-hidden">
+                <div class="px-4 py-3 border-b border-amber-200/50 dark:border-amber-800/30 bg-amber-100/50 dark:bg-amber-900/20 flex justify-between items-center">
+                   <span class="font-bold text-amber-700 dark:text-amber-300 text-sm">Scheduled Today</span>
+                   <span class="bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-xs font-bold px-2 py-0.5 rounded-full">{{ notifications().endingToday.length }}</span>
+                </div>
+                <div class="divide-y divide-amber-100 dark:divide-amber-800/30">
+                   @for (task of notifications().endingToday; track task.id) {
+                      <div 
+                        (click)="openTaskDetail(task.id)"
+                        class="p-4 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 transition-colors cursor-pointer flex items-center gap-3"
+                      >
+                         <div class="mt-0.5 text-amber-500 shrink-0">
+                           <app-icon name="clock" [size]="16"></app-icon>
+                         </div>
+                         <div class="flex-1 min-w-0">
+                           <div class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{{ task.title }}</div>
+                           @if (task.startDate) {
+                              <div class="text-xs text-amber-600 dark:text-amber-400">Starts {{ task.startDate | date:'shortTime' }}</div>
+                           } @else {
+                              <div class="text-xs text-amber-600 dark:text-amber-400">Due {{ task.deadline | date:'shortTime' }}</div>
+                           }
+                         </div>
+                         <app-icon name="chevron-right" [size]="14" class="text-amber-400"></app-icon>
+                      </div>
+                   }
+                </div>
+             </div>
+           }
+        </div>
+      </div>
+    }
+  } @else {
+    <!-- Controls for Task View OR History View -->
+    <div class="flex items-center justify-between mb-6">
+       <div>
+         <h2 class="text-2xl font-bold text-slate-900 dark:text-white">
+            @if (view() === 'history') { Archived History } 
+            @else if (view() === 'tasks-completed') { Completed Tasks }
+            @else if (view() === 'tasks-not-completed') { Pending Tasks }
+            @else { All Tasks }
+         </h2>
+         <div class="mt-2">
+            <div class="relative">
+            <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+            <input 
+              type="text" 
+              placeholder="Search tasks..." 
+              class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
+              (input)="searchQuery.set($any($event.target).value)"
+            >
+            </div>
+            
+            <!-- Date Filters (Non-Dashboard View) -->
+            <div class="flex gap-2 mt-3 overflow-x-auto pb-1 no-scrollbar">
+              @for (filter of ['All', 'Today', 'This Week', 'This Month']; track filter) {
+                <button 
+                  (click)="setDateFilter($any(filter))"
+                  class="px-3 py-1 text-xs font-medium rounded-full border transition-colors whitespace-nowrap"
+                  [class.bg-indigo-600]="dateFilter() === filter"
+                  [class.text-white]="dateFilter() === filter"
+                  [class.border-indigo-600]="dateFilter() === filter"
+                  [class.bg-white]="dateFilter() !== filter"
+                  [class.dark:bg-slate-800]="dateFilter() !== filter"
+                  [class.text-slate-600]="dateFilter() !== filter"
+                  [class.dark:text-slate-300]="dateFilter() !== filter"
+                  [class.border-slate-200]="dateFilter() !== filter"
+                  [class.dark:border-slate-700]="dateFilter() !== filter"
+                >
+                  {{ filter }}
+                </button>
+              }
+            </div>
+         </div>
+       </div>
+    </div>
+  }
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
+    
+    <!-- BOARD VIEW (Visible if Dashboard + Tab=Board) -->
+    @if (view() === 'dashboard' && dashboardTab() === 'board') {
+      <div class="flex flex-col md:flex-row gap-6 h-full min-w-full md:min-w-0 pb-4">
+        
+        <!-- Column: Super Important -->
+        <div 
+          class="flex-1 min-w-[300px] flex flex-col bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm transition-colors hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event, 'Super Important')"
+        >
+           <div class="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50">
+             <div class="flex items-center gap-2">
+               <app-icon name="flame" [size]="18" class="text-rose-500"></app-icon>
+               <h3 class="font-bold text-slate-700 dark:text-slate-200">Super Important</h3>
+               <span class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-xs font-bold text-slate-400 shadow-sm">{{ colTasks.super().length }}</span>
+             </div>
+           </div>
+           
+           <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+              @for (task of colTasks.super(); track task.id) {
+                 <ng-container *ngTemplateOutlet="taskCard; context: { $implicit: task }"></ng-container>
+              }
+           </div>
+        </div>
+
+        <!-- Column: Important -->
+        <div 
+          class="flex-1 min-w-[300px] flex flex-col bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm transition-colors hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event, 'Important')"
+        >
+           <div class="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50">
+             <div class="flex items-center gap-2">
+               <app-icon name="star" [size]="18" class="text-amber-500"></app-icon>
+               <h3 class="font-bold text-slate-700 dark:text-slate-200">Important</h3>
+               <span class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-xs font-bold text-slate-400 shadow-sm">{{ colTasks.important().length }}</span>
+             </div>
+           </div>
+           
+           <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+              @for (task of colTasks.important(); track task.id) {
+                 <ng-container *ngTemplateOutlet="taskCard; context: { $implicit: task }"></ng-container>
+              }
+           </div>
+        </div>
+
+        <!-- Column: Less Important -->
+        <div 
+          class="flex-1 min-w-[300px] flex flex-col bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm transition-colors hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event, 'Less Important')"
+        >
+           <div class="p-4 flex items-center justify-between border-b border-slate-200/50 dark:border-slate-700/50">
+             <div class="flex items-center gap-2">
+               <app-icon name="coffee" [size]="18" class="text-blue-500"></app-icon>
+               <h3 class="font-bold text-slate-700 dark:text-slate-200">Less Important</h3>
+               <span class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 text-xs font-bold text-slate-400 shadow-sm">{{ colTasks.less().length }}</span>
+             </div>
+           </div>
+           
+           <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+              @for (task of colTasks.less(); track task.id) {
+                 <ng-container *ngTemplateOutlet="taskCard; context: { $implicit: task }"></ng-container>
+              }
+           </div>
+        </div>
+      </div>
+    }
+
+    <!-- LIST VIEW (Visible if View=Tasks OR View=History OR Dashboard+ListTab) -->
+    @if (view() === 'tasks' || view() === 'history' || view() === 'tasks-completed' || view() === 'tasks-not-completed' || (view() === 'dashboard' && dashboardTab() === 'list')) {
+       <div class="flex flex-col h-full overflow-y-auto custom-scrollbar space-y-8 pb-12">
+         
+         <!-- Section: Super Important -->
+           <div 
+              class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event, 'Super Important')"
+           >
+             <div 
+               (click)="toggleSection('super')"
+               class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-rose-50/50 dark:bg-rose-900/10 flex items-center gap-3 cursor-pointer select-none hover:bg-rose-100/50 dark:hover:bg-rose-900/20 transition-colors"
+             >
+               <app-icon name="chevron-right" [size]="16" class="text-slate-400 transition-transform duration-200" [class.rotate-90]="!collapsedSections().super"></app-icon>
+               <app-icon name="flame" [size]="18" class="text-rose-500"></app-icon>
+               <h3 class="font-bold text-slate-900 dark:text-white">Super Important</h3>
+               <span class="text-sm text-slate-500 dark:text-slate-400">({{colTasks.super().length}} tasks)</span>
+               @if(view() !== 'history') {
+                  <span class="text-xs text-slate-400 ml-auto hidden sm:block">Drop tasks here to reorder</span>
+               }
+             </div>
+             @if (!collapsedSections().super) {
+               <div class="divide-y divide-slate-100 dark:divide-slate-700 min-h-[50px]">
+                 @for (task of colTasks.super(); track task.id) {
+                   <ng-container *ngTemplateOutlet="taskListItem; context: { $implicit: task }"></ng-container>
+                 }
+                 @if (colTasks.super().length === 0) {
+                   <div class="p-6 text-center text-slate-400 text-sm">No tasks in this category.</div>
+                 }
+               </div>
+             }
+           </div>
+
+         <!-- Section: Important -->
+           <div 
+              class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event, 'Important')"
+           >
+             <div 
+               (click)="toggleSection('important')"
+               class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-amber-50/50 dark:bg-amber-900/10 flex items-center gap-3 cursor-pointer select-none hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors"
+             >
+               <app-icon name="chevron-right" [size]="16" class="text-slate-400 transition-transform duration-200" [class.rotate-90]="!collapsedSections().important"></app-icon>
+               <app-icon name="star" [size]="18" class="text-amber-500"></app-icon>
+               <h3 class="font-bold text-slate-900 dark:text-white">Important</h3>
+               <span class="text-sm text-slate-500 dark:text-slate-400">({{colTasks.important().length}} tasks)</span>
+               @if(view() !== 'history') {
+                  <span class="text-xs text-slate-400 ml-auto hidden sm:block">Drop tasks here to reorder</span>
+               }
+             </div>
+             @if (!collapsedSections().important) {
+               <div class="divide-y divide-slate-100 dark:divide-slate-700 min-h-[50px]">
+                 @for (task of colTasks.important(); track task.id) {
+                   <ng-container *ngTemplateOutlet="taskListItem; context: { $implicit: task }"></ng-container>
+                 }
+                 @if (colTasks.important().length === 0) {
+                   <div class="p-6 text-center text-slate-400 text-sm">No tasks in this category.</div>
+                 }
+               </div>
+             }
+           </div>
+
+         <!-- Section: Less Important -->
+           <div 
+              class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event, 'Less Important')"
+           >
+             <div 
+               (click)="toggleSection('less')"
+               class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/10 flex items-center gap-3 cursor-pointer select-none hover:bg-slate-100/50 dark:hover:bg-slate-800/20 transition-colors"
+             >
+               <app-icon name="chevron-right" [size]="16" class="text-slate-400 transition-transform duration-200" [class.rotate-90]="!collapsedSections().less"></app-icon>
+               <app-icon name="coffee" [size]="18" class="text-blue-500"></app-icon>
+               <h3 class="font-bold text-slate-900 dark:text-white">Less Important</h3>
+               <span class="text-sm text-slate-500 dark:text-slate-400">({{colTasks.less().length}} tasks)</span>
+               @if(view() !== 'history') {
+                  <span class="text-xs text-slate-400 ml-auto hidden sm:block">Drop tasks here to reorder</span>
+               }
+             </div>
+             @if (!collapsedSections().less) {
+               <div class="divide-y divide-slate-100 dark:divide-slate-700 min-h-[50px]">
+                 @for (task of colTasks.less(); track task.id) {
+                   <ng-container *ngTemplateOutlet="taskListItem; context: { $implicit: task }"></ng-container>
+                 }
+                 @if (colTasks.less().length === 0) {
+                   <div class="p-6 text-center text-slate-400 text-sm">No tasks in this category.</div>
+                 }
+               </div>
+             }
+           </div>
+
+       </div>
+    }
+
+  </div>
+</div>
+
+<!-- Task Card Template (Kanban) -->
+<ng-template #taskCard let-task>
+  <div 
+    draggable="true"
+    (dragstart)="onDragStart($event, task.id)"
+    (click)="openTaskDetail(task.id)"
+    class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 cursor-grab active:cursor-grabbing hover:shadow-md dark:hover:bg-slate-750 transition-all group relative overflow-hidden"
+    [class.ring-2]="taskService.activeTaskId() === task.id"
+    [class.ring-indigo-500]="taskService.activeTaskId() === task.id"
+  >
+    <!-- Active Timer Indicator -->
+    @if (taskService.activeTaskId() === task.id) {
+       <div class="absolute top-0 left-0 w-full h-1 bg-indigo-500 animate-pulse"></div>
+       <div class="absolute top-2 right-2">
+         <span class="relative flex h-3 w-3">
+           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+           <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+         </span>
+       </div>
+    }
+
+    <div class="flex justify-between items-start mb-2">
+       <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium truncate max-w-[120px]">
+         {{ task.project || 'No Project' }}
+       </span>
+       @if(task.status === 'Completed') {
+          <span class="text-emerald-500 text-xs font-bold flex items-center gap-1">
+            <app-icon name="check" [size]="14"></app-icon> Done
+          </span>
+       } @else {
+         <div class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400">
+           <app-icon name="grip-vertical" [size]="16"></app-icon>
+         </div>
+       }
+    </div>
+    <h4 class="font-semibold text-slate-900 dark:text-slate-100 mb-2 leading-snug" [class.line-through]="task.status === 'Completed'" [class.text-slate-400]="task.status === 'Completed'">{{ task.title }}</h4>
+    
+    <!-- Subtask Progress -->
+    @let stats = getSubtaskStats(task);
+    @if (stats.total > 0) {
+       <div class="mb-3">
+          <div class="flex items-center justify-between text-[10px] text-slate-400 mb-1">
+            <span>Progress</span>
+            <span>{{stats.completed}}/{{stats.total}}</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" [style.width.%]="stats.percent"></div>
+          </div>
+       </div>
+    }
+
+    <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-3 border-t border-slate-100 dark:border-slate-700/50 pt-3">
+      <div class="flex items-center gap-1">
+         <app-icon name="clock" [size]="14"></app-icon>
+         <span>{{ task.estimatedEffort || '1h' }}</span>
+      </div>
+      @if (task.totalTimeElapsed && task.totalTimeElapsed !== '0') {
+        <div class="flex items-center gap-1 text-indigo-500 dark:text-indigo-400">
+           <app-icon name="timer" [size]="14"></app-icon>
+           <span>{{ formatTotalTime(task.totalTimeElapsed) }}</span>
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<!-- Task List Item Template (List View) -->
+<ng-template #taskListItem let-task>
+  <div 
+    draggable="true"
+    (dragstart)="onDragStart($event, task.id)"
+    (click)="openTaskDetail(task.id)"
+    class="p-4 hover:bg-slate-50 dark:hover:bg-slate-750/50 transition-colors flex items-center gap-4 cursor-pointer group active:cursor-grabbing relative"
+    [class.bg-indigo-50]="taskService.activeTaskId() === task.id"
+    [class.dark:bg-indigo-900/10]="taskService.activeTaskId() === task.id"
+  >
+    <!-- Grip for DnD -->
+    @if(view() !== 'history') {
+      <div class="text-slate-300 dark:text-slate-600 cursor-grab group-hover:text-slate-400 transition-colors">
+        <app-icon name="grip-vertical" [size]="16"></app-icon>
+      </div>
+    }
+
+    <!-- Status Dot -->
+    <div class="shrink-0" [ngClass]="{
+      'text-emerald-500': task.status === 'Completed',
+      'text-amber-500': task.status === 'In Progress',
+      'text-slate-300': task.status === 'Backlog'
+    }">
+       @if (taskService.activeTaskId() === task.id) {
+           <span class="relative flex h-3 w-3">
+             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+             <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+           </span>
+       } @else if(task.status === 'Completed') {
+          <app-icon name="check" [size]="20"></app-icon>
+       } @else {
+          <div class="w-5 h-5 rounded-full border-2 border-current"></div>
+       }
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-3 mb-1">
+         <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate" [class.line-through]="task.status === 'Completed'" [class.text-slate-400]="task.status === 'Completed'">{{ task.title }}</h4>
+         <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase tracking-wide">
+           {{ task.project || 'No Project' }}
+         </span>
+         @if(task.archived) {
+           <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 uppercase tracking-wide">Archived</span>
+         }
+      </div>
+      
+      <div class="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1">
+         <span>Due: {{ task.deadline | date:'MMM d, h:mm a' }}</span>
+         <span class="flex items-center gap-1">
+           <app-icon name="zap" [size]="12"></app-icon> {{ task.energyLevel }} Energy
+         </span>
+         @if (task.totalTimeElapsed && task.totalTimeElapsed !== '0') {
+           <span class="flex items-center gap-1 text-indigo-500 dark:text-indigo-400 font-mono">
+             <app-icon name="timer" [size]="12"></app-icon> {{ formatTotalTime(task.totalTimeElapsed) }}
+           </span>
+         }
+      </div>
+      
+       <!-- Subtask Progress (Inline for List) -->
+       @let stats = getSubtaskStats(task);
+       @if (stats.total > 0) {
+          <div class="mt-2 w-full max-w-xs flex items-center gap-2">
+             <div class="flex-1 bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+               <div class="bg-emerald-500 h-full rounded-full transition-all duration-300" [style.width.%]="stats.percent"></div>
+             </div>
+             <span class="text-[10px] text-slate-400 font-medium">{{stats.completed}}/{{stats.total}}</span>
+          </div>
+       }
+    </div>
+    
+    <div class="text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+      <app-icon name="chevron-right" [size]="16"></app-icon>
+    </div>
+  </div>
+</ng-template>

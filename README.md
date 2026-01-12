@@ -1,51 +1,46 @@
+# Productivity Flow (Beta)
 
-# Productivity Helper
+**Productivity Flow** is an advanced, privacy-first task management dashboard built with **Angular**. It goes beyond simple to-do lists by integrating energy management, focus timers, and habit-building streaks directly into your workflow.
 
-**Productivity Helper** is a streamlined, client-side task management application designed to help users organize, prioritize, and track time spent on their daily objectives. It provides a centralized dashboard to manage complexity through granular task details and integrated time tracking.
+## 🚀 Key Features
 
-**🔗 Live Demo:** [https://s-tech-ninja.github.io/productivity-helper/](https://s-tech-ninja.github.io/productivity-helper/)
+### 🧠 Smart Task Management
+*   **Three-Tier Prioritization:** Organize tasks into **Super Important**, **Important**, and **Less Important**.
+*   **Energy-Based Planning:** Tag tasks by Energy Level (**High**, **Medium**, **Low**) to match your mental capacity.
+*   **Rich Metadata:** Track Projects, Tags, Start Dates, Deadlines, and Recurrence (Daily/Weekly/Monthly).
+*   **Structured Subtasks:** Break down tasks into checklists with individual completion states and notes.
 
-## 🚀 Features
+### ⏱️ Focus & Time Tracking
+*   **Integrated Timer:** Start/Stop timers for any task. Tracks `totalTimeElapsed` and `timerSessionCount`.
+*   **Session Persistence:** Timer state is saved to `localStorage`, so you don't lose your active session if the tab closes.
+*   **Streak Counter:** Gamified tracking of consecutive days with completed tasks.
 
-* **Smart Prioritization:** Organize tasks into three distinct tiers: **Super Important**, **Important**, and **Less Important**.
-* **Drag-and-Drop Workflow:** Reorder tasks or move them between priority lists instantly using an intuitive drag-and-handle interface.
-* **Integrated Time Tracking:** Start and pause timers for individual tasks to accurately measure "Time Spent" versus "Time Estimated."
-* **Dynamic Checklists:** Add sub-tasks to any entry with real-time progress bar updates and automatic sorting (active tasks vs. completed tasks).
-* **Detailed Task Metadata:** Track tasks by Project, Tags, Energy Level (Low/High), and Due Date/Time.
-* **Data Persistence:** Your data stays with you. All tasks and timers are saved to `localStorage`, ensuring no progress is lost when closing the tab.
-* **Security Minded:** Built-in XSS protection ensures task descriptions and names are rendered safely.
+### 🔔 Intelligent Notifications
+*   **Proactive Alerts:** Browser notifications trigger **15 minutes before** a scheduled task and **at the start time**.
+*   **Audio Cues:** Sound effects for timer start and task reminders.
+*   **Dashboard Alerts:** Visual indicators for "Ending Today" and "Overdue" tasks.
 
-## 🛠️ Tech Stack
+### 📊 Dashboard & Views
+*   **Multiple Views:** Switch between **Board** (Kanban-style), **List**, **History**, and **Completed** views.
+*   **Dynamic Filtering:** Filter by Date (**Today**, **This Week**, **This Month**) and Search text.
+*   **Drag-and-Drop:** Reorder tasks or change priorities instantly.
 
-* **Core:** [jQuery](https://jquery.com/) (DOM manipulation and event handling)
-* **UI Components:** [Bootstrap 5](https://getbootstrap.com/) (Modals, Progress bars, and Layout)
-* **Interactions:** [jQuery UI](https://jqueryui.com/) (Sortable functionality for drag-and-drop)
-* **Icons:** [FontAwesome](https://fontawesome.com/)
-* **Storage:** Browser `localStorage` API
+## 🛠️ Technical Architecture
 
-## ⚙️ Technical Overview
+### Core Stack
+*   **Framework:** Angular (utilizing **Signals** for reactive state management).
+*   **Language:** TypeScript.
+*   **Storage:** `localStorage` (Client-side only).
 
-### State Management & Persistence
+### State Management
+The application uses **Angular Signals** (`signal`, `computed`, `effect`) for a highly reactive and performant user experience.
+*   **Source of Truth:** `TaskService` maintains the `tasksSignal`.
+*   **Persistence:** `effect()` hooks automatically sync state changes to `localStorage`.
 
-The application maintains a central `tasks` array as the "Source of Truth." Every modification (adding, editing, deleting, or reordering) triggers a synchronization between the UI, the application state, and the browser's `localStorage`.
+### Data Migration
+Includes a robust migration layer to handle data schema evolution:
+*   Automatically converts legacy string-based subtasks to structured `Subtask` objects.
+*   Maps legacy `location` fields to the new `tags` array.
 
-### Data Migration Layer
-
-To ensure backward compatibility, the `loadTasks()` function includes a migration map. If the application logic is updated with new properties (e.g., `energyLevel` or `timeSpent`), it automatically detects older data formats and patches them with default values.
-
-### Time Tracking Logic
-
-The timer uses a "Session Start" logic to maintain accuracy even if the page isn't refreshed for hours:
-
-1. **Start:** Records the `currentSessionStartTime`.
-2. **Active Tracking:** While running, a global `setInterval` updates the UI every second by calculating:
-
-
-3. **Pause:** The calculated delta is added to the permanent `timeSpent` total and the session is cleared.
-
-## 📝 Usage
-
-1. **Create a Task:** Click the "Create Task" button. Enter a name and assign a priority level.
-2. **Focus & Details:** Click any task card to open the Detail View. Here you can manage your checklist and start the timer.
-3. **Live Progress:** As you check items off your sub-task list, the progress bar on the card and in the detail view updates automatically.
-4. **Prioritize:** Use the vertical grip icon on the left of any task card to drag it into a different priority list.
+## 🔒 Privacy
+Your data never leaves your browser. All tasks, timers, and settings are stored locally in your browser's `localStorage`.

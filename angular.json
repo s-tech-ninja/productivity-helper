@@ -17,7 +17,7 @@
               "src/assets"
             ],
             "outputPath": {
-              "base": "./docs/",
+              "base": "./dist/",
               "browser": "."
             },
             "browser": "index.tsx",

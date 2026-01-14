@@ -116,7 +116,7 @@
         <!-- Description (Rich Text) -->
         @if (task().description) {
           <section>
-            <div class="rich-text-content text-sm text-slate-700 dark:text-slate-300 leading-relaxed" [innerHTML]="task().description"></div>
+            <div class="rich-text-content prose prose-sm prose-slate dark:prose-invert max-w-none" [innerHTML]="task().description"></div>
           </section>
         }
 

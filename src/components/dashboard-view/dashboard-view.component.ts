@@ -53,6 +53,77 @@ export class DashboardViewComponent {
   notifications = this.taskService.notifications;
   notificationCount = this.taskService.notificationCount;
 
+  // Add this signal
+  sortOption = signal<'smart' | 'deadline' | 'priority' | 'energy' | 'newest'>('smart');
+
+  // Add this method
+  updateSort(option: string) {
+    this.sortOption.set(option as any);
+  }
+
+  // Update your filteredTasks computed (or similar) to include this sorting logic
+  sortedTasks = computed(() => {
+    const tasks = this.filteredTasks(); // Assuming you have a filtered list
+    const sort = this.sortOption();
+
+    return [...tasks].sort((a, b) => {
+      // 1. Always put Completed tasks at the bottom
+      if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+      if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+
+      // 2. Sorting Strategies
+      switch (sort) {
+        case 'deadline':
+          // Null deadlines go last
+          if (!a.deadline) return 1;
+          if (!b.deadline) return -1;
+          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+
+        case 'priority':
+          const pMap: Record<string, number> = { 'Super Important': 3, 'Important': 2, 'Less Important': 1 };
+          return (pMap[b.category] || 0) - (pMap[a.category] || 0);
+
+        case 'energy':
+          const eMap: Record<string, number> = { 'High': 3, 'Medium': 2, 'Low': 1 };
+          // Default to Medium (2) if undefined
+          return (eMap[b.energyLevel || 'Medium'] || 2) - (eMap[a.energyLevel || 'Medium'] || 2);
+
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+        case 'smart':
+        default:
+          // A. Overdue check (Deadline < Now)
+          const now = new Date().getTime();
+          const aDue = a.deadline ? new Date(a.deadline).getTime() : null;
+          const bDue = b.deadline ? new Date(b.deadline).getTime() : null;
+          
+          const aOverdue = aDue && aDue < now;
+          const bOverdue = bDue && bDue < now;
+
+          if (aOverdue && !bOverdue) return -1;
+          if (!aOverdue && bOverdue) return 1;
+
+          // B. Deadline (Soonest first)
+          if (aDue && bDue) {
+              if (aDue !== bDue) return aDue - bDue;
+          }
+          // Push tasks with no deadline to bottom of "Smart" list
+          if (aDue && !bDue) return -1;
+          if (!aDue && bDue) return 1;
+
+          // C. Priority Tie-breaker
+          const pMapSmart: Record<string, number> = { 'Super Important': 3, 'Important': 2, 'Less Important': 1 };
+          if (a.category !== b.category) {
+              return (pMapSmart[b.category] || 0) - (pMapSmart[a.category] || 0);
+          }
+
+          // D. Created Date (Newest first)
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  });
+
   toggleNotifications() {
     this.showNotifications.update(v => !v);
   }
@@ -130,9 +201,9 @@ export class DashboardViewComponent {
   });
 
   colTasks = {
-    super: computed(() => this.filteredTasks().filter(t => t.category === 'Super Important')),
-    important: computed(() => this.filteredTasks().filter(t => t.category === 'Important')),
-    less: computed(() => this.filteredTasks().filter(t => t.category === 'Less Important')),
+    super: computed(() => this.sortedTasks().filter(t => t.category === 'Super Important')),
+    important: computed(() => this.sortedTasks().filter(t => t.category === 'Important')),
+    less: computed(() => this.sortedTasks().filter(t => t.category === 'Less Important')),
   };
 
   isOverdue(dateStr: string): boolean {

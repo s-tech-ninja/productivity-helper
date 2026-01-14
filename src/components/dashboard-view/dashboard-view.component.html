@@ -10,13 +10,13 @@
          <!-- Search Input (Desktop) -->
          <div class="mt-2 hidden md:block">
             <div class="relative">
-            <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
-            <input 
-              type="text" 
-              placeholder="Search tasks..." 
-              class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
-              (input)="searchQuery.set($any($event.target).value)"
-            >
+              <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+              <input 
+                type="text" 
+                placeholder="Search tasks..." 
+                class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
+                (input)="searchQuery.set($any($event.target).value)"
+              >
             </div>
             
             <!-- Date Filters -->
@@ -289,14 +289,32 @@
             @else { All Tasks }
          </h2>
          <div class="mt-2">
-            <div class="relative">
-            <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
-            <input 
-              type="text" 
-              placeholder="Search tasks..." 
-              class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
-              (input)="searchQuery.set($any($event.target).value)"
-            >
+            <div class="flex items-center gap-2">
+              <div class="relative">
+                <app-icon name="target" [size]="16" class="absolute left-[0.3rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+                <input 
+                  type="text" 
+                  placeholder="Search tasks..." 
+                  class="pl-9 pr-4 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 w-64 transition-all"
+                  (input)="searchQuery.set($any($event.target).value)"
+                >
+              </div>
+
+              <!-- Sort Control -->
+              <div class="relative group">
+                <app-icon name="list-ordered" [size]="16" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></app-icon>
+                <select 
+                  (change)="updateSort($any($event.target).value)"
+                  class="appearance-none pl-9 pr-8 py-1.5 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors font-medium"
+                >
+                  <option value="smart">Smart Sort</option>
+                  <option value="deadline">Deadline</option>
+                  <option value="priority">Priority</option>
+                  <option value="energy">Energy</option>
+                  <option value="newest">Newest</option>
+                </select>
+                <app-icon name="chevron-down" [size]="14" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></app-icon>
+              </div>
             </div>
             
             <!-- Date Filters (Non-Dashboard View) -->

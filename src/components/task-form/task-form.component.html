@@ -353,13 +353,13 @@
                    
                    <!-- Subtask Note Input -->
                    <div class="pl-11 pr-2">
-                      <input 
-                        type="text" 
+                      <textarea 
                         [value]="item.notes || ''"
                         (input)="updateSubtaskNote($index, $any($event.target).value)"
-                        class="w-full text-xs px-2 py-1 bg-transparent border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 focus:outline-none focus:border-indigo-400 placeholder-slate-300 dark:placeholder-slate-600 transition-colors"
+                        class="w-full text-xs px-2 py-1 bg-transparent border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 focus:outline-none focus:border-indigo-400 placeholder-slate-300 dark:placeholder-slate-600 transition-colors resize-y"
                         placeholder="Add notes..."
-                      >
+                        rows="1"
+                      ></textarea>
                    </div>
                  </div>
                }

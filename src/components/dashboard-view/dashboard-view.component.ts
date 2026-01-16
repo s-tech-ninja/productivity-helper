@@ -15,6 +15,7 @@ export class DashboardViewComponent {
   triggerComplete = output<Task>(); // Output to parent for completion modal
   triggerDelete = output<Task>(); // Output to parent for delete confirmation
   triggerDetail = output<string>();
+  triggerNavigate = output<string>();
   
   taskService = inject(TaskService);
   tasks = this.taskService.tasks;

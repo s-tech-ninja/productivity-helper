@@ -164,6 +164,26 @@
         <span class="font-medium">Calendar</span>
       </button>
 
+      <!-- Diary Link -->
+      <button 
+        (click)="setView('diary')"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left"
+        [class.bg-indigo-50]="currentView() === 'diary'"
+        [class.text-indigo-600]="currentView() === 'diary'"
+        [class.dark:bg-indigo-900/30]="currentView() === 'diary'"
+        [class.dark:text-indigo-400]="currentView() === 'diary'"
+        [class.text-slate-600]="currentView() !== 'diary'"
+        [class.dark:text-slate-300]="currentView() !== 'diary'"
+        [class.hover:bg-slate-50]="currentView() !== 'diary'"
+        [class.dark:hover:bg-slate-700/50]="currentView() !== 'diary'"
+      >
+        <app-icon name="book-open" [size]="20"
+          [class.group-hover:text-indigo-600]="currentView() !== 'diary'"
+          [class.dark:group-hover:text-indigo-400]="currentView() !== 'diary'"
+        ></app-icon>
+        <span class="font-medium">Diary</span>
+      </button>
+
       <!-- Help Menu -->
       <button 
         (click)="isHelpOpen.set(true)"
@@ -250,6 +270,7 @@
              @case ('tasks-not-completed') { Tasks }
              @case ('history') { Tasks }
              @case ('analytics') { Analytics Suite }
+             @case ('diary') { Diary }
              @case ('calendar') { Calendar }
            }
         </h1>
@@ -345,9 +366,12 @@
             (triggerComplete)="openCompletionModal($event)"
             (triggerDelete)="openDeleteModal($event)"
             (triggerDetail)="openTaskDetail($event)"
+            (triggerNavigate)="setView($any($event))"
          ></app-dashboard-view>
       } @else if (currentView() === 'analytics') {
          <app-analytics-view></app-analytics-view>
+      } @else if (currentView() === 'diary') {
+         <app-diary-view class="block h-full"></app-diary-view>
       } @else if (currentView() === 'calendar') {
          <app-calendar-view (triggerDetail)="openTaskDetail($event)"></app-calendar-view>
       }

@@ -6,6 +6,7 @@ import { TaskFormComponent } from './components/task-form/task-form.component';
 import { DashboardViewComponent } from './components/dashboard-view/dashboard-view.component';
 import { CalendarViewComponent } from './components/calendar-view/calendar-view.component';
 import { AnalyticsViewComponent } from './components/analytics-view/analytics-view.component';
+import { DiaryViewComponent } from './components/diary-view/diary-view.component';
 import { HelpComponent } from './components/help-modal/help-modal.component';
 import { CompletionModalComponent } from './components/completion-modal/completion-modal.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
@@ -16,7 +17,7 @@ import { Task, TaskService } from './services/task.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent],
+  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
@@ -28,7 +29,7 @@ export class AppComponent {
   currentYear = new Date().getFullYear();
   
   // View State for routing
-  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'tasks-completed' | 'tasks-not-completed'>('dashboard');
+  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed'>('dashboard');
 
   isSidebarOpen = signal(false);
   showNotifications = signal(false);
@@ -80,7 +81,7 @@ export class AppComponent {
     }, 200);
   }
 
-  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'tasks-completed' | 'tasks-not-completed') {
+  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed') {
     this.currentView.set(view);
     // On mobile, close sidebar after navigation
     if (window.innerWidth < 768) {

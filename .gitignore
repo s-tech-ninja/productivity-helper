@@ -9,6 +9,7 @@ pnpm-debug.log*
 /dist/
 /out-tsc/
 /tmp/
+/docs/
 
 # Compiled files
 *.js

@@ -44,3 +44,21 @@ Includes a robust migration layer to handle data schema evolution:
 
 ## 🔒 Privacy
 Your data never leaves your browser. All tasks, timers, and settings are stored locally in your browser's `localStorage`.
+
+
+## Update Angular Commands
+
+| Update Target | Command to Run |
+| :--- | :--- |
+| Code Changes | Just Save File (Auto-sync) |
+| New NPM Package | `docker compose exec node npm install <name>` |
+| Angular Framework | `docker compose exec node npx ng update` |
+| Docker/Node Config | `docker compose up --build` |
+| Force Fresh Reinstall | `docker compose down -v` then `docker compose up` |
+
+| Step | Command |
+| :--- | :--- |
+| Commit Work | `git commit -m "save"` |
+| Check Versions | `docker compose exec node npx ng version` |
+| Update CLI/Core | `docker compose exec node npx ng update @angular/core @angular/cli` |
+| Reset Container | `docker compose down -v && docker compose up --build` |

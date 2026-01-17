@@ -1,140 +1,161 @@
 import { Component, input, output, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Task, TaskService, Subtask } from '../../services/task.service';
+import { TaskService, Task } from '../../services/task.service';
 import { IconComponent } from '../icons/icon.component';
 
 @Component({
   selector: 'app-task-detail',
   standalone: true,
   imports: [CommonModule, IconComponent, FormsModule],
-  templateUrl: './task-detail.component.html',
-  styles: [`
-    .rich-text-content ul {
-      list-style-type: disc;
-      padding-left: 1.25rem;
-      margin-bottom: 0.5rem;
-    }
-    .rich-text-content ol {
-      list-style-type: decimal;
-      padding-left: 1.25rem;
-      margin-bottom: 0.5rem;
-    }
-    .rich-text-content b, .rich-text-content strong {
-      font-weight: bold;
-    }
-    .rich-text-content i, .rich-text-content em {
-      font-style: italic;
-    }
-    .rich-text-content u {
-      text-decoration: underline;
-    }
-    .rich-text-content p {
-      margin-bottom: 0.5rem;
-    }
-  `]
+  templateUrl: './task-detail.component.html'
 })
 export class TaskDetailComponent {
   task = input.required<Task>();
   close = output<void>();
-  edit = output<Task>(); 
-  complete = output<Task>(); 
-  delete = output<Task>(); 
-  
+  edit = output<Task>();
+  complete = output<Task>();
+  delete = output<Task>();
+
   private taskService = inject(TaskService);
+
+  // Timer Logic Helpers
+  isTimerRunning = computed(() => 
+    this.taskService.activeTaskId() === this.task().id
+  );
   
-  // Timer State
-  isTimerRunning = computed(() => this.taskService.activeTaskId() === this.task().id);
-  
-  isOtherTimerRunning = computed(() => {
-    const activeId = this.taskService.activeTaskId();
-    return activeId !== null && activeId !== this.task().id;
-  });
-  
-  // Real-time Timer Display
+  isOtherTimerRunning = computed(() => 
+    !!this.taskService.activeTaskId() && this.taskService.activeTaskId() !== this.task().id
+  );
+
+  // Live timer display
   liveTimeDisplay = computed(() => {
-    const now = this.taskService.tick(); 
-    const isRunning = this.isTimerRunning();
-    const startTime = this.taskService.activeTimerStart();
-    const previouslyLogged = parseInt(this.task().totalTimeElapsed || '0', 10);
+    // Dependency on tick to force refresh every second
+    this.taskService.tick(); 
     
-    let currentSessionMs = 0;
-    if (isRunning && startTime) {
-      currentSessionMs = now - startTime;
+    if (this.isTimerRunning() && this.taskService.activeTimerStart()) {
+       const start = this.taskService.activeTimerStart()!;
+       const current = parseInt(this.task().totalTimeElapsed || '0', 10);
+       const session = Date.now() - start;
+       return this.taskService.formatDuration(current + session);
     }
-    
-    return this.taskService.formatDuration(previouslyLogged + currentSessionMs);
+    return this.taskService.formatDuration(parseInt(this.task().totalTimeElapsed || '0', 10));
   });
 
-  // Sort subtasks: Unchecked first, then Checked
   sortedSubtasks = computed(() => {
     const subtasks = this.task().subtasks || [];
-    // Clone before sort to avoid mutating the signal reference
+    // Sort: Incomplete first, then Completed
     return [...subtasks].sort((a, b) => {
       if (a.completed === b.completed) return 0;
       return a.completed ? 1 : -1;
     });
   });
-  
-  completedCount = computed(() => (this.task().subtasks || []).filter(t => t.completed).length);
-  
+
+  completedCount = computed(() => 
+    (this.task().subtasks || []).filter(s => s.completed).length
+  );
+
   progressPercentage = computed(() => {
-     const total = (this.task().subtasks || []).length;
-     if (total === 0) return 0;
-     return Math.round((this.completedCount() / total) * 100);
-  });
-
-  canComplete = computed(() => {
     const total = (this.task().subtasks || []).length;
-    // If no subtasks, logic allows completion
-    if (total === 0) return true;
-    return this.completedCount() === total;
+    if (total === 0) return 0;
+    return Math.round((this.completedCount() / total) * 100);
   });
 
-  toggleSubtask(subtaskId: string) {
-    const currentSubtasks = this.task().subtasks || [];
-    const updatedSubtasks = currentSubtasks.map(s => {
-      if (s.id === subtaskId) {
-        return {
-          ...s,
-          completed: !s.completed,
-          completedAt: !s.completed ? Date.now() : undefined
-        };
-      }
-      return s;
-    });
-    
-    this.taskService.updateTask(this.task().id, { subtasks: updatedSubtasks });
-  }
-
-  updateSubtaskNotes(subtaskId: string, notes: string) {
-    const currentSubtasks = this.task().subtasks || [];
-    const updatedSubtasks = currentSubtasks.map(s => {
-      if (s.id === subtaskId) {
-        return { ...s, notes };
-      }
-      return s;
-    });
-    this.taskService.updateTask(this.task().id, { subtasks: updatedSubtasks });
+  canComplete() {
+    const t = this.task();
+    return (t.subtasks || []).every(s => s.completed);
   }
 
   toggleTimer() {
     this.taskService.toggleTimer(this.task().id);
   }
-  
-  formatTotalTime(timeStr: string | undefined): string {
-    return this.taskService.formatDuration(parseInt(timeStr || '0', 10));
+
+  toggleSubtask(subtaskId: string) {
+    const currentTask = this.task();
+    if (!currentTask.subtasks) return;
+
+    // Create a new array with the updated item (Immutable update)
+    const newSubtasks = currentTask.subtasks.map(s => 
+      s.id === subtaskId ? { 
+        ...s, 
+        completed: !s.completed, 
+        completedAt: !s.completed ? Date.now() : undefined 
+      } : s
+    );
+    
+    this.taskService.updateTask(currentTask.id, { subtasks: newSubtasks });
+  }
+
+  updateSubtaskNotes(subtaskId: string, notes: string) {
+    const currentTask = this.task();
+    const newSubtasks = currentTask.subtasks.map(s => 
+      s.id === subtaskId ? { ...s, notes } : s
+    );
+    
+    this.taskService.updateTask(currentTask.id, { subtasks: newSubtasks });
+  }
+
+  onMarkCompleted() {
+    this.complete.emit(this.task());
   }
 
   onDelete() {
     this.delete.emit(this.task());
   }
 
-  onMarkCompleted() {
-    if (this.isTimerRunning()) {
-      this.taskService.stopTimer();
-    }
-    this.complete.emit(this.task());
-    this.close.emit();
+  formatTotalTime(msStr: string | undefined) {
+    return this.taskService.formatDuration(parseInt(msStr || '0', 10));
   }
+
+  nextOccurrence = computed(() => {
+    const t = this.task();
+    if (t.recurrence === 'None') return null;
+    
+    const startStr = t.startDate || (t.createdAt ? new Date(t.createdAt).toISOString() : null);
+    if (!startStr) return null;
+    
+    const start = new Date(startStr);
+    const now = new Date();
+    
+    if (start.getTime() > now.getTime()) return start;
+    
+    const next = new Date(start);
+    
+    switch (t.recurrence) {
+        case 'Daily': {
+            const diff = now.getTime() - start.getTime();
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            next.setDate(start.getDate() + days);
+            while (next <= now) next.setDate(next.getDate() + 1);
+            break;
+        }
+        case 'Weekly': {
+            const diff = now.getTime() - start.getTime();
+            const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+            next.setDate(start.getDate() + (weeks * 7));
+            while (next <= now) next.setDate(next.getDate() + 7);
+            break;
+        }
+        case 'Bi-Weekly': {
+            const diff = now.getTime() - start.getTime();
+            const twoWeeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 14));
+            next.setDate(start.getDate() + (twoWeeks * 14));
+            while (next <= now) next.setDate(next.getDate() + 14);
+            break;
+        }
+        case 'Monthly': {
+            while (next <= now) {
+                next.setMonth(next.getMonth() + 1);
+            }
+            break;
+        }
+    }
+    
+    if (t.deadline) {
+        const end = new Date(t.deadline);
+        if (next.getTime() > end.getTime()) return null;
+    }
+    
+    return next;
+  });
 }

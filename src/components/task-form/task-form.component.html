@@ -179,7 +179,7 @@
               </div>
               <!-- Deadline -->
               <div class="space-y-2">
-                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Deadline <span class="text-rose-500">*</span></label>
+                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{{ taskForm.get('recurrence')?.value !== 'None' ? 'End Date' : 'Deadline' }} <span class="text-rose-500">*</span></label>
                 <input formControlName="deadline" type="datetime-local" [class]="inputClass">
               </div>
               <!-- Effort (Time Input) -->
@@ -241,7 +241,11 @@
                      <option value="Monthly">Monthly</option>
                    </select>
                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
-                     <app-icon name="chevron-right" [size]="16" class="rotate-90"></app-icon>
+                     @if (taskForm.get('recurrence')?.disabled) {
+                       <app-icon name="lock" [size]="16"></app-icon>
+                     } @else {
+                       <app-icon name="chevron-right" [size]="16" class="rotate-90"></app-icon>
+                     }
                    </div>
                 </div>
               </div>

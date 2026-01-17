@@ -2,11 +2,12 @@ import { Component, inject, computed, signal, input, output, effect } from '@ang
 import { CommonModule } from '@angular/common';
 import { TaskService, Task } from '../../services/task.service';
 import { IconComponent } from '../icons/icon.component'; 
-
+import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-dashboard-view',
   standalone: true,
   imports: [CommonModule, IconComponent],
+  providers: [DatePipe],
   templateUrl: './dashboard-view.component.html'
 })
 export class DashboardViewComponent {
@@ -17,6 +18,7 @@ export class DashboardViewComponent {
   triggerDetail = output<string>();
   triggerNavigate = output<string>();
   
+  datePipe = inject(DatePipe);
   taskService = inject(TaskService);
   tasks = this.taskService.tasks;
   stats = this.taskService.stats;
@@ -143,15 +145,22 @@ export class DashboardViewComponent {
     const currentView = this.view();
     const allTasks = this.tasks();
     const dateFilter = this.dateFilter();
+    const today = new Date();
 
     // Step 1: Filter by View (Archived vs Active vs Status)
     let tasksInView = allTasks;
     if (currentView === 'history') {
       tasksInView = allTasks.filter(t => t.archived);
     } else if (currentView === 'tasks-completed') {
-      tasksInView = allTasks.filter(t => t.status === 'Completed' && !t.archived);
+      tasksInView = allTasks.filter(t => 
+        (!t.archived && t.status === 'Completed') ||
+        (!t.archived && t.recurrence !== 'None' && this.taskService.isOccurrenceCompleted(t, today))
+      );
     } else if (currentView === 'tasks-not-completed') {
-      tasksInView = allTasks.filter(t => t.status !== 'Completed' && !t.archived);
+      tasksInView = allTasks.filter(t => 
+        (!t.archived && t.status !== 'Completed') &&
+        !(t.recurrence !== 'None' && this.taskService.isOccurrenceCompleted(t, today))
+      );
     }
     else {
       tasksInView = allTasks.filter(t => !t.archived);
@@ -160,31 +169,50 @@ export class DashboardViewComponent {
     // Step 2: Date Filter
     if (dateFilter !== 'All') {
       const now = new Date();
-      now.setHours(23, 59, 59, 999); // Compare against end of today
-      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).getTime();
+      now.setHours(0, 0, 0, 0);
       
       tasksInView = tasksInView.filter(t => {
-        if (!t.deadline) return false;
-        
-        const d = new Date(t.deadline);
-        d.setHours(23, 59, 59, 999); // Normalize task deadline to end of its day
-        const taskDeadline = d.getTime();
-        
         if (dateFilter === 'Today') {
-          return taskDeadline <= endOfToday;
+          const isOnDate = this.taskService.isTaskOnDate(t, now);
+          if (!isOnDate) return false;
+
+          // If it's a recurring task, check if it was completed TODAY
+          // If so, we still want to show it, but we might want to visually mark it as completed
+          // The filter below (Step 1) might have filtered out 'Completed' status tasks if we are in 'dashboard' view?
+          // Actually, 'dashboard' view usually shows all non-archived.
+          // But if we reset the task status to 'Backlog', it shows as Todo.
+          // We need to handle the display status in the template or map it here.
+          
+          return true;
         }
         
         if (dateFilter === 'This Week') {
+           // Check next 7 days (or remaining days of week)
+           // Simple approach: Check if it occurs on any day from Today to End of Week
+           const current = new Date(now);
            const endOfWeek = new Date(now);
-           const diff = now.getDate() - now.getDay() + 6; // Adjust to Saturday (End of week)
-           endOfWeek.setDate(diff);
-           endOfWeek.setHours(23, 59, 59, 999);
-           return taskDeadline <= endOfWeek.getTime();
+           endOfWeek.setDate(now.getDate() + (6 - now.getDay())); // Saturday
+           
+           while (current <= endOfWeek) {
+             if (this.taskService.isTaskOnDate(t, current)) return true;
+             current.setDate(current.getDate() + 1);
+           }
+           return false;
         }
         
         if (dateFilter === 'This Month') {
-           const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).getTime();
-           return taskDeadline <= endOfMonth;
+           // Optimization: Check if start date is before end of month AND deadline is after start of month
+           // Then check specific recurrence if needed, but for listing usually "Active in this month" is enough?
+           // Let's stick to strict occurrence check for accuracy
+           const current = new Date(now);
+           const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+           
+           // Safety cap for loop
+           while (current <= endOfMonth) {
+             if (this.taskService.isTaskOnDate(t, current)) return true;
+             current.setDate(current.getDate() + 1);
+           }
+           return false;
         }
         
         return true;
@@ -192,13 +220,38 @@ export class DashboardViewComponent {
     }
 
     // Step 3: Search Query
-    if (!query) return tasksInView;
-    
-    return tasksInView.filter(t => 
-      t.title.toLowerCase().includes(query) || 
-      t.description?.toLowerCase().includes(query) ||
-      t.project?.toLowerCase().includes(query)
-    );
+    if (query) {
+      tasksInView = tasksInView.filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        t.description?.toLowerCase().includes(query) ||
+        t.project?.toLowerCase().includes(query)
+      );
+    }
+
+    // Step 4: Visual Fix for Recurring Tasks completed today (Apply to all views)
+    tasksInView = tasksInView.map(t => {
+      if (t.recurrence !== 'None') {
+        const todayStr = today.toLocaleDateString('en-CA');
+        // Ensure we check completion history safely
+        const completion = t.completionHistory?.find(h => h.occurrenceDate === todayStr);
+        
+        if (completion) {
+          return { 
+            ...t, 
+            status: 'Completed', 
+            subtasks: completion.subtasksSnapshot || t.subtasks,
+            focusScore: completion.focusScore,
+            reflection: completion.reflection,
+            interruptions: completion.interruptions,
+            completionTime: new Date(completion.completedAt).toISOString(),
+            totalTimeElapsed: completion.timeElapsed
+          };
+        }
+      }
+      return t;
+    });
+
+    return tasksInView;
   });
 
   colTasks = {

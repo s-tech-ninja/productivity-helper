@@ -135,17 +135,25 @@
                <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().createdAt | date:'MMM d, y' }}</p>
              </div>
              <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
-               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Deadline</p>
+               <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">{{ task().recurrence !== 'None' ? 'End Date' : 'Deadline' }}</p>
                <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().deadline | date:'MMM d, h:mm a' }}</p>
              </div>
              <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
                <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Est. Effort</p>
                <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().estimatedEffort || '-' }}</p>
              </div>
+             
              @if (task().startDate) {
-               <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg col-span-2">
+               <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg" [class.col-span-2]="!nextOccurrence()">
                  <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Start Date</p>
                  <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().startDate | date:'MMM d, h:mm a' }}</p>
+               </div>
+             }
+             
+             @if (nextOccurrence()) {
+               <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg" [class.col-span-2]="!task().startDate">
+                 <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Next Occurrence</p>
+                 <p class="font-medium text-indigo-600 dark:text-indigo-400">{{ nextOccurrence() | date:'MMM d, h:mm a' }}</p>
                </div>
              }
              <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg col-span-2">

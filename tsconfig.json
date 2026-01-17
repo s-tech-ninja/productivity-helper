@@ -5,9 +5,9 @@
     "useDefineForClassFields": false,
     "module": "ESNext",
     "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
+      "es2022",
+      "dom",
+      "dom.iterable"
     ],
     "skipLibCheck": true,
     "types": [
@@ -29,5 +29,8 @@
   ],
   "angularCompilerOptions": {
     "disableTypeScriptVersionCheck": true
-  }
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
 }

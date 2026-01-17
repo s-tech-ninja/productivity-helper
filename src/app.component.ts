@@ -5,6 +5,7 @@ import { AuthModalComponent } from './components/auth-modal/auth-modal.component
 import { TaskFormComponent } from './components/task-form/task-form.component';
 import { DashboardViewComponent } from './components/dashboard-view/dashboard-view.component';
 import { CalendarViewComponent } from './components/calendar-view/calendar-view.component';
+import { DatePipe } from '@angular/common';
 import { AnalyticsViewComponent } from './components/analytics-view/analytics-view.component';
 import { DiaryViewComponent } from './components/diary-view/diary-view.component';
 import { HelpComponent } from './components/help-modal/help-modal.component';
@@ -17,7 +18,7 @@ import { Task, TaskService } from './services/task.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent],
+  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent,DatePipe],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
@@ -44,7 +45,29 @@ export class AppComponent {
   activeTask = computed(() => {
     const id = this.selectedTaskId();
     if (!id) return null;
-    return this.taskService.tasks().find(t => t.id === id) || null;
+    const task = this.taskService.tasks().find(t => t.id === id) || null;
+
+    // If recurring task, check if completed today and overlay history data
+    if (task && task.recurrence !== 'None') {
+      const today = new Date();
+      const todayStr = today.toLocaleDateString('en-CA');
+      const completion = task.completionHistory?.find(h => h.occurrenceDate === todayStr);
+      
+      if (completion) {
+        return {
+          ...task,
+          status: 'Completed',
+          focusScore: completion.focusScore,
+          reflection: completion.reflection,
+          completionTime: new Date(completion.completedAt).toISOString(),
+          subtasks: completion.subtasksSnapshot || task.subtasks,
+          totalTimeElapsed: completion.timeElapsed || task.totalTimeElapsed,
+          interruptions: completion.interruptions || task.interruptions
+        } as Task;
+      }
+    }
+    
+    return task;
   });
 
   // Edit State
@@ -124,8 +147,7 @@ export class AppComponent {
   onCompleteTask(data: { focusScore: number; reflection: string }) {
     const task = this.taskToComplete();
     if (task) {
-      this.taskService.updateTask(task.id, {
-        status: 'Completed',
+      this.taskService.completeTask(task.id, {
         focusScore: data.focusScore,
         reflection: data.reflection,
         completionTime: new Date().toISOString()

@@ -23,20 +23,6 @@ export class CalendarViewComponent {
 
   currentDate = signal(new Date());
 
-  // Group tasks by deadline date for quick lookup
-  private tasksByDate = computed(() => {
-    const map = new Map<string, Task[]>();
-    this.taskService.tasks().forEach(task => {
-      if (task.deadline) {
-        const dateKey = new Date(task.deadline).toDateString();
-        if (!map.has(dateKey)) {
-          map.set(dateKey, []);
-        }
-        map.get(dateKey)!.push(task);
-      }
-    });
-    return map;
-  });
 
   daysInMonth = computed(() => {
     const date = this.currentDate();
@@ -49,7 +35,7 @@ export class CalendarViewComponent {
     const lastDayOfMonth = new Date(year, month + 1, 0);
 
     const days: CalendarDay[] = [];
-    const tasksMap = this.tasksByDate();
+    const tasks = this.taskService.tasks();
 
     // Days from previous month
     const startDayOfWeek = firstDayOfMonth.getDay();
@@ -59,7 +45,7 @@ export class CalendarViewComponent {
         date: prevMonthDate,
         isCurrentMonth: false,
         isToday: false,
-        tasks: tasksMap.get(prevMonthDate.toDateString()) || []
+        tasks: tasks.filter(t => this.taskService.isTaskOnDate(t, prevMonthDate))
       });
     }
 
@@ -70,7 +56,7 @@ export class CalendarViewComponent {
         date: currentDay,
         isCurrentMonth: true,
         isToday: currentDay.getTime() === today.getTime(),
-        tasks: tasksMap.get(currentDay.toDateString()) || []
+        tasks: tasks.filter(t => this.taskService.isTaskOnDate(t, currentDay))
       });
     }
     

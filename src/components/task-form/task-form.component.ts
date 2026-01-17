@@ -34,7 +34,7 @@ export class TaskFormComponent implements OnInit {
   taskToEdit = input<Task | null>(null);
   
   // Reusable styled string for input classes
-  readonly inputClass = "w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 transition-all duration-200 ease-in-out hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none";
+  readonly inputClass = "w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 transition-all duration-200 ease-in-out hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
 
   @ViewChild('editor') editorRef!: ElementRef<HTMLDivElement>;
   
@@ -82,6 +82,11 @@ export class TaskFormComponent implements OnInit {
         ...task,
         subtasks: [] // Patch subtasks manually below
       } as any);
+      
+      // Disable recurrence if it is already set (not None)
+      if (task.recurrence !== 'None') {
+        this.taskForm.get('recurrence')?.disable();
+      }
       
       // Parse estimated effort back to hours/mins
       if (task.estimatedEffort) {

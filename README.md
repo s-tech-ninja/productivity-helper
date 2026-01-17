@@ -62,3 +62,21 @@ Your data never leaves your browser. All tasks, timers, and settings are stored 
 | Check Versions | `docker compose exec node npx ng version` |
 | Update CLI/Core | `docker compose exec node npx ng update @angular/core @angular/cli` |
 | Reset Container | `docker compose down -v && docker compose up --build` |
+
+## Deployment (GitHub Pages)
+
+| Step | Command |
+| :--- | :--- |
+| 1. Install Deployer | `docker compose exec --user root node npx ng add angular-cli-ghpages` |
+| 2. Install Git | `docker compose exec node apk add git` |
+| 3. Configure Git | `docker compose exec node git config --global user.email "you@example.com"`<br>`docker compose exec node git config --global user.name "Your Name"` |
+| 4. Deploy (Use PAT) | `docker compose exec node npx ng deploy --base-href=/productivity-helper/ --repo=https://<TOKEN>@github.com/<USERNAME>/<REPO>.git` |
+| Manual Alternative | `npx angular-cli-ghpages --dir=dist/productivity-helper --repo=https://<TOKEN>@github.com/<USERNAME>/<REPO>.git` |
+
+
+## Create GitHub Token (PAT)
+
+1. Go to **Settings** > **Developer settings** > **Personal access tokens** > **Tokens (classic)**.
+2. Click **Generate new token (classic)**.
+3. Select the `repo` scope (required for pushing to the repository).
+4. Click **Generate token** and copy the string (starts with `ghp_`).

@@ -8,16 +8,27 @@ export interface Subtask {
   completedAt?: number; // Timestamp
 }
 
-export interface TaskCompletion {
-  completedAt: number; // Timestamp of when it was marked done
-  occurrenceDate: string; // The date of the occurrence (YYYY-MM-DD)
+export interface TaskHistory {
+  startDate: string;
+  deadline: string;
+  status: 'Backlog' | 'In Progress' | 'Paused' | 'Completed';
+  subtasks: Subtask[];
+  completionTime?: string;
+  totalTimeElapsed?: string;
+  timerSessionCount?: number;
+  interruptions?: string;
   focusScore?: number;
   reflection?: string;
-  interruptions?: string;
-  timeElapsed?: string;
-  subtasksSnapshot?: Subtask[]; // Snapshot of subtasks at completion
 }
 
+export interface TaskFormPreferences {
+  showDescription: boolean;
+  showProject: boolean;
+  showTags: boolean;
+  showEffort: boolean;
+  showEnergy: boolean;
+  showRecurrence: boolean;
+}
 
 export interface Task {
   id: string;
@@ -50,16 +61,7 @@ export interface Task {
   interruptions?: string; // Log/Notes
   focusScore?: number; // 1-5
   reflection?: string; // Post-task note
-  completionHistory: TaskCompletion[]; // History of recurring completions
-  recurrenceTemplate?: { // Snapshot of the series definition for resetting
-    title: string;
-    description?: string;
-    subtasks: Subtask[];
-    estimatedEffort: string;
-    energyLevel: 'High' | 'Medium' | 'Low';
-    project: string;
-    category: 'Super Important' | 'Important' | 'Less Important';
-  };
+  history?: Record<string, TaskHistory>;
 }
 
 @Injectable({
@@ -79,8 +81,20 @@ export class TaskService {
   readonly activeTimerStart = signal<number | null>(null);
   private secondsTimer: any;
   private minutesTimer: any;
+  private lastSessionHour = 0;
   // A signal that updates every second to trigger UI refresh for the timer
   readonly tick = signal<number>(Date.now());
+
+  // Preferences
+  readonly soundEnabled = signal<boolean>(true);
+  readonly formPreferences = signal<TaskFormPreferences>({
+    showDescription: true,
+    showProject: true,
+    showTags: true,
+    showEffort: true,
+    showEnergy: true,
+    showRecurrence: true
+  });
 
   private notifiedTaskIds = new Set<string>();
   private startedTaskIds = new Set<string>();
@@ -105,20 +119,38 @@ export class TaskService {
     };
   });
 
+  readonly projects = computed(() => {
+    const tasks = this.tasksSignal();
+    const uniqueProjects = new Set<string>();
+    tasks.forEach(t => {
+      if (t.project && t.project.trim()) {
+        uniqueProjects.add(t.project.trim());
+      }
+    });
+    return Array.from(uniqueProjects).sort();
+  });
+
   // Streak: Consecutive days with at least one completed task
   readonly streak = computed(() => {
     const tasks = this.tasksSignal();
     
-    // 1. Standard Completed Tasks
-    const standardTimestamps = tasks
-      .filter(t => t.status === 'Completed' && t.completionTime)
-      .map(t => new Date(t.completionTime!).getTime());
+    const allTimestamps: number[] = [];
 
-    // 2. Recurring Task Completions (History)
-    const recurringTimestamps = tasks
-      .flatMap(t => (t.completionHistory || []).map(h => h.completedAt));
+    tasks.forEach(t => {
+      // 1. Standard Completed Tasks
+      if (t.status === 'Completed' && t.completionTime) {
+        allTimestamps.push(new Date(t.completionTime).getTime());
+      }
 
-    const allTimestamps = [...standardTimestamps, ...recurringTimestamps];
+      // 2. Recurring Task History
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          if (h.status === 'Completed' && h.completionTime) {
+            allTimestamps.push(new Date(h.completionTime).getTime());
+          }
+        });
+      }
+    });
 
     const completedDates = allTimestamps
       .map(ts => {
@@ -165,36 +197,21 @@ export class TaskService {
     today.setHours(0, 0, 0, 0);
 
     for (const t of all) {
-      // Skip if recurring task is completed for today
-      if (t.recurrence !== 'None' && this.isOccurrenceCompleted(t, today)) {
-        continue;
-      }
-
       // 1. Overdue Check
-      if (t.recurrence === 'None') {
-        // Standard Task: Overdue if deadline passed
-        if (t.deadline && new Date(t.deadline).getTime() < now) {
-          overdue.push(t);
-          continue;
-        }
-      } else {
-        // Recurring Task: Overdue if it occurs today AND the time has passed
-        // (We assume the time component of the deadline applies to each occurrence)
-        if (this.isTaskOnDate(t, today)) {
-           if (t.deadline) {
-             const deadlineTime = new Date(t.deadline);
-             const todayDeadline = new Date(today);
-             todayDeadline.setHours(deadlineTime.getHours(), deadlineTime.getMinutes(), 59, 999);
-             if (now > todayDeadline.getTime()) {
-               overdue.push(t);
-               continue; // Don't show in endingToday if it's already overdue
-             }
-           }
-        }
+      if (t.deadline && new Date(t.deadline).getTime() < now) {
+        overdue.push(t);
+        continue;
       }
       
       // 2. Scheduled Today Check
       if (this.isTaskOnDate(t, today)) {
+        // For recurring tasks, check if already completed for today to avoid showing in "Scheduled Today" alert
+        if (t.recurrence !== 'None' && t.history) {
+           const dateStr = today.toLocaleDateString('en-CA');
+           if (t.history[dateStr] && t.history[dateStr].status === 'Completed') {
+             continue;
+           }
+        }
         endingToday.push(t);
         continue;
       }
@@ -208,6 +225,7 @@ export class TaskService {
   constructor() {
     this.loadFromStorage();
     this.loadTimerState();
+    this.loadPreferences();
 
     // Auto-save whenever tasks change
     effect(() => {
@@ -230,9 +248,24 @@ export class TaskService {
       }
     });
 
+    // Auto-save preferences
+    effect(() => {
+      localStorage.setItem('productivity_flow_sound', JSON.stringify(this.soundEnabled()));
+      localStorage.setItem('productivity_flow_form_prefs', JSON.stringify(this.formPreferences()));
+    });
+
     // 1. Secs Timer - for clock on task has started
     this.secondsTimer = setInterval(() => {
       if (this.activeTaskId()) {
+        const start = this.activeTimerStart();
+        if (start) {
+          const duration = Date.now() - start;
+          const currentHour = Math.floor(duration / 3600000); // 3600000 ms = 1 hour
+          if (currentHour > this.lastSessionHour) {
+            this.playBellSound();
+            this.lastSessionHour = currentHour;
+          }
+        }
         this.tick.set(Date.now());
       }
     }, 1000);
@@ -247,6 +280,24 @@ export class TaskService {
     if ('Notification' in window && Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
+  }
+
+  private loadPreferences() {
+    const sound = localStorage.getItem('productivity_flow_sound');
+    if (sound !== null) this.soundEnabled.set(JSON.parse(sound));
+
+    const formPrefs = localStorage.getItem('productivity_flow_form_prefs');
+    if (formPrefs) {
+      this.formPreferences.set({ ...this.formPreferences(), ...JSON.parse(formPrefs) });
+    }
+  }
+
+  toggleSound() {
+    this.soundEnabled.update(v => !v);
+  }
+
+  updateFormPreference(key: keyof TaskFormPreferences, value: boolean) {
+    this.formPreferences.update(p => ({ ...p, [key]: value }));
   }
 
   private checkUpcomingTasks() {
@@ -311,25 +362,16 @@ export class TaskService {
              return { ...t, subtasks: [] };
            }
            // Data Migration: Convert legacy location to tags
-           if (t.location && !t.tags) {
-             t.tags = [t.location];
-             delete t.location;
+           if ((t as any).location) {
+             if (!t.tags || t.tags.length === 0) {
+                t.tags = [(t as any).location];
+             }
+             delete (t as any).location;
            }
            if (!t.tags) t.tags = [];
-           if (!t.completionHistory) t.completionHistory = [];
+           if (!t.recurrence) t.recurrence = 'None';
+           if (!t.history || Array.isArray(t.history)) t.history = {};
            
-           // Migration: Create template for existing recurring tasks if missing
-           if (t.recurrence !== 'None' && !t.recurrenceTemplate) {
-             t.recurrenceTemplate = {
-               title: t.title,
-               description: t.description,
-               subtasks: (t.subtasks || []).map((s: Subtask) => ({...s})),
-               estimatedEffort: t.estimatedEffort,
-               energyLevel: t.energyLevel,
-               project: t.project,
-               category: t.category
-             };
-           }
            return t;
         });
 
@@ -403,7 +445,7 @@ export class TaskService {
         totalTimeElapsed: '0',
         timerSessionCount: 0,
         archived: false,
-        completionHistory: []
+        history: {}
       }
     ];
     this.tasksSignal.set(initialTasks);
@@ -417,110 +459,90 @@ export class TaskService {
       totalTimeElapsed: '0',
       timerSessionCount: 0,
       archived: false,
-      completionHistory: [],
-      recurrenceTemplate: task.recurrence !== 'None' ? {
-        title: task.title,
-        description: task.description,
-        subtasks: task.subtasks.map(s => ({...s})),
-        estimatedEffort: task.estimatedEffort,
-        energyLevel: task.energyLevel,
-        project: task.project,
-        category: task.category
-      } : undefined
+      history: {}
     };
+
     this.tasksSignal.update(tasks => [newTask, ...tasks]);
   }
 
-  updateTask(id: string, updates: Partial<Task>) {
+  updateTask(id: string, updates: Partial<Task>, dateContext?: string) {
     this.tasksSignal.update(tasks => 
       tasks.map(t => {
         if (t.id !== id) return t;
-        
-        // Check if this is a recurring task completed today
-        const todayStr = new Date().toLocaleDateString('en-CA');
-        const isRecurringCompletedToday = t.recurrence !== 'None' && 
-                                          t.completionHistory?.length > 0 && 
-                                          t.completionHistory.some(h => h.occurrenceDate === todayStr);
 
-        if (isRecurringCompletedToday) {
-           const historyIndex = t.completionHistory.findIndex(h => h.occurrenceDate === todayStr);
+        // Handle Recurring Task Updates (Copy-on-Write to History)
+        if (t.recurrence !== 'None') {
+           const dateKey = dateContext || new Date().toLocaleDateString('en-CA');
            
-           // Case 1: Undo Completion (Status changed from Completed)
-           if (updates.status && updates.status !== 'Completed') {
-               const historyEntry = t.completionHistory[historyIndex];
-               const newHistory = [...t.completionHistory];
-               newHistory.splice(historyIndex, 1);
+           // Separate Global (Template) vs Instance (History) updates
+           const globalKeys = ['title', 'description', 'category', 'project', 'energyLevel', 'tags', 'estimatedEffort', 'recurrence', 'archived'];
+           
+           // Heuristic: If updating global keys, it's a form save -> Preserve history state.
+           // If NOT updating global keys (just subtasks), it's a detail view toggle -> Overwrite history state.
+           const isStructuralUpdate = Object.keys(updates).some(k => globalKeys.includes(k));
+
+           const globalUpdates: any = {};
+           const instanceUpdates: any = {};
+
+           Object.keys(updates).forEach(key => {
+             if (globalKeys.includes(key)) {
+               globalUpdates[key] = (updates as any)[key];
+             } else if (key === 'subtasks') {
+               // Subtasks: Update Instance (as-is) AND Global (sanitized structure)
                
-               // Restore state from history snapshot to the active task
-               const restoredTask: Task = {
-                   ...t,
-                   // Restore instance data
-                   subtasks: historyEntry.subtasksSnapshot || t.subtasks,
-                   totalTimeElapsed: historyEntry.timeElapsed || t.totalTimeElapsed,
-                   interruptions: historyEntry.interruptions || t.interruptions,
-                   focusScore: historyEntry.focusScore,
-                   reflection: historyEntry.reflection,
-                   
-                   ...updates, // Apply updates (overriding restored data if present)
-                   completionHistory: newHistory
-               };
-               return restoredTask;
-           }
-           
-           // Case 2: Editing the Completed Instance
-           // We update the history entry, but exclude instance-specific fields from the main task
-           // to avoid overwriting the "next occurrence" setup.
-           const historyEntry = { ...t.completionHistory[historyIndex] };
-           // Safety: Ensure snapshot exists if it was missing (e.g. legacy data)
-           if (!historyEntry.subtasksSnapshot) {
-               historyEntry.subtasksSnapshot = t.subtasks.map(s => ({...s}));
-           }
-           
-           let historyUpdated = false;
+               // Merge Logic: Preserve completion/notes from history if ID matches
+               // This allows editing the template (text/order) without resetting daily progress
+               const incomingSubtasks = (updates as any)[key] as Subtask[];
+               const existingHistory = t.history?.[dateKey];
+               
+               // Only merge (preserve existing completion) if it's a structural update (Edit Form)
+               // Otherwise (Detail View), trust the incoming subtasks which have the new toggled state.
+               if (isStructuralUpdate && existingHistory && existingHistory.subtasks) {
+                 instanceUpdates[key] = incomingSubtasks.map(newSub => {
+                   const existingSub = existingHistory.subtasks.find(s => s.id === newSub.id);
+                   if (existingSub) {
+                     return { ...newSub, completed: existingSub.completed, completedAt: existingSub.completedAt, notes: existingSub.notes || newSub.notes };
+                   }
+                   return newSub;
+                 });
+               } else {
+                 instanceUpdates[key] = incomingSubtasks;
+               }
+               
+               // Update main task template with new structure, but reset completion
+               if (Array.isArray((updates as any)[key])) {
+                 globalUpdates[key] = (updates as any)[key].map((s: Subtask) => ({
+                   ...s,
+                   completed: false,
+                   completedAt: undefined
+                 }));
+               }
+             } else {
+               instanceUpdates[key] = (updates as any)[key];
+             }
+           });
 
-           if (updates.subtasks) {
-               historyEntry.subtasksSnapshot = updates.subtasks;
-               historyUpdated = true;
-           }
-           if (updates.focusScore !== undefined) { historyEntry.focusScore = updates.focusScore; historyUpdated = true; }
-           if (updates.reflection !== undefined) { historyEntry.reflection = updates.reflection; historyUpdated = true; }
-           if (updates.interruptions !== undefined) { historyEntry.interruptions = updates.interruptions; historyUpdated = true; }
+           // Get existing history or create FRESH entry from template
+           const existingHistory = t.history?.[dateKey];
+           let historyEntry: TaskHistory;
 
-           // Apply updates to main task, BUT exclude instance-specific fields
-           const { subtasks, focusScore, reflection, interruptions, ...seriesUpdates } = updates;
-           
-           const updatedMainTask = {
-               ...t,
-               ...seriesUpdates
-           };
-
-           if (historyUpdated) {
-               const newHistory = [...t.completionHistory];
-               newHistory[historyIndex] = historyEntry;
-               updatedMainTask.completionHistory = newHistory;
+           if (existingHistory) {
+             historyEntry = { ...existingHistory, ...instanceUpdates };
+           } else {
+             // Create Fresh Entry (Reset status/subtasks for the new day)
+             historyEntry = {
+               status: 'Backlog',
+               subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
+               totalTimeElapsed: '0',
+               timerSessionCount: 0,
+               ...instanceUpdates // Apply the specific change (e.g. checking a box)
+             };
            }
-           
-           return updatedMainTask;
+
+           return { ...t, ...globalUpdates, history: { ...(t.history || {}), [dateKey]: historyEntry } };
         }
 
-        const updatedTask = { ...t, ...updates };
-
-        // Logic: If switching TO Recurring (from None), capture the template
-        if (t.recurrence === 'None' && updatedTask.recurrence !== 'None') {
-           updatedTask.recurrenceTemplate = {
-              title: updatedTask.title,
-              description: updatedTask.description,
-              subtasks: updatedTask.subtasks.map(s => ({...s})),
-              estimatedEffort: updatedTask.estimatedEffort,
-              energyLevel: updatedTask.energyLevel,
-              project: updatedTask.project,
-              category: updatedTask.category
-           };
-        } else if (updatedTask.recurrence === 'None') {
-           updatedTask.recurrenceTemplate = undefined;
-        }
-
-        return updatedTask;
+        return { ...t, ...updates };
       })
     );
   }
@@ -529,58 +551,65 @@ export class TaskService {
     this.tasksSignal.update(tasks => tasks.map(t => {
       if (t.id !== taskId) return t;
 
-      // 1. Handle Recurring Task
+      // Handle Recurring Task
       if (t.recurrence !== 'None') {
-        const now = new Date();
-        const todayStr = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+        const dateKey = new Date().toLocaleDateString('en-CA');
+        const existingHistory = t.history?.[dateKey];
         
-        const historyEntry: TaskCompletion = {
-          completedAt: new Date(data.completionTime).getTime(),
-          occurrenceDate: todayStr, // Assuming completion is for "today's" instance
-          focusScore: data.focusScore ?? t.focusScore,
-          reflection: data.reflection || t.reflection,
-          interruptions: t.interruptions,
-          timeElapsed: t.totalTimeElapsed,
-          subtasksSnapshot: (t.subtasks || []).map(s => ({ ...s })) // Save copy of current state
+        // Ensure subtasks are marked as completed in the history snapshot
+        // We prioritize existing history (actual progress) over the template
+        const rawSubtasks = existingHistory?.subtasks || t.subtasks || [];
+        const completedSubtasks = rawSubtasks.map(s => ({
+          ...s,
+          completed: true,
+          completedAt: s.completedAt || Date.now()
+        }));
+        
+        // 1. Save to History
+        const historyEntry: TaskHistory = {
+          // Defaults from template
+          startDate: t.startDate,
+          deadline: t.deadline,
+          totalTimeElapsed: '0',
+          timerSessionCount: 0,
+          interruptions: '',
+          
+          ...(existingHistory || {}), // Overlay existing progress (time, interruptions, etc.)
+          
+          status: 'Completed',
+          subtasks: completedSubtasks,
+          completionTime: data.completionTime,
+          focusScore: data.focusScore,
+          reflection: data.reflection
         };
 
-        const template = t.recurrenceTemplate;
+        // 2. Calculate Next Dates
+        const nextStartDate = this.addInterval(t.startDate, t.recurrence);
+        const nextDeadline = t.deadline ? this.addInterval(t.deadline, t.recurrence) : '';
 
         return {
           ...t,
-          // Reset State for next occurrence
-          status: 'Backlog', // Reset to start
+          // Reset for next occurrence
+          status: 'Backlog',
+          startDate: nextStartDate,
+          deadline: nextDeadline,
+          subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
           totalTimeElapsed: '0',
           timerSessionCount: 0,
           interruptions: '',
           focusScore: undefined,
           reflection: undefined,
-          // Add to history
-          completionHistory: [historyEntry, ...(t.completionHistory || [])],
-          // Reset subtasks if desired? Usually yes for recurring
-          // Restore from template if available (Resetting edits made to the occurrence)
-          ...(template ? {
-             title: template.title,
-             description: template.description,
-             subtasks: template.subtasks.map(s => ({ ...s, id: crypto.randomUUID() })), // New IDs for new instance
-             estimatedEffort: template.estimatedEffort,
-             energyLevel: template.energyLevel,
-             project: template.project,
-             category: template.category
-          } : {
-             subtasks: t.subtasks.map(s => ({ ...s, completed: false, completedAt: undefined }))
-          })
+          completionTime: undefined,
+          history: { ...(t.history || {}), [dateKey]: historyEntry }
         };
       }
 
-      // 2. Handle One-time Task
       return {
         ...t,
         status: 'Completed',
         focusScore: data.focusScore,
         reflection: data.reflection,
-        completionTime: data.completionTime,
-        completionHistory: [] // Ensure array exists
+        completionTime: data.completionTime
       };
     }));
   }
@@ -616,51 +645,60 @@ export class TaskService {
   isTaskOnDate(task: Task, date: Date): boolean {
     const checkDate = new Date(date);
     checkDate.setHours(0, 0, 0, 0);
+    const checkTime = checkDate.getTime();
 
-    // 1. Non-recurring: Match Deadline Date
-    if (task.recurrence === 'None') {
-      if (!task.deadline) return false;
-      const deadline = new Date(task.deadline);
-      deadline.setHours(0, 0, 0, 0);
-      return deadline.getTime() === checkDate.getTime();
+    // Check history for recurring tasks to ensure they show up on past/current dates if completed
+    if (task.recurrence !== 'None' && task.history) {
+      const dateStr = checkDate.toLocaleDateString('en-CA');
+      if (task.history[dateStr]) {
+        return true;
+      }
     }
 
-    // 2. Recurring: Match Pattern
-    const startStr = task.startDate || (task.createdAt ? new Date(task.createdAt).toISOString() : null);
-    if (!startStr) return false;
+    let startTime: number | null = null;
+    let startDateObj: Date | null = null;
+    if (task.startDate) {
+      startDateObj = new Date(task.startDate);
+      if (!isNaN(startDateObj.getTime())) {
+        startDateObj.setHours(0, 0, 0, 0);
+        startTime = startDateObj.getTime();
+      }
+    }
 
-    const startDate = new Date(startStr);
-    startDate.setHours(0, 0, 0, 0);
-
-    // A. Before Start Date? -> No
-    if (checkDate.getTime() < startDate.getTime()) return false;
-
-    // B. After Series Deadline? -> No
+    let endTime: number | null = null;
     if (task.deadline) {
-      const deadlineDate = new Date(task.deadline);
-      deadlineDate.setHours(0, 0, 0, 0);
-      if (checkDate.getTime() > deadlineDate.getTime()) return false;
+      const end = new Date(task.deadline);
+      if (!isNaN(end.getTime())) {
+        end.setHours(0, 0, 0, 0);
+        endTime = end.getTime();
+      }
     }
 
-    const diffTime = checkDate.getTime() - startDate.getTime();
+    // 1. Non-recurring or Invalid Start (Treat as Span)
+    if (task.recurrence === 'None' || !startTime || !startDateObj) {
+      if (startTime !== null && endTime !== null) {
+        return checkTime >= startTime && checkTime <= endTime;
+      }
+      if (endTime !== null) return checkTime === endTime;
+      if (startTime !== null) return checkTime === startTime;
+      return false;
+    }
+
+    // 2. Recurring Logic
+    // Must be within range [Start, End]
+    if (checkTime < startTime) return false;
+    if (endTime !== null && checkTime > endTime) return false;
+
+    const diffTime = checkTime - startTime;
     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
     switch (task.recurrence) {
       case 'Daily': return true;
       case 'Weekly': return diffDays % 7 === 0;
       case 'Bi-Weekly': return diffDays % 14 === 0;
-      case 'Monthly': return checkDate.getDate() === startDate.getDate();
+      case 'Monthly': return checkDate.getDate() === startDateObj.getDate();
       default: return false;
     }
-  }
-
-  isOccurrenceCompleted(task: Task, date: Date): boolean {
-    if (!task.completionHistory || task.completionHistory.length === 0) return false;
-    
-    // Compare YYYY-MM-DD
-    // Adjust for local timezone to ensure "today" matches the stored string
-    const dateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD format in local time
-    return task.completionHistory.some(h => h.occurrenceDate === dateStr);
   }
 
   // --- Timer Logic ---
@@ -681,11 +719,39 @@ export class TaskService {
   private startTimer(taskId: string) {
     this.activeTaskId.set(taskId);
     this.activeTimerStart.set(Date.now());
+    this.lastSessionHour = 0;
     this.playStartSound();
     
     // Increment session count and set status to In Progress
     this.tasksSignal.update(tasks => tasks.map(t => {
       if (t.id === taskId) {
+        // Handle Recurring Task: Update History for Today
+        if (t.recurrence !== 'None') {
+           const dateKey = new Date().toLocaleDateString('en-CA');
+           const existingHistory = t.history?.[dateKey];
+           let historyEntry: TaskHistory;
+
+           if (existingHistory) {
+             historyEntry = { 
+               ...existingHistory, 
+               status: 'In Progress',
+               timerSessionCount: (existingHistory.timerSessionCount || 0) + 1
+             };
+           } else {
+             // Create Fresh Entry if starting timer for the first time today
+             historyEntry = {
+               startDate: t.startDate,
+               deadline: t.deadline,
+               status: 'In Progress',
+               subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
+               totalTimeElapsed: '0',
+               timerSessionCount: 1,
+               completionTime: undefined
+             };
+           }
+           return { ...t, history: { ...(t.history || {}), [dateKey]: historyEntry } };
+        }
+
         return {
           ...t,
           status: 'In Progress',
@@ -705,6 +771,34 @@ export class TaskService {
       
       this.tasksSignal.update(tasks => tasks.map(t => {
         if (t.id === activeId) {
+          // Handle Recurring Task: Update History for Today
+          if (t.recurrence !== 'None') {
+             const dateKey = new Date().toLocaleDateString('en-CA');
+             const existingHistory = t.history?.[dateKey];
+             let historyEntry: TaskHistory;
+
+             if (existingHistory) {
+               const currentTotal = parseInt(existingHistory.totalTimeElapsed || '0', 10);
+               historyEntry = { 
+                 ...existingHistory, 
+                 status: 'Paused',
+                 totalTimeElapsed: (currentTotal + delta).toString()
+               };
+             } else {
+               // Fallback if history missing (rare for stopTimer)
+               historyEntry = {
+                 startDate: t.startDate,
+                 deadline: t.deadline,
+                 status: 'Paused',
+                 subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
+                 totalTimeElapsed: delta.toString(),
+                 timerSessionCount: 0,
+                 completionTime: undefined
+               };
+             }
+             return { ...t, history: { ...(t.history || {}), [dateKey]: historyEntry } };
+          }
+
           const currentTotal = parseInt(t.totalTimeElapsed || '0', 10);
           return {
             ...t,
@@ -721,6 +815,8 @@ export class TaskService {
   }
 
   private playSound(fileName: string, volume: number = 0.5) {
+    if (!this.soundEnabled()) return;
+
     // Use relative path 'assets/...' instead of '/assets/...' to avoid 404s on some server configs
     const path = `src/assets/sounds/${fileName}`;
     const audio = new Audio(path);
@@ -771,6 +867,10 @@ export class TaskService {
     this.playSound('reminder-level-up.mp3', 1.0);
   }
 
+  private playBellSound() {
+    this.playSound('bell-ring.mp3', 0.8); // Assuming a bell sound exists or fallback
+  }
+
   // Helper to format ms into HH:MM:SS
   formatDuration(ms: number): string {
     if (!ms || isNaN(ms)) return '00:00:00';
@@ -781,5 +881,22 @@ export class TaskService {
 
     const pad = (num: number) => num.toString().padStart(2, '0');
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+
+  private addInterval(dateStr: string, recurrence: string): string {
+    if (!dateStr) return dateStr;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+
+    switch (recurrence) {
+      case 'Daily': d.setDate(d.getDate() + 1); break;
+      case 'Weekly': d.setDate(d.getDate() + 7); break;
+      case 'Bi-Weekly': d.setDate(d.getDate() + 14); break;
+      case 'Monthly': d.setMonth(d.getMonth() + 1); break;
+    }
+    
+    // Format back to YYYY-MM-DDTHH:mm (Local time)
+    const pad = (n: number) => n < 10 ? '0' + n : n;
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 }

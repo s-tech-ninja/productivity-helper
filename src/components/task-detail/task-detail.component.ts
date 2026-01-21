@@ -1,4 +1,4 @@
-import { Component, input, output, inject, computed } from '@angular/core';
+import { Component, input, output, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskService, Task } from '../../services/task.service';
@@ -12,12 +12,15 @@ import { IconComponent } from '../icons/icon.component';
 })
 export class TaskDetailComponent {
   task = input.required<Task>();
+  dateContext = input<string | null>(null);
   close = output<void>();
   edit = output<Task>();
   complete = output<Task>();
   delete = output<Task>();
 
   private taskService = inject(TaskService);
+
+  isHistoryExpanded = signal(false);
 
   // Timer Logic Helpers
   isTimerRunning = computed(() => 
@@ -83,7 +86,7 @@ export class TaskDetailComponent {
       } : s
     );
     
-    this.taskService.updateTask(currentTask.id, { subtasks: newSubtasks });
+    this.taskService.updateTask(currentTask.id, { subtasks: newSubtasks }, this.dateContext() || undefined);
   }
 
   updateSubtaskNotes(subtaskId: string, notes: string) {
@@ -92,7 +95,7 @@ export class TaskDetailComponent {
       s.id === subtaskId ? { ...s, notes } : s
     );
     
-    this.taskService.updateTask(currentTask.id, { subtasks: newSubtasks });
+    this.taskService.updateTask(currentTask.id, { subtasks: newSubtasks }, this.dateContext() || undefined);
   }
 
   onMarkCompleted() {
@@ -109,47 +112,22 @@ export class TaskDetailComponent {
 
   nextOccurrence = computed(() => {
     const t = this.task();
-    if (t.recurrence === 'None') return null;
+    if (!t.recurrence || t.recurrence === 'None' || !t.startDate) return null;
     
-    const startStr = t.startDate || (t.createdAt ? new Date(t.createdAt).toISOString() : null);
-    if (!startStr) return null;
-    
-    const start = new Date(startStr);
+    const start = new Date(t.startDate);
+    if (isNaN(start.getTime())) return null;
+
     const now = new Date();
-    
-    if (start.getTime() > now.getTime()) return start;
-    
     const next = new Date(start);
     
-    switch (t.recurrence) {
-        case 'Daily': {
-            const diff = now.getTime() - start.getTime();
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            next.setDate(start.getDate() + days);
-            while (next <= now) next.setDate(next.getDate() + 1);
-            break;
-        }
-        case 'Weekly': {
-            const diff = now.getTime() - start.getTime();
-            const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
-            next.setDate(start.getDate() + (weeks * 7));
-            while (next <= now) next.setDate(next.getDate() + 7);
-            break;
-        }
-        case 'Bi-Weekly': {
-            const diff = now.getTime() - start.getTime();
-            const twoWeeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 14));
-            next.setDate(start.getDate() + (twoWeeks * 14));
-            while (next <= now) next.setDate(next.getDate() + 14);
-            break;
-        }
-        case 'Monthly': {
-            while (next <= now) {
-                next.setMonth(next.getMonth() + 1);
-            }
-            break;
-        }
-    }
+    do {
+      switch (t.recurrence) {
+        case 'Daily': next.setDate(next.getDate() + 1); break;
+        case 'Weekly': next.setDate(next.getDate() + 7); break;
+        case 'Bi-Weekly': next.setDate(next.getDate() + 14); break;
+        case 'Monthly': next.setMonth(next.getMonth() + 1); break;
+      }
+    } while (next.getTime() <= now.getTime());
     
     if (t.deadline) {
         const end = new Date(t.deadline);
@@ -157,5 +135,69 @@ export class TaskDetailComponent {
     }
     
     return next;
+  });
+
+  recurrenceStats = computed(() => {
+    const t = this.task();
+    if (t.recurrence === 'None') return null;
+
+    // Count completed entries in history
+    const completed = Object.values(t.history || {}).filter(h => h.status === 'Completed').length;
+    
+    if (!t.startDate || !t.deadline) {
+      return { completed, total: '?' };
+    }
+
+    // Calculate remaining occurrences from current startDate to deadline
+    let count = 0;
+    const current = new Date(t.startDate);
+    const end = new Date(t.deadline);
+    
+    // Safety break
+    const MAX_LOOPS = 1000; 
+    let loops = 0;
+
+    while (current <= end && loops < MAX_LOOPS) {
+      count++;
+      loops++;
+      
+      switch (t.recurrence) {
+        case 'Daily': current.setDate(current.getDate() + 1); break;
+        case 'Weekly': current.setDate(current.getDate() + 7); break;
+        case 'Bi-Weekly': current.setDate(current.getDate() + 14); break;
+        case 'Monthly': current.setMonth(current.getMonth() + 1); break;
+        default: loops = MAX_LOOPS; break;
+      }
+    }
+
+    return {
+      completed,
+      total: completed + count
+    };
+  });
+
+  historyList = computed(() => {
+    const t = this.task();
+    if (!t.history) return [];
+    
+    return Object.entries(t.history)
+      .map(([date, data]) => ({ date, ...data }))
+      .filter(entry => entry.status === 'Completed') // Only show completed history to avoid daily noise
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  });
+
+  isLate(entry: any): boolean {
+    if (!entry.completionTime || !entry.deadline) return false;
+    return new Date(entry.completionTime).getTime() > new Date(entry.deadline).getTime();
+  }
+
+  checklistDisabled = computed(() => {
+    const t = this.task();
+    // Enable for non-recurring tasks
+    if (t.recurrence === 'None') return false;
+
+    const today = new Date();
+    // Disable if today is not a scheduled day for this task
+    return !this.taskService.isTaskOnDate(t, today);
   });
 }

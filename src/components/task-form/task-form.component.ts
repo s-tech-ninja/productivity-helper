@@ -1,6 +1,6 @@
-import { Component, output, inject, input, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, output, inject, input, OnInit, signal, ViewChild, ElementRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { IconComponent } from '../icons/icon.component';
 import { TaskService, Task, Subtask } from '../../services/task.service';
 
@@ -39,7 +39,7 @@ export class TaskFormComponent implements OnInit {
   @ViewChild('editor') editorRef!: ElementRef<HTMLDivElement>;
   
   private fb: FormBuilder = inject(FormBuilder);
-  private taskService = inject(TaskService);
+  taskService = inject(TaskService);
   
   // Dynamic checklist state using Subtask object
   subtasksList = signal<Subtask[]>([]);
@@ -58,7 +58,6 @@ export class TaskFormComponent implements OnInit {
     estimatedEffort: [''],
     energyLevel: ['Medium'],
     recurrence: ['None'],
-    location: [''],
     subtasks: [[] as Subtask[]], // Now expects an array
     status: ['Backlog'],
     archived: [false],
@@ -75,6 +74,66 @@ export class TaskFormComponent implements OnInit {
   tags = signal<string[]>([]);
 
   ngOnInit() {
+    this.taskForm.addValidators((group: AbstractControl): ValidationErrors | null => {
+      const start = group.get('startDate')?.value;
+      const end = group.get('deadline')?.value;
+      const recurrence = group.get('recurrence')?.value;
+      
+      const errors: any = {};
+      const now = new Date();
+
+      if (start) {
+        const startDate = new Date(start);
+        // Check if start date is in the past (allow if editing and value is unchanged)
+        const originalStart = this.taskToEdit()?.startDate;
+        const isUnchanged = originalStart === start;
+
+        if (!isUnchanged && startDate < now) {
+          // Allow 1 minute buffer for "just now" creation
+          if (now.getTime() - startDate.getTime() > 60000) {
+            errors.startDateInPast = true;
+          }
+        }
+      }
+
+      if (start && end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        if (endDate <= startDate) {
+          errors.dateRangeInvalid = true;
+        }
+
+        // Max 30 Occurrences Validation
+        if (recurrence && recurrence !== 'None') {
+          const diffTime = endDate.getTime() - startDate.getTime();
+          const diffDays = diffTime / (1000 * 3600 * 24);
+          
+          let maxDays = 0;
+          switch (recurrence) {
+            case 'Daily': maxDays = 30; break;
+            case 'Weekly': maxDays = 30 * 7; break;
+            case 'Bi-Weekly': maxDays = 30 * 14; break;
+            case 'Monthly': maxDays = 30 * 30.5; break; // Approx
+          }
+
+          if (diffDays > maxDays) {
+            errors.maxOccurrencesExceeded = true;
+          }
+        }
+      }
+
+      return Object.keys(errors).length > 0 ? errors : null;
+    });
+
+    this.taskForm.get('recurrence')?.valueChanges.subscribe(val => {
+      this.updateStartDateValidator(val);
+    });
+
+    this.taskForm.get('project')?.valueChanges.subscribe(val => {
+      this.projectSearch.set(val || '');
+    });
+
     const task = this.taskToEdit();
     if (task) {
       // Patch basics
@@ -84,7 +143,7 @@ export class TaskFormComponent implements OnInit {
       } as any);
       
       // Disable recurrence if it is already set (not None)
-      if (task.recurrence !== 'None') {
+      if (task.recurrence && task.recurrence !== 'None') {
         this.taskForm.get('recurrence')?.disable();
       }
       
@@ -114,8 +173,30 @@ export class TaskFormComponent implements OnInit {
          this.subtasksList.set(JSON.parse(JSON.stringify(task.subtasks)));
       }
       this.tags.set(task.tags || []);
+    } else {
+      // Default Start Date to Today for new tasks
+      const now = new Date();
+      now.setSeconds(0, 0);
+      const offset = now.getTimezoneOffset() * 60000;
+      const localIso = new Date(now.getTime() - offset).toISOString().slice(0, 16);
+      
+      this.taskForm.patchValue({ startDate: localIso });
     }
+    
+    // Initialize validator based on current value
+    this.updateStartDateValidator(this.taskForm.get('recurrence')?.value);
   }
+
+  updateStartDateValidator(recurrence: string | null | undefined) {
+    const startDateControl = this.taskForm.get('startDate');
+    if (recurrence && recurrence !== 'None') {
+      startDateControl?.setValidators([Validators.required]);
+    } else {
+      startDateControl?.clearValidators();
+    }
+    startDateControl?.updateValueAndValidity();
+  }
+
   addTag(tag: string) {
     const trimmed = tag.trim();
     if (trimmed && !this.tags().includes(trimmed)) {
@@ -125,6 +206,10 @@ export class TaskFormComponent implements OnInit {
 
   removeTag(tagToRemove: string) {
     this.tags.update(t => t.filter(tag => tag !== tagToRemove));
+  }
+
+  get isEffortWarning(): boolean {
+    return (this.effortHours * 60 + this.effortMinutes) > 120;
   }
 
   updateEffortString() {
@@ -237,5 +322,35 @@ export class TaskFormComponent implements OnInit {
       }
       this.cancel.emit();
     }
+  }
+
+  // Project Dropdown Logic
+  isProjectDropdownOpen = signal(false);
+  projectSearch = signal('');
+
+  filteredProjects = computed(() => {
+    const search = this.projectSearch().toLowerCase().trim();
+    const all = this.taskService.projects();
+    if (!search) return all;
+    return all.filter(p => p.toLowerCase().includes(search));
+  });
+
+  showCreateProjectOption = computed(() => {
+    const search = this.projectSearch().trim();
+    if (!search) return false;
+    // Don't show create if exact match exists (case insensitive)
+    const exists = this.taskService.projects().some(p => p.toLowerCase() === search.toLowerCase());
+    return !exists;
+  });
+
+  selectProject(proj: string) {
+    this.taskForm.patchValue({ project: proj });
+    this.isProjectDropdownOpen.set(false);
+  }
+
+  closeProjectDropdown() {
+    setTimeout(() => {
+      this.isProjectDropdownOpen.set(false);
+    }, 200);
   }
 }

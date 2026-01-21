@@ -19,7 +19,7 @@ interface CalendarDay {
 export class CalendarViewComponent {
   private taskService = inject(TaskService);
   
-  triggerDetail = output<string>();
+  triggerDetail = output<{ id: string; date?: string }>();
 
   currentDate = signal(new Date());
 
@@ -59,6 +59,19 @@ export class CalendarViewComponent {
         tasks: tasks.filter(t => this.taskService.isTaskOnDate(t, currentDay))
       });
     }
+
+    // Days from next month (Fill the grid)
+    const endDayOfWeek = lastDayOfMonth.getDay();
+    const remainingDays = 6 - endDayOfWeek;
+    for (let i = 1; i <= remainingDays; i++) {
+      const nextMonthDate = new Date(year, month + 1, i);
+      days.push({
+        date: nextMonthDate,
+        isCurrentMonth: false,
+        isToday: false,
+        tasks: tasks.filter(t => this.taskService.isTaskOnDate(t, nextMonthDate))
+      });
+    }
     
     return days;
   });
@@ -69,5 +82,5 @@ export class CalendarViewComponent {
   nextMonth = () => this.currentDate.update(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   goToToday = () => this.currentDate.set(new Date());
   
-  openTaskDetail = (task: Task) => this.triggerDetail.emit(task.id);
+  openTaskDetail = (task: Task, date?: Date) => this.triggerDetail.emit({ id: task.id, date: date ? date.toLocaleDateString('en-CA') : undefined });
 }

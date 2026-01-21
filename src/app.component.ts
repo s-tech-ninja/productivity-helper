@@ -14,11 +14,12 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
 import { ThemeService } from './services/theme.service';
 import { TaskDetailComponent } from './components/task-detail/task-detail.component';
 import { Task, TaskService } from './services/task.service';
+import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent,DatePipe],
+  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
@@ -39,34 +40,47 @@ export class AppComponent {
   isTaskFormOpen = signal(false);
   isHelpOpen = signal(false);
   isDeleteModalOpen = signal(false);
+  isSettingsOpen = signal(false);
   
   // Detail Panel State
   selectedTaskId = signal<string | null>(null);
-  activeTask = computed(() => {
-    const id = this.selectedTaskId();
-    if (!id) return null;
-    const task = this.taskService.tasks().find(t => t.id === id) || null;
+  selectedTaskDate = signal<string | null>(null); // Context date for the selected task
 
-    // If recurring task, check if completed today and overlay history data
-    if (task && task.recurrence !== 'None') {
-      const today = new Date();
-      const todayStr = today.toLocaleDateString('en-CA');
-      const completion = task.completionHistory?.find(h => h.occurrenceDate === todayStr);
+  activeTask = computed(() => {
+    const selectedId = this.selectedTaskId();
+    if (!selectedId) return null;
+    const task = this.taskService.tasks().find(t => t.id === selectedId) || null;
+
+    if (task) {
+      const dateKey = this.selectedTaskDate() || new Date().toLocaleDateString('en-CA');
       
-      if (completion) {
+      // 1. Try to load existing history for this date
+      if (task.history && task.history[dateKey]) {
+        const h = task.history[dateKey];
         return {
           ...task,
-          status: 'Completed',
-          focusScore: completion.focusScore,
-          reflection: completion.reflection,
-          completionTime: new Date(completion.completedAt).toISOString(),
-          subtasks: completion.subtasksSnapshot || task.subtasks,
-          totalTimeElapsed: completion.timeElapsed || task.totalTimeElapsed,
-          interruptions: completion.interruptions || task.interruptions
-        } as Task;
+          status: h.status,
+          subtasks: h.subtasks,
+          completionTime: h.completionTime,
+          totalTimeElapsed: h.totalTimeElapsed,
+          timerSessionCount: h.timerSessionCount,
+          interruptions: h.interruptions,
+          focusScore: h.focusScore,
+          reflection: h.reflection
+        };
+      } 
+      // 2. If recurring and NO history for today, return a "Fresh Start" view
+      else if (task.recurrence !== 'None') {
+        return {
+          ...task,
+          status: 'Backlog',
+          subtasks: (task.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
+          totalTimeElapsed: '0',
+          timerSessionCount: 0,
+          completionTime: undefined
+        };
       }
     }
-    
     return task;
   });
 
@@ -119,14 +133,26 @@ export class AppComponent {
     
   }
 
-  openTaskDetail(taskId: string | null) {
+  openTaskDetail(data: { id: string; date?: string } | null) {
     this.isTaskFormOpen.set(false);
-    this.selectedTaskId.set(taskId);
+    if (data) {
+      this.selectedTaskId.set(data.id);
+      this.selectedTaskDate.set(data.date || null);
+    } else {
+      this.selectedTaskId.set(null);
+      this.selectedTaskDate.set(null);
+    }
   }
 
   openEditTask(task: Task) {
     this.selectedTaskId.set(null); // Close detail view
-    this.taskToEdit.set(task);
+    
+    let taskToEdit = task;
+    // Find main task to ensure we have the full object
+    const mainTask = this.taskService.tasks().find(t => t.id === task.id) || task;
+    taskToEdit = mainTask;
+
+    this.taskToEdit.set(taskToEdit);
     this.isTaskFormOpen.set(true);
   }
 

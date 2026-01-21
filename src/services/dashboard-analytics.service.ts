@@ -78,6 +78,15 @@ export class DashboardAnalyticsService {
       if (t.status === 'Completed' && t.completionTime) {
         this.addToBucket(velocityMap, t.completionTime, 'completed', rangeType);
       }
+
+      // History Completions
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          if (h.status === 'Completed' && h.completionTime) {
+            this.addToBucket(velocityMap, h.completionTime, 'completed', rangeType);
+          }
+        });
+      }
     });
 
     return Array.from(velocityMap.values());
@@ -118,17 +127,29 @@ export class DashboardAnalyticsService {
 
   // 2. Focus & Time Metrics
   focusMetrics = computed(() => {
-    const completedTasks = this.tasks().filter(t => t.status === 'Completed' && !t.archived);
+    const tasks = this.tasks().filter(t => !t.archived);
     
     let totalMinutes = 0;
     let totalFocusScore = 0;
     let focusCount = 0;
 
-    completedTasks.forEach(t => {
+    tasks.forEach(t => {
+      // Main Task Data
       totalMinutes += this.parseDuration(t.totalTimeElapsed);
-      if (t.focusScore) {
+      if (t.status === 'Completed' && t.focusScore) {
         totalFocusScore += t.focusScore;
         focusCount++;
+      }
+
+      // History Data
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          totalMinutes += this.parseDuration(h.totalTimeElapsed);
+          if (h.status === 'Completed' && h.focusScore) {
+            totalFocusScore += h.focusScore;
+            focusCount++;
+          }
+        });
       }
     });
 
@@ -140,8 +161,25 @@ export class DashboardAnalyticsService {
 
   // 3. Accuracy Analysis (Last 10 Completed)
   accuracyMetrics = computed(() => {
-    return this.tasks()
-      .filter(t => t.status === 'Completed' && !t.archived && t.estimatedEffort)
+    const completedItems: any[] = [];
+    
+    this.tasks().forEach(t => {
+      if (t.archived) return;
+      
+      if (t.status === 'Completed' && t.estimatedEffort) {
+        completedItems.push(t);
+      }
+      
+      if (t.history && t.estimatedEffort) {
+        Object.values(t.history).forEach(h => {
+          if (h.status === 'Completed') {
+            completedItems.push({ ...h, title: t.title, estimatedEffort: t.estimatedEffort });
+          }
+        });
+      }
+    });
+
+    return completedItems
       .sort((a, b) => {
         const timeA = a.completionTime ? new Date(a.completionTime).getTime() : 0;
         const timeB = b.completionTime ? new Date(b.completionTime).getTime() : 0;
@@ -157,11 +195,25 @@ export class DashboardAnalyticsService {
 
   // 4. Energy Distribution
   energyDistribution = computed(() => {
-    const completed = this.tasks().filter(t => t.status === 'Completed' && !t.archived);
+    const completedItems: any[] = [];
+    
+    this.tasks().forEach(t => {
+      if (t.archived) return;
+      if (t.status === 'Completed') completedItems.push(t);
+      
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          if (h.status === 'Completed') {
+            completedItems.push({ ...h, energyLevel: t.energyLevel });
+          }
+        });
+      }
+    });
+
     return {
-      high: completed.filter(t => t.energyLevel === 'High').length,
-      medium: completed.filter(t => t.energyLevel === 'Medium').length,
-      low: completed.filter(t => t.energyLevel === 'Low').length
+      high: completedItems.filter(t => t.energyLevel === 'High').length,
+      medium: completedItems.filter(t => t.energyLevel === 'Medium').length,
+      low: completedItems.filter(t => t.energyLevel === 'Low').length
     };
   });
 
@@ -174,6 +226,13 @@ export class DashboardAnalyticsService {
       if (mins > 0) {
         map.set(proj, (map.get(proj) || 0) + mins);
       }
+      
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          const hMins = this.parseDuration(h.totalTimeElapsed);
+          if (hMins > 0) map.set(proj, (map.get(proj) || 0) + hMins);
+        });
+      }
     });
 
     return Array.from(map.entries())
@@ -183,8 +242,25 @@ export class DashboardAnalyticsService {
 
   // 6. Recent Activity
   recentActivity = computed(() => {
-    return this.tasks()
-      .filter(t => t.status === 'Completed' && !t.archived)
+    const completedItems: any[] = [];
+
+    this.tasks().forEach(t => {
+      if (t.archived) return;
+      
+      if (t.status === 'Completed') {
+        completedItems.push(t);
+      }
+      
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          if (h.status === 'Completed') {
+            completedItems.push({ ...h, title: t.title, estimatedEffort: t.estimatedEffort });
+          }
+        });
+      }
+    });
+
+    return completedItems
       .sort((a, b) => {
         const timeA = a.completionTime ? new Date(a.completionTime).getTime() : 0;
         const timeB = b.completionTime ? new Date(b.completionTime).getTime() : 0;
@@ -216,6 +292,13 @@ export class DashboardAnalyticsService {
       // Heuristic: If interruption string exists or sessions > 4 for a task, flag it
       if (t.interruptions || (t.timerSessionCount || 0) > 4) {
         interruptedTasks++;
+      }
+      
+      if (t.history) {
+        Object.values(t.history).forEach(h => {
+          totalSessions += h.timerSessionCount || 0;
+          if (h.interruptions || (h.timerSessionCount || 0) > 4) interruptedTasks++;
+        });
       }
     });
 

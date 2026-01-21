@@ -15,7 +15,7 @@ export class DashboardViewComponent {
   triggerEdit = output<Task>(); // Output to parent to open edit modal
   triggerComplete = output<Task>(); // Output to parent for completion modal
   triggerDelete = output<Task>(); // Output to parent for delete confirmation
-  triggerDetail = output<string>();
+  triggerDetail = output<{ id: string; date?: string }>();
   triggerNavigate = output<string>();
   
   datePipe = inject(DatePipe);
@@ -146,24 +146,21 @@ export class DashboardViewComponent {
     const allTasks = this.tasks();
     const dateFilter = this.dateFilter();
     const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA');
 
     // Step 1: Filter by View (Archived vs Active vs Status)
     let tasksInView = allTasks;
+
     if (currentView === 'history') {
       tasksInView = allTasks.filter(t => t.archived);
     } else if (currentView === 'tasks-completed') {
-      tasksInView = allTasks.filter(t => 
-        (!t.archived && t.status === 'Completed') ||
-        (!t.archived && t.recurrence !== 'None' && this.taskService.isOccurrenceCompleted(t, today))
-      );
+      tasksInView = tasksInView.filter(t => !t.archived && t.status === 'Completed');
+
     } else if (currentView === 'tasks-not-completed') {
-      tasksInView = allTasks.filter(t => 
-        (!t.archived && t.status !== 'Completed') &&
-        !(t.recurrence !== 'None' && this.taskService.isOccurrenceCompleted(t, today))
-      );
+      tasksInView = tasksInView.filter(t => !t.archived && t.status !== 'Completed');
     }
     else {
-      tasksInView = allTasks.filter(t => !t.archived);
+      tasksInView = tasksInView.filter(t => !t.archived);
     }
 
     // Step 2: Date Filter
@@ -173,17 +170,7 @@ export class DashboardViewComponent {
       
       tasksInView = tasksInView.filter(t => {
         if (dateFilter === 'Today') {
-          const isOnDate = this.taskService.isTaskOnDate(t, now);
-          if (!isOnDate) return false;
-
-          // If it's a recurring task, check if it was completed TODAY
-          // If so, we still want to show it, but we might want to visually mark it as completed
-          // The filter below (Step 1) might have filtered out 'Completed' status tasks if we are in 'dashboard' view?
-          // Actually, 'dashboard' view usually shows all non-archived.
-          // But if we reset the task status to 'Backlog', it shows as Todo.
-          // We need to handle the display status in the template or map it here.
-          
-          return true;
+          return this.taskService.isTaskOnDate(t, now);
         }
         
         if (dateFilter === 'This Week') {
@@ -228,23 +215,21 @@ export class DashboardViewComponent {
       );
     }
 
-    // Step 4: Visual Fix for Recurring Tasks completed today (Apply to all views)
+    // Step 4: Overlay History for Recurring Tasks (Today)
     tasksInView = tasksInView.map(t => {
       if (t.recurrence !== 'None') {
-        const todayStr = today.toLocaleDateString('en-CA');
-        // Ensure we check completion history safely
-        const completion = t.completionHistory?.find(h => h.occurrenceDate === todayStr);
-        
-        if (completion) {
-          return { 
-            ...t, 
-            status: 'Completed', 
-            subtasks: completion.subtasksSnapshot || t.subtasks,
-            focusScore: completion.focusScore,
-            reflection: completion.reflection,
-            interruptions: completion.interruptions,
-            completionTime: new Date(completion.completedAt).toISOString(),
-            totalTimeElapsed: completion.timeElapsed
+        const h = t.history?.[todayStr];
+        if (h) {
+          return {
+            ...t,
+            status: h.status,
+            subtasks: h.subtasks,
+            completionTime: h.completionTime,
+            totalTimeElapsed: h.totalTimeElapsed,
+            timerSessionCount: h.timerSessionCount,
+            interruptions: h.interruptions,
+            focusScore: h.focusScore,
+            reflection: h.reflection
           };
         }
       }
@@ -283,7 +268,7 @@ export class DashboardViewComponent {
   }
 
   openTaskDetail(taskId: string) {
-    this.triggerDetail.emit(taskId);
+    this.triggerDetail.emit({ id: taskId });
   }
 
   enableNotifications() {

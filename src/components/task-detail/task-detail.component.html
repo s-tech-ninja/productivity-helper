@@ -414,14 +414,19 @@
                           <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Checklist</p>
                           <div class="space-y-1">
                             @for (sub of entry.subtasks; track sub.id) {
-                               <div class="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
-                                 <div class="mt-0.5 w-3 h-3 border rounded flex items-center justify-center shrink-0" 
-                                      [class.bg-emerald-500]="sub.completed" 
-                                      [class.border-emerald-500]="sub.completed" 
-                                      [class.border-slate-400]="!sub.completed">
-                                    @if(sub.completed) { <app-icon name="check" [size]="10" class="text-white"></app-icon> }
+                               <div>
+                                 <div class="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-400">
+                                   <div class="mt-0.5 w-3 h-3 border rounded flex items-center justify-center shrink-0" 
+                                        [class.bg-emerald-500]="sub.completed" 
+                                        [class.border-emerald-500]="sub.completed" 
+                                        [class.border-slate-400]="!sub.completed">
+                                      @if(sub.completed) { <app-icon name="check" [size]="10" class="text-white"></app-icon> }
+                                   </div>
+                                   <span [class.line-through]="sub.completed" [class.opacity-75]="sub.completed">{{ sub.text }}</span>
                                  </div>
-                                 <span [class.line-through]="sub.completed" [class.opacity-75]="sub.completed">{{ sub.text }}</span>
+                                 @if (sub.notes) {
+                                    <p class="pl-5 mt-0.5 text-[10px] text-slate-500 dark:text-slate-500 italic">{{ sub.notes }}</p>
+                                 }
                                </div>
                             }
                           </div>

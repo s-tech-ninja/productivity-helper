@@ -8,7 +8,15 @@ import { DatePipe } from '@angular/common';
   standalone: true,
   imports: [CommonModule, IconComponent],
   providers: [DatePipe],
-  templateUrl: './dashboard-view.component.html'
+  templateUrl: './dashboard-view.component.html',
+  styles: [`
+    /* Fix for dark mode hover visibility */
+    :host-context(.dark) ::ng-deep .hover\\:bg-slate-50:hover,
+    :host-context(.dark) ::ng-deep .hover\\:bg-white:hover {
+      background-color: rgba(51, 65, 85, 0.5) !important; /* slate-700/50 */
+      color: #e2e8f0 !important; /* slate-200 */
+    }
+  `]
 })
 export class DashboardViewComponent {
   view = input<'dashboard' | 'tasks' | 'history' | 'tasks-completed' | 'tasks-not-completed'>('dashboard');
@@ -154,7 +162,13 @@ export class DashboardViewComponent {
     if (currentView === 'history') {
       tasksInView = allTasks.filter(t => t.archived);
     } else if (currentView === 'tasks-completed') {
-      tasksInView = tasksInView.filter(t => !t.archived && t.status === 'Completed');
+      tasksInView = tasksInView.filter(t => {
+        if (t.archived) return false;
+        if (t.status === 'Completed') return true;
+        // Include recurring tasks completed today
+        if (t.recurrence !== 'None' && t.history?.[todayStr]?.status === 'Completed') return true;
+        return false;
+      });
 
     } else if (currentView === 'tasks-not-completed') {
       tasksInView = tasksInView.filter(t => !t.archived && t.status !== 'Completed');
@@ -235,6 +249,11 @@ export class DashboardViewComponent {
       }
       return t;
     });
+
+    // Step 5: Filter out completed recurring tasks for Dashboard/Pending views
+    if (currentView === 'dashboard' || currentView === 'tasks-not-completed') {
+      tasksInView = tasksInView.filter(t => !(t.recurrence !== 'None' && t.status === 'Completed'));
+    }
 
     return tasksInView;
   });

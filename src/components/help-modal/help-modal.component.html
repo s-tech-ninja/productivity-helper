@@ -46,11 +46,11 @@
 
       <div class="p-6 space-y-8">
         
-        <!-- Section: Organization -->
+        <!-- Section: Dashboard & Planning -->
         <section>
           <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-2">
             <app-icon name="layout-dashboard" [size]="20" class="text-indigo-500"></app-icon> 
-            Dashboard & Organization
+            Dashboard & Planning
           </h3>
           <div class="space-y-4 text-sm">
             <div class="flex gap-4">
@@ -58,8 +58,9 @@
                  <span class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold">A</span>
                </div>
                <div>
-                 <strong class="text-slate-900 dark:text-white block mb-1">Importance-Based Columns</strong>
-                 <p>Tasks are grouped by <span class="text-rose-500 font-medium">Super Important</span>, <span class="text-amber-500 font-medium">Important</span>, and <span class="text-slate-500 font-medium">Less Important</span>. Drag and drop tasks between these columns to instantly re-prioritize.</p>
+                 <strong class="text-slate-900 dark:text-white block mb-1">Smart Organization</strong>
+                 <p class="mb-2">Tasks are grouped by <span class="text-rose-500 font-medium">Super Important</span>, <span class="text-amber-500 font-medium">Important</span>, and <span class="text-slate-500 font-medium">Less Important</span>. Drag and drop to re-prioritize.</p>
+                 <p>Use the <strong>Smart Sort</strong> dropdown in List View to automatically order tasks by Deadline, Priority, Energy Level, or our intelligent "Smart" algorithm that highlights overdue and urgent items.</p>
                </div>
             </div>
             <div class="flex gap-4">
@@ -67,18 +68,18 @@
                  <span class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs font-bold">B</span>
                </div>
                <div>
-                 <strong class="text-slate-900 dark:text-white block mb-1">View Options</strong>
-                 <p>Switch between <strong>Board View</strong> (Kanban style) for high-level planning and <strong>List View</strong> for a dense, linear checklist. Use the search bar to filter visible tasks in real-time.</p>
+                 <strong class="text-slate-900 dark:text-white block mb-1">Performance Stats</strong>
+                 <p>Keep an eye on the top dashboard metrics: <strong>Daily Streak</strong>, <strong>Completion Rate</strong>, and <strong>Energy Breakdown</strong>. These indicators help you maintain momentum and balance your workload.</p>
                </div>
             </div>
           </div>
         </section>
 
-        <!-- Section: Execution -->
+        <!-- Section: Execution & Recurring -->
         <section>
           <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-2">
             <app-icon name="timer" [size]="20" class="text-emerald-500"></app-icon> 
-            Execution Tools
+            Execution & Recurring Tasks
           </h3>
           <div class="space-y-4 text-sm">
              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -86,48 +87,59 @@
                  <strong class="text-slate-900 dark:text-white block mb-1 flex items-center gap-2">
                    <app-icon name="play" [size]="14"></app-icon> Focus Timer
                  </strong>
-                 <p>Open a task detail and click the Play button to track time automatically. The total time logged updates your analytics.</p>
+                 <p>Track time automatically. Sessions are saved even if you close the browser. Total time logged feeds directly into your analytics.</p>
                </div>
                <div class="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
                  <strong class="text-slate-900 dark:text-white block mb-1 flex items-center gap-2">
                    <app-icon name="list-todo" [size]="14"></app-icon> Smart Checklists
                  </strong>
-                 <p>Add subtasks, drag to reorder, and now add specific <strong>notes</strong> to each subtask line. Timestamps are recorded upon completion.</p>
+                 <p>Break tasks down. You can now add specific <strong>notes</strong> to each subtask. These notes are preserved in history for recurring tasks.</p>
                </div>
              </div>
-             <p class="text-slate-500 italic px-2">
-               When you finish a task, you'll be prompted to rate your <strong>Focus Score (1-5)</strong> and write a brief reflection. This data feeds into your Accuracy & Focus charts.
-             </p>
+             
+             <div class="flex gap-4 mt-2">
+               <div class="shrink-0 mt-1">
+                 <app-icon name="refresh-cw" [size]="20" class="text-indigo-500"></app-icon>
+               </div>
+               <div>
+                 <strong class="text-slate-900 dark:text-white block mb-1">Recurring Tasks Logic</strong>
+                 <p>When you complete a recurring task (Daily/Weekly), it automatically resets for the next cycle. The completed instance—including its subtasks, notes, and reflection—is saved in the <strong>History</strong> tab within the task detail.</p>
+               </div>
+             </div>
           </div>
         </section>
 
-        <!-- Section: Analytics -->
+        <!-- Section: Analysis & History -->
         <section>
           <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-2">
             <app-icon name="bar-chart" [size]="20" class="text-amber-500"></app-icon> 
-            Analytics Suite
+            Analysis & History
           </h3>
           <div class="space-y-3 text-sm">
-             <p>Navigate to the <strong>Analytics</strong> tab to see visual insights. Preferences for chart visibility are saved automatically.</p>
+             <p>Navigate to the <strong>Analytics</strong> tab for visual insights, or check the <strong>History</strong> view for a chronological log of all archived activities.</p>
              <ul class="list-disc ml-5 space-y-1 text-slate-600 dark:text-slate-400">
-               <li><strong>Velocity:</strong> Compare tasks created vs. completed over Daily, Weekly, or Monthly ranges.</li>
-               <li><strong>Accuracy:</strong> Compare your <em>Estimated Effort</em> vs. <em>Actual Time</em> logged.</li>
-               <li><strong>Distribution:</strong> See where your time goes by Project and Energy Level.</li>
+               <li><strong>Completion Protocol:</strong> Upon finishing a task, rate your <strong>Focus Score (1-5)</strong> and write a reflection.</li>
+               <li><strong>Velocity:</strong> Compare tasks created vs. completed over time.</li>
+               <li><strong>Accuracy:</strong> Compare <em>Estimated Effort</em> vs. <em>Actual Time</em>.</li>
+               <li><strong>Completed View:</strong> See all finished tasks, including today's completed recurring instances.</li>
              </ul>
           </div>
         </section>
 
-        <!-- Section: Data -->
+        <!-- Section: Data & Settings -->
         <section>
           <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-2">
-            <app-icon name="archive" [size]="20" class="text-blue-500"></app-icon> 
-            Data Management
+            <app-icon name="settings" [size]="20" class="text-slate-500"></app-icon> 
+            Data & Customization
           </h3>
           <div class="flex items-center gap-4 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800">
              <div class="space-y-1">
-               <strong class="text-indigo-900 dark:text-indigo-300">Backup & Restore</strong>
+               <strong class="text-indigo-900 dark:text-indigo-300">Privacy First</strong>
                <p class="text-xs text-indigo-800 dark:text-indigo-400">
-                 Your data is stored locally in your browser. Use the <strong>Export</strong> button in the sidebar to save a JSON backup. Use <strong>Import</strong> to restore data or move it to another device.
+                 Your data is stored locally in your browser. Use <strong>Export/Import</strong> in the sidebar to backup your data or move it to another device.
+               </p>
+               <p class="text-xs text-indigo-800 dark:text-indigo-400 mt-1">
+                 Customize your experience in <strong>Settings</strong>: Toggle Dark Mode, Sound Effects, and configure Task Fields.
                </p>
              </div>
              <div class="flex flex-col gap-2 shrink-0">

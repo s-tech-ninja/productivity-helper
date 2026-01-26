@@ -197,23 +197,41 @@ export class TaskService {
     today.setHours(0, 0, 0, 0);
 
     for (const t of all) {
-      // 1. Overdue Check
+      // Recurring Task Logic
+      if (t.recurrence !== 'None') {
+        if (this.isTaskOnDate(t, today)) {
+           // Check if completed today
+           const dateStr = today.toLocaleDateString('en-CA');
+           if (t.history?.[dateStr]?.status === 'Completed') {
+             continue;
+           }
+
+           // Check Time relative to Today
+           if (t.deadline) {
+             const deadlineDate = new Date(t.deadline);
+             const dueTimeToday = new Date(today);
+             dueTimeToday.setHours(deadlineDate.getHours(), deadlineDate.getMinutes(), deadlineDate.getSeconds(), deadlineDate.getMilliseconds());
+             
+             if (dueTimeToday.getTime() < now) {
+               overdue.push(t);
+             } else {
+               endingToday.push(t);
+             }
+           } else {
+             endingToday.push(t);
+           }
+        }
+        continue;
+      }
+      
+      // Non-Recurring Logic
       if (t.deadline && new Date(t.deadline).getTime() < now) {
         overdue.push(t);
         continue;
       }
       
-      // 2. Scheduled Today Check
       if (this.isTaskOnDate(t, today)) {
-        // For recurring tasks, check if already completed for today to avoid showing in "Scheduled Today" alert
-        if (t.recurrence !== 'None' && t.history) {
-           const dateStr = today.toLocaleDateString('en-CA');
-           if (t.history[dateStr] && t.history[dateStr].status === 'Completed') {
-             continue;
-           }
-        }
         endingToday.push(t);
-        continue;
       }
     }
 

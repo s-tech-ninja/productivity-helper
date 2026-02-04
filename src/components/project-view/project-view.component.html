@@ -1,0 +1,107 @@
+<div class="flex h-full">
+  <!-- Projects Sidebar -->
+  <div class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
+    <div class="p-4 border-b border-slate-100 dark:border-slate-700">
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <app-icon name="layout-dashboard" [size]="20" class="text-indigo-600 dark:text-indigo-400"></app-icon>
+        Projects
+      </h2>
+    </div>
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+      @for (proj of projects(); track proj) {
+        <button 
+          (click)="selectProject(proj)"
+          class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-between group"
+          [class.bg-indigo-50]="selectedProject() === proj"
+          [class.text-indigo-700]="selectedProject() === proj"
+          [class.dark:bg-indigo-900/30]="selectedProject() === proj"
+          [class.dark:text-indigo-300]="selectedProject() === proj"
+          [class.text-slate-600]="selectedProject() !== proj"
+          [class.dark:text-slate-400]="selectedProject() !== proj"
+          [class.hover:bg-slate-50]="selectedProject() !== proj"
+          [class.dark:hover:bg-slate-700/50]="selectedProject() !== proj"
+        >
+          <span class="truncate">{{ proj }}</span>
+          <app-icon name="chevron-right" [size]="14" class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400"></app-icon>
+        </button>
+      }
+      @if (projects().length === 0) {
+        <div class="p-4 text-center text-slate-400 text-xs">
+          No projects found.
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Tasks Area -->
+  <div class="flex-1 bg-slate-50 dark:bg-slate-900/50 flex flex-col min-w-0">
+    @if (selectedProject()) {
+      <div class="p-6 border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ selectedProject() }}</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ filteredTasks().length }} active tasks</p>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (task of filteredTasks(); track task.id) {
+            <div 
+              (click)="openTaskDetail(task.id)"
+              class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div class="flex justify-between items-start mb-2">
+                <div class="flex flex-wrap gap-2">
+                  <span 
+                    class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border"
+                    [class.bg-rose-50]="task.category === 'Super Important'"
+                    [class.text-rose-600]="task.category === 'Super Important'"
+                    [class.border-rose-100]="task.category === 'Super Important'"
+                    [class.bg-amber-50]="task.category === 'Important'"
+                    [class.text-amber-600]="task.category === 'Important'"
+                    [class.border-amber-100]="task.category === 'Important'"
+                    [class.bg-slate-50]="task.category === 'Less Important'"
+                    [class.text-slate-600]="task.category === 'Less Important'"
+                    [class.border-slate-100]="task.category === 'Less Important'"
+                  >
+                    {{ task.category }}
+                  </span>
+                  @if (isOverdue(task)) {
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800">Overdue</span>
+                  } @else if (isToday(task)) {
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border bg-indigo-100 text-indigo-600 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800">Today</span>
+                  }
+                </div>
+                @if (task.status === 'Completed') {
+                  <app-icon name="check-circle" [size]="16" class="text-emerald-500"></app-icon>
+                }
+              </div>
+              <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-2 line-clamp-2">{{ task.title }}</h3>
+              <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                @if (task.deadline) {
+                  <span class="flex items-center gap-1">
+                    <app-icon name="calendar" [size]="12"></app-icon> {{ task.deadline | date:'MMM d' }}
+                  </span>
+                }
+                <span class="flex items-center gap-1">
+                  <app-icon name="zap" [size]="12"></app-icon> {{ task.energyLevel }}
+                </span>
+              </div>
+            </div>
+          }
+          @if (filteredTasks().length === 0) {
+            <div class="col-span-full py-12 text-center text-slate-400">
+              <app-icon name="list-todo" [size]="48" class="mx-auto mb-3 opacity-20"></app-icon>
+              <p>No active tasks in this project.</p>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="flex-1 flex flex-col items-center justify-center text-slate-400">
+        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+          <app-icon name="layout-dashboard" [size]="32" class="opacity-50"></app-icon>
+        </div>
+        <p>Select a project from the sidebar to view tasks.</p>
+      </div>
+    }
+  </div>
+</div>

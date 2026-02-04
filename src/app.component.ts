@@ -17,11 +17,12 @@ import { Task, TaskService } from './services/task.service';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
 import { AiFeaturesViewComponent } from './components/ai-view1/ai-features-view.component';
 import { ProjectAnalysisViewComponent } from './components/project-analysis/project-analysis-view.component';
+import { ProjectViewComponent } from './components/project-view/project-view.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent, AiFeaturesViewComponent, ProjectAnalysisViewComponent],
+  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent, AiFeaturesViewComponent, ProjectAnalysisViewComponent, ProjectViewComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
@@ -33,7 +34,7 @@ export class AppComponent {
   currentYear = new Date().getFullYear();
   
   // View State for routing
-  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis'>('dashboard');
+  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis' | 'project-view'>('dashboard');
 
   isSidebarOpen = signal(false);
   showNotifications = signal(false);
@@ -125,7 +126,7 @@ export class AppComponent {
     }, 200);
   }
 
-  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis') {
+  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis' | 'project-view') {
     this.currentView.set(view);
     // On mobile, close sidebar after navigation
     if (window.innerWidth < 768) {

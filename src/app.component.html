@@ -186,6 +186,20 @@
                <app-icon name="history" [size]="16" class="text-slate-400"></app-icon>
                History
              </button>
+             <button
+                (click)="setView('project-view')"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
+                [class.text-indigo-600]="currentView() === 'project-view'"
+                [class.dark:text-indigo-400]="currentView() === 'project-view'"
+                [class.font-medium]="currentView() === 'project-view'"
+                [class.text-slate-500]="currentView() !== 'project-view'"
+                [class.dark:text-slate-400]="currentView() !== 'project-view'"
+                [class.hover:text-slate-900]="currentView() !== 'project-view'"
+                [class.dark:hover:text-white]="currentView() !== 'project-view'"
+              >
+               <app-icon name="layout-dashboard" [size]="16" class="text-slate-400"></app-icon>
+               Project Board
+             </button>
           </div>
         }
       </div>
@@ -323,6 +337,7 @@
              @case ('analytics') { Analytics Suite }
              @case ('ai-features') { AI Insights }
              @case ('project-analysis') { Project Analysis }
+             @case ('project-view') { Project Tasks }
              @case ('diary') { Diary }
              @case ('calendar') { Calendar }
            }
@@ -427,6 +442,8 @@
          <app-ai-features-view class="block h-full"></app-ai-features-view>
       } @else if (currentView() === 'project-analysis') {
          <app-project-analysis-view></app-project-analysis-view>
+      } @else if (currentView() === 'project-view') {
+         <app-project-view (triggerDetail)="openTaskDetail($event)" class="block h-full"></app-project-view>
       } @else if (currentView() === 'diary') {
          <app-diary-view class="block h-full"></app-diary-view>
       } @else if (currentView() === 'calendar') {

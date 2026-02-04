@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed, effect, inject } from '@angular/core';
+import { IndexedDbService } from './indexed-db.service';
 
 export interface Subtask {
   id: string;
@@ -68,6 +69,8 @@ export interface Task {
   providedIn: 'root'
 })
 export class TaskService {
+  private indexedDbService = inject(IndexedDbService);
+  private isInitialized = false;
   private STORAGE_KEY = 'productivity_flow_tasks';
   private TIMER_STATE_KEY = 'productivity_flow_timer_state';
   
@@ -248,10 +251,8 @@ export class TaskService {
     // Auto-save whenever tasks change
     effect(() => {
       const tasks = this.tasksSignal();
-      try {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(tasks));
-      } catch (e) {
-        console.error('Error saving tasks to localStorage:', e);
+      if (this.isInitialized) {
+        this.indexedDbService.saveAllTasks(tasks).catch(err => console.error('Save failed', err));
       }
     });
 
@@ -357,18 +358,26 @@ export class TaskService {
     });
   }
 
-  private loadFromStorage() {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
-    if (stored) {
-      try {
-        let parsedData = JSON.parse(stored);
-        
-        if (!Array.isArray(parsedData)) {
-          throw new Error('Stored data is not an array');
-        }
+  private async loadFromStorage() {
+    try {
+      let rawTasks = await this.indexedDbService.getAllTasks();
 
+      // Migration: If DB is empty, try to load from LocalStorage
+      if (rawTasks.length === 0) {
+        const stored = localStorage.getItem(this.STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) rawTasks = parsed;
+          } catch (e) {
+            console.error('LocalStorage parse error', e);
+          }
+        }
+      }
+
+      if (rawTasks.length > 0) {
         // Data Migration: Convert legacy string subtasks to Subtask[]
-        parsedData = parsedData.map((t: any) => {
+        const processedTasks = rawTasks.map((t: any) => {
            if (typeof t.subtasks === 'string') {
              return {
                ...t,
@@ -393,13 +402,15 @@ export class TaskService {
            return t;
         });
 
-        this.tasksSignal.set(parsedData);
-      } catch (e) {
-        console.error('Failed to parse tasks', e);
+        this.tasksSignal.set(processedTasks);
+      } else {
         this.seedInitialData();
       }
-    } else {
+    } catch (e) {
+      console.error('Failed to load tasks from DB', e);
       this.seedInitialData();
+    } finally {
+      this.isInitialized = true;
     }
   }
 
@@ -656,7 +667,22 @@ export class TaskService {
       }
       return t;
     });
-    this.tasksSignal.set(migrated);
+
+    if (this.tasksSignal().length > 0) {
+      const replace = confirm('Existing tasks found. Do you want to replace them?\n\nOK = Replace All\nCancel = Append Imported Tasks');
+      if (replace) {
+        this.tasksSignal.set(migrated);
+      } else {
+        // Append: Regenerate IDs to avoid conflicts
+        const toAppend = migrated.map(t => ({
+          ...t,
+          id: crypto.randomUUID()
+        }));
+        this.tasksSignal.update(current => [...current, ...toAppend]);
+      }
+    } else {
+      this.tasksSignal.set(migrated);
+    }
   }
 
   // Shared Recurrence Logic

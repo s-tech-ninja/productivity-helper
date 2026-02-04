@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskService, Task } from '../../services/task.service';
 import { IconComponent } from '../icons/icon.component';
+import { MarkdownPipe } from '../pipes/markdown.pipe'; // <--- 1. Add this import
 
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [CommonModule, IconComponent, FormsModule],
+  imports: [CommonModule, IconComponent, FormsModule, MarkdownPipe],
   templateUrl: './task-detail.component.html'
 })
 export class TaskDetailComponent {

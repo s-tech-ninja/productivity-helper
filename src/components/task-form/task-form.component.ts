@@ -1,33 +1,15 @@
-import { Component, output, inject, input, OnInit, signal, ViewChild, ElementRef, computed } from '@angular/core';
+import { Component, output, inject, input, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { IconComponent } from '../icons/icon.component';
 import { TaskService, Task, Subtask } from '../../services/task.service';
+import { WysiwygEditorComponent } from '../sub-components/wysiwyg-editor/wysiwyg-editor.component';
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, IconComponent],
-  templateUrl: './task-form.component.html',
-  styles: [`
-    :host ::ng-deep .editor-content ul {
-      list-style-type: disc;
-      padding-left: 1.25rem;
-    }
-    :host ::ng-deep .editor-content ol {
-      list-style-type: decimal;
-      padding-left: 1.25rem;
-    }
-    :host ::ng-deep .editor-content b, :host ::ng-deep .editor-content strong {
-      font-weight: bold;
-    }
-    :host ::ng-deep .editor-content i, :host ::ng-deep .editor-content em {
-      font-style: italic;
-    }
-    :host ::ng-deep .editor-content u {
-      text-decoration: underline;
-    }
-  `]
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, IconComponent, WysiwygEditorComponent],
+  templateUrl: './task-form.component.html'
 })
 export class TaskFormComponent implements OnInit {
   cancel = output<void>();
@@ -35,8 +17,6 @@ export class TaskFormComponent implements OnInit {
   
   // Reusable styled string for input classes
   readonly inputClass = "w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 transition-all duration-200 ease-in-out hover:bg-white dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed";
-
-  @ViewChild('editor') editorRef!: ElementRef<HTMLDivElement>;
   
   private fb: FormBuilder = inject(FormBuilder);
   taskService = inject(TaskService);
@@ -161,12 +141,6 @@ export class TaskFormComponent implements OnInit {
         this.taskForm.patchValue({ interruptions: `${task.timerSessionCount} sessions` });
       }
       
-      setTimeout(() => {
-        if (this.editorRef && task.description) {
-          this.editorRef.nativeElement.innerHTML = task.description;
-        }
-      }, 0);
-
       // Handle Subtasks (Array)
       if (task.subtasks && Array.isArray(task.subtasks)) {
          // Clone to avoid mutating readonly signal directly until submit
@@ -220,25 +194,6 @@ export class TaskFormComponent implements OnInit {
       str += `${this.effortMinutes}m`;
     }
     this.taskForm.patchValue({ estimatedEffort: str });
-  }
-
-  // WYSIWYG Commands
-  execCmd(command: string) {
-    let value: string | undefined;
-    if (command === 'createLink') {
-      const url = prompt('Enter link URL:', 'https://');
-      if (!url) return;
-      value = url;
-    }
-    document.execCommand(command, false, value);
-    if (this.editorRef) {
-       this.updateDescription({ target: this.editorRef.nativeElement });
-    }
-  }
-
-  updateDescription(event: any) {
-    const content = event.target.innerHTML;
-    this.taskForm.patchValue({ description: content });
   }
 
   addSubtask(input: HTMLInputElement) {

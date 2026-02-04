@@ -1,7 +1,8 @@
-import { Component, signal, computed, ViewChild, ElementRef, effect } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../icons/icon.component';
+import { WysiwygEditorComponent } from '../sub-components/wysiwyg-editor/wysiwyg-editor.component';
 
 interface DiaryEntry {
   id: string;
@@ -15,37 +16,13 @@ interface DiaryEntry {
 @Component({
   selector: 'app-diary-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, IconComponent],
-  templateUrl: './diary-view.component.html',
-  styles: [`
-    :host ::ng-deep .editor-content ul { list-style-type: disc; padding-left: 1.25rem; }
-    :host ::ng-deep .editor-content ol { list-style-type: decimal; padding-left: 1.25rem; }
-    :host ::ng-deep .editor-content b, :host ::ng-deep .editor-content strong { font-weight: bold; }
-    :host ::ng-deep .editor-content i, :host ::ng-deep .editor-content em { font-style: italic; }
-    :host ::ng-deep .editor-content u { text-decoration: underline; }
-    :host ::ng-deep .editor-content blockquote { border-left: 4px solid #cbd5e1; padding-left: 1rem; font-style: italic; }
-    :host ::ng-deep .editor-content a { color: #4f46e5; text-decoration: underline; }
-  `]
+  imports: [CommonModule, FormsModule, IconComponent, WysiwygEditorComponent],
+  templateUrl: './diary-view.component.html'
 })
 export class DiaryViewComponent {
   entries = signal<DiaryEntry[]>([]);
   selectedId = signal<string | null>(null);
   showArchived = signal(false);
-  
-  private _editorRef?: ElementRef<HTMLDivElement>;
-
-  @ViewChild('editor')
-  set editorRef(value: ElementRef<HTMLDivElement> | undefined) {
-    this._editorRef = value;
-    // Immediately sync content when the editor element is created/attached
-    if (value && this.activeEntry()) {
-      value.nativeElement.innerHTML = this.activeEntry()!.content;
-    }
-  }
-
-  get editorRef() {
-    return this._editorRef;
-  }
 
   // Computed list for the sidebar
   filteredEntries = computed(() => {
@@ -71,16 +48,6 @@ export class DiaryViewComponent {
          this.selectedId.set(this.entries()[0].id);
        }
     }
-
-    // Sync editor content when active entry changes
-    effect(() => {
-      const entry = this.activeEntry();
-      if (entry && this.editorRef?.nativeElement) {
-        if (this.editorRef.nativeElement.innerHTML !== entry.content) {
-          this.editorRef.nativeElement.innerHTML = entry.content;
-        }
-      }
-    });
   }
 
   loadEntries() {
@@ -163,13 +130,6 @@ export class DiaryViewComponent {
 
   stripHtml(html: string): string {
     return html ? html.replace(/<[^>]*>/g, '') : '';
-  }
-
-  execCmd(command: string, value?: string) {
-    document.execCommand(command, false, value);
-    if (this.editorRef) {
-       this.updateContent({ target: this.editorRef.nativeElement! });
-    }
   }
 
   isToday(dateInput: string | Date): boolean {

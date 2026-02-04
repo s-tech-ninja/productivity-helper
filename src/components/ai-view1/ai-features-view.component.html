@@ -1,0 +1,115 @@
+<div class="p-4 md:p-8 max-w-6xl mx-auto h-full flex flex-col">
+  <div class="mb-6 shrink-0">
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">AI Productivity Assistant</h2>
+    <p class="text-slate-500 dark:text-slate-400">Select tasks to generate tailored analysis prompts for your favorite LLM (ChatGPT, Claude, Gemini).</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+    
+    <!-- Left Column: Task Selection -->
+    <div class="lg:col-span-1 flex flex-col bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden h-[600px] lg:h-auto">
+       <div class="p-4 border-b border-slate-100 dark:border-slate-700 space-y-3">
+          <!-- Search -->
+          <div class="relative">
+            <app-icon name="target" [size]="16" class="absolute left-[0.4rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+            <input 
+              type="text" 
+              [ngModel]="searchQuery()"
+              (ngModelChange)="updateSearch($event)"
+              placeholder="Filter tasks..." 
+              class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-700 dark:text-slate-200"
+            >
+          </div>
+          <!-- Actions -->
+          <div class="flex justify-between items-center">
+             <button (click)="toggleAll()" class="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+               Toggle All
+             </button>
+             <span class="text-xs text-slate-500">{{ selectedTaskIds().size }} selected</span>
+          </div>
+       </div>
+       
+       <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+          @for (task of filteredTasks(); track task.id) {
+            <div 
+              (click)="toggleSelection(task.id)"
+              class="flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
+              [class.bg-indigo-50]="selectedTaskIds().has(task.id)"
+              [class.dark:bg-indigo-900/20]="selectedTaskIds().has(task.id)"
+            >
+              <div class="mt-0.5 w-4 h-4 rounded border flex items-center justify-center transition-colors shrink-0"
+                   [class.bg-indigo-600]="selectedTaskIds().has(task.id)"
+                   [class.border-indigo-600]="selectedTaskIds().has(task.id)"
+                   [class.border-slate-300]="!selectedTaskIds().has(task.id)"
+                   [class.dark:border-slate-600]="!selectedTaskIds().has(task.id)">
+                 @if(selectedTaskIds().has(task.id)) { <app-icon name="check" [size]="10" class="text-white"></app-icon> }
+              </div>
+              <div class="flex-1 min-w-0">
+                 <p class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{{ task.title }}</p>
+                 <p class="text-xs text-slate-500 truncate">{{ task.project || 'No Project' }}</p>
+              </div>
+            </div>
+          }
+          @if (filteredTasks().length === 0) {
+            <div class="p-4 text-center text-slate-400 text-sm">No tasks found.</div>
+          }
+       </div>
+       
+       <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+         <button 
+           (click)="generate()"
+           class="w-full py-2.5 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+           [class.bg-indigo-600]="!isGenerated()"
+           [class.hover:bg-indigo-700]="!isGenerated()"
+           [class.shadow-indigo-500/20]="!isGenerated()"
+           [class.bg-emerald-600]="isGenerated()"
+           [class.hover:bg-emerald-700]="isGenerated()"
+           [class.shadow-emerald-500/20]="isGenerated()"
+         >
+           @if (isGenerated()) {
+             <app-icon name="check" [size]="18"></app-icon> Generated!
+           } @else {
+             <app-icon name="sparkles" [size]="18"></app-icon> Generate Prompts
+           }
+         </button>
+       </div>
+    </div>
+
+    <!-- Right Column: Prompts -->
+    <div class="lg:col-span-2 overflow-y-auto custom-scrollbar pr-2">
+      <div class="grid gap-6">
+        @for (prompt of prompts(); track $index) {
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-all hover:shadow-md">
+            <div class="flex items-start justify-between gap-4 mb-3">
+              <h3 
+                (click)="togglePrompt($index)"
+                class="font-bold text-slate-800 dark:text-white flex items-center gap-2 cursor-pointer select-none group flex-1"
+              >
+                <div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold">{{ $index + 1 }}</div>
+                <span>{{ prompt.name }}</span>
+                <app-icon name="chevron-right" [size]="16" class="text-slate-400 transition-transform duration-200 group-hover:text-indigo-500" [class.rotate-90]="prompt.expanded"></app-icon>
+              </h3>
+
+              <button 
+                (click)="copyToClipboard(prompt.text, $index)" 
+                class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors shrink-0"
+                [class.bg-emerald-50]="copiedIndex() === $index"
+                [class.text-emerald-600]="copiedIndex() === $index"
+                [class.bg-slate-100]="copiedIndex() !== $index"
+                [class.dark:bg-slate-700]="copiedIndex() !== $index"
+                [class.text-slate-600]="copiedIndex() !== $index"
+                [class.dark:text-slate-300]="copiedIndex() !== $index"
+              >
+                <app-icon [name]="copiedIndex() === $index ? 'check' : 'copy'" [size]="14"></app-icon>
+                {{ copiedIndex() === $index ? 'Copied!' : 'Copy' }}
+              </button>
+            </div>
+            @if (prompt.expanded) {
+              <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 text-sm font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap border border-slate-100 dark:border-slate-800 overflow-x-auto animate-in fade-in slide-in-from-top-1 duration-200">{{ prompt.text }}</div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

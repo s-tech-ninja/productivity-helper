@@ -15,11 +15,13 @@ import { ThemeService } from './services/theme.service';
 import { TaskDetailComponent } from './components/task-detail/task-detail.component';
 import { Task, TaskService } from './services/task.service';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
+import { AiFeaturesViewComponent } from './components/ai-view1/ai-features-view.component';
+import { ProjectAnalysisViewComponent } from './components/project-analysis/project-analysis-view.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent],
+  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent, AiFeaturesViewComponent, ProjectAnalysisViewComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
@@ -31,7 +33,7 @@ export class AppComponent {
   currentYear = new Date().getFullYear();
   
   // View State for routing
-  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed'>('dashboard');
+  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis'>('dashboard');
 
   isSidebarOpen = signal(false);
   showNotifications = signal(false);
@@ -93,10 +95,15 @@ export class AppComponent {
   // Delete State
   taskToDelete = signal<Task | null>(null);
   
+  isAnalysisExpanded = signal(true);
   isTasksExpanded = signal(true);
 
   toggleSidebar() {
     this.isSidebarOpen.update(v => !v);
+  }
+
+  toggleAnalysisSubmenu() {
+    this.isAnalysisExpanded.update(v => !v);
   }
 
   toggleTasksSubmenu() {
@@ -118,7 +125,7 @@ export class AppComponent {
     }, 200);
   }
 
-  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed') {
+  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis') {
     this.currentView.set(view);
     // On mobile, close sidebar after navigation
     if (window.innerWidth < 768) {

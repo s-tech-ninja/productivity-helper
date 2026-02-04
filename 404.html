@@ -34,6 +34,14 @@
     
     .dark ::-webkit-scrollbar-thumb { background: #475569; }
     .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+    .animate-flicker {
+      animation: flicker 2s infinite;
+    }
   </style>
 <script type="importmap">
 {
@@ -55,5 +63,5 @@
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 h-screen overflow-hidden transition-colors duration-300">
   <app-root></app-root>
-<script src="main-KE2JLE3G.js" type="module"></script></body>
+<script src="main-F3TRTHGL.js" type="module"></script></body>
 </html>

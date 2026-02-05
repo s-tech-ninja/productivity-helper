@@ -326,8 +326,28 @@ export class TaskService {
     const now = Date.now();
     const fifteenMins = 15 * 60 * 1000;
     const hasNotificationPermission = 'Notification' in window && Notification.permission === 'granted';
+    const updates = new Map<string, Partial<Task>>();
 
     this.tasksSignal().forEach(t => {
+      // --- 1. RECURRING TASK MAINTENANCE ---
+      if (t.recurrence !== 'None' && !t.archived) {
+         // Fix "Stuck Completed" state
+         // Recurring tasks should never remain in 'Completed' status in the main list.
+         // They should be reset to 'Backlog' for the next occurrence.
+         if (t.status === 'Completed') {
+            updates.set(t.id, {
+               status: 'Backlog',
+               subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
+               totalTimeElapsed: '0',
+               timerSessionCount: 0,
+               interruptions: '',
+               focusScore: undefined,
+               reflection: undefined,
+               completionTime: undefined
+            });
+         }
+      }
+
       if (!t.startDate || t.status === 'Completed' || t.archived) return;
 
       const start = new Date(t.startDate).getTime();
@@ -358,6 +378,16 @@ export class TaskService {
         this.notifiedTaskIds.add(t.id);
       }
     });
+
+    // Apply Batch Updates
+    if (updates.size > 0) {
+       this.tasksSignal.update(tasks => tasks.map(t => {
+          if (updates.has(t.id)) {
+             return { ...t, ...updates.get(t.id) };
+          }
+          return t;
+       }));
+    }
   }
 
   private async loadFromStorage() {
@@ -614,23 +644,16 @@ export class TaskService {
           reflection: data.reflection
         };
 
-        // 2. Calculate Next Dates
-        const nextStartDate = this.addInterval(t.startDate, t.recurrence);
-        const nextDeadline = t.deadline ? this.addInterval(t.deadline, t.recurrence) : '';
-
         return {
           ...t,
-          // Reset for next occurrence
-          status: 'Backlog',
-          startDate: nextStartDate,
-          deadline: nextDeadline,
-          subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
-          totalTimeElapsed: '0',
+          status: 'Backlog', // Reset status immediately for next occurrence
+          subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })), // Reset subtasks
+          totalTimeElapsed: '0', // Reset timer
           timerSessionCount: 0,
           interruptions: '',
+          completionTime: undefined, // Clear main task completion details
           focusScore: undefined,
           reflection: undefined,
-          completionTime: undefined,
           history: { ...(t.history || {}), [dateKey]: historyEntry }
         };
       }

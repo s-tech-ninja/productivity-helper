@@ -253,18 +253,23 @@ export class DashboardAnalyticsService {
   // 6. Recent Activity
   recentActivity = computed(() => {
     const completedItems: any[] = [];
+    const range = this.range();
 
     this.tasks().forEach(t => {
       if (t.archived) return;
       
       if (t.status === 'Completed') {
-        completedItems.push(t);
+        if (this.isInRange(t.completionTime, range)) {
+          completedItems.push(t);
+        }
       }
       
       if (t.history) {
         Object.entries(t.history).forEach(([date, h]) => {
           if (h.status === 'Completed') {
-            completedItems.push({ ...h, id: `${t.id}_${date}`, title: t.title, estimatedEffort: t.estimatedEffort });
+            if (this.isInRange(h.completionTime || date, range)) {
+              completedItems.push({ ...h, id: `${t.id}_${date}`, title: t.title, estimatedEffort: t.estimatedEffort });
+            }
           }
         });
       }

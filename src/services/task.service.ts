@@ -9,10 +9,12 @@ export interface Subtask {
   completedAt?: number; // Timestamp
 }
 
+export type TaskStatus = 'Backlog' | 'In Progress' | 'Paused' | 'Completed' | 'Missed';
+
 export interface TaskHistory {
   startDate: string;
   deadline: string;
-  status: 'Backlog' | 'In Progress' | 'Paused' | 'Completed';
+  status: TaskStatus;
   subtasks: Subtask[];
   completionTime?: string;
   totalTimeElapsed?: string;
@@ -49,7 +51,7 @@ export interface Task {
   subtasks: Subtask[];
   
   // Execution & Performance (Phase 2)
-  status: 'Backlog' | 'In Progress' | 'Paused' | 'Completed';
+  status: TaskStatus;
   createdAt: number;
   
   // Archive State

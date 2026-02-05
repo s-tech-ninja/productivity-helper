@@ -13,7 +13,7 @@ export interface ProjectTime {
   minutes: number;
 }
 
-export type AnalyticsRange = 'daily' | 'weekly' | 'monthly';
+export type AnalyticsRange = 'daily' | 'weekly' | 'monthly' | 'all';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +42,9 @@ export class DashboardAnalyticsService {
     } else if (rangeType === 'monthly') {
       loops = 6;
       incrementType = 'month';
+    } else if (rangeType === 'all') {
+      loops = 12;
+      incrementType = 'month';
     }
 
     // Initialize Buckets
@@ -62,7 +65,7 @@ export class DashboardAnalyticsService {
         d.setDate(diff);
         key = d.toISOString().split('T')[0];
         label = `W${this.getWeekNumber(d)}`;
-      } else if (rangeType === 'monthly') {
+      } else if (rangeType === 'monthly' || rangeType === 'all') {
         d.setMonth(today.getMonth() - i);
         key = `${d.getFullYear()}-${d.getMonth() + 1}`; // YYYY-M
         label = d.toLocaleDateString('en-US', { month: 'short' });
@@ -107,7 +110,7 @@ export class DashboardAnalyticsService {
       const weekStart = new Date(d);
       weekStart.setDate(diff);
       key = weekStart.toISOString().split('T')[0];
-    } else if (rangeType === 'monthly') {
+    } else if (rangeType === 'monthly' || rangeType === 'all') {
       key = `${d.getFullYear()}-${d.getMonth() + 1}`;
     }
 
@@ -128,28 +131,35 @@ export class DashboardAnalyticsService {
   // 2. Focus & Time Metrics
   focusMetrics = computed(() => {
     const tasks = this.tasks().filter(t => !t.archived);
+    const range = this.range();
     
     let totalMinutes = 0;
     let totalFocusScore = 0;
     let focusCount = 0;
 
     tasks.forEach(t => {
-      // Main Task Data
-      totalMinutes += this.parseDuration(t.totalTimeElapsed);
-      if (t.status === 'Completed' && t.focusScore) {
-        totalFocusScore += t.focusScore;
-        focusCount++;
-      }
-
-      // History Data
-      if (t.history) {
-        Object.values(t.history).forEach(h => {
-          totalMinutes += this.parseDuration(h.totalTimeElapsed);
-          if (h.status === 'Completed' && h.focusScore) {
-            totalFocusScore += h.focusScore;
-            focusCount++;
-          }
-        });
+      // 1. Recurring Tasks: Use History for granular data
+      if (t.recurrence !== 'None' && t.history) {
+         Object.entries(t.history).forEach(([dateStr, h]) => {
+            if (this.isInRange(dateStr, range)) {
+               totalMinutes += this.parseDuration(h.totalTimeElapsed);
+               if (h.status === 'Completed' && h.focusScore) {
+                  totalFocusScore += h.focusScore;
+                  focusCount++;
+               }
+            }
+         });
+      } 
+      // 2. Non-Recurring: Use Main Task (Approximate by completion time if filtered)
+      else if (t.recurrence === 'None') {
+         const inRange = range === 'all' || (t.status === 'Completed' && this.isInRange(t.completionTime, range));
+         if (inRange) {
+            totalMinutes += this.parseDuration(t.totalTimeElapsed);
+            if (t.status === 'Completed' && t.focusScore) {
+               totalFocusScore += t.focusScore;
+               focusCount++;
+            }
+         }
       }
     });
 
@@ -252,9 +262,9 @@ export class DashboardAnalyticsService {
       }
       
       if (t.history) {
-        Object.values(t.history).forEach(h => {
+        Object.entries(t.history).forEach(([date, h]) => {
           if (h.status === 'Completed') {
-            completedItems.push({ ...h, title: t.title, estimatedEffort: t.estimatedEffort });
+            completedItems.push({ ...h, id: `${t.id}_${date}`, title: t.title, estimatedEffort: t.estimatedEffort });
           }
         });
       }
@@ -314,6 +324,35 @@ export class DashboardAnalyticsService {
 
 
   // --- Helpers ---
+
+  private isInRange(dateStr: string | number | undefined, range: AnalyticsRange): boolean {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return false;
+    
+    if (range === 'all') return true;
+
+    const target = new Date(d);
+    target.setHours(0,0,0,0);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (range === 'daily') {
+      return target.getTime() === today.getTime();
+    }
+
+    if (range === 'weekly') {
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(today.getDate() - 7);
+      return target.getTime() >= sevenDaysAgo.getTime();
+    }
+
+    if (range === 'monthly') {
+      return target.getMonth() === today.getMonth() && target.getFullYear() === today.getFullYear();
+    }
+
+    return false;
+  }
 
   private parseDuration(msStr: string | undefined): number {
     if (!msStr) return 0;

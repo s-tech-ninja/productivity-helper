@@ -29,7 +29,7 @@ export class DashboardViewComponent {
   datePipe = inject(DatePipe);
   taskService = inject(TaskService);
   tasks = this.taskService.tasks;
-  stats = this.taskService.stats;
+  stats = computed(() => this.taskService.calculateStats(this.filteredTasks()));
   streak = this.taskService.streak;
   
   // Local state for toggling between Board/List inside Dashboard view
@@ -251,7 +251,7 @@ export class DashboardViewComponent {
     });
 
     // Step 5: Filter out completed recurring tasks for Dashboard/Pending views
-    if (currentView === 'dashboard' || currentView === 'tasks-not-completed') {
+    if (currentView === 'tasks-not-completed') {
       tasksInView = tasksInView.filter(t => !(t.recurrence !== 'None' && t.status === 'Completed'));
     }
 

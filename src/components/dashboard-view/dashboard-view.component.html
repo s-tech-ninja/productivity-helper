@@ -112,7 +112,7 @@
             <div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg">
               <app-icon name="check" [size]="20"></app-icon>
             </div>
-            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Completion Rate</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Completion Rate ({{ dateFilter() }})</span>
           </div>
           <div class="flex items-end gap-2">
             <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats().completionRate }}%</span>
@@ -126,7 +126,7 @@
       <!-- 3. Focus Breakdown -->
       <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
          <div class="flex items-center justify-between mb-2">
-           <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Focus Breakdown</span>
+           <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Focus Breakdown ({{ dateFilter() }})</span>
            <app-icon name="list-todo" [size]="18" class="text-slate-400"></app-icon>
          </div>
          <div class="space-y-2">
@@ -156,7 +156,7 @@
             <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-lg">
               <app-icon name="zap" [size]="20"></app-icon>
             </div>
-            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">High Energy Tasks</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">High Energy Tasks ({{ dateFilter() }})</span>
           </div>
           <div class="flex items-end gap-2">
             <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats().highEnergy }}</span>
@@ -174,7 +174,7 @@
             <div class="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-lg">
               <app-icon name="target" [size]="20"></app-icon>
             </div>
-            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Tasks</span>
+            <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Tasks ({{ dateFilter() }})</span>
           </div>
           <div class="flex items-end gap-2">
             <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ stats().total }}</span>
@@ -186,7 +186,7 @@
        <!-- 6. Energy Breakdown -->
        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col justify-between">
          <div class="flex items-center justify-between mb-2">
-           <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Energy Breakdown</span>
+           <span class="text-sm text-slate-500 dark:text-slate-400 font-medium">Energy Breakdown ({{ dateFilter() }})</span>
            <app-icon name="activity" [size]="18" class="text-slate-400"></app-icon>
          </div>
          <div class="space-y-2">

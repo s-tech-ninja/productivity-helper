@@ -9,10 +9,12 @@ export interface Subtask {
   completedAt?: number; // Timestamp
 }
 
+export type TaskStatus = 'Backlog' | 'In Progress' | 'Paused' | 'Completed' | 'Missed';
+
 export interface TaskHistory {
   startDate: string;
   deadline: string;
-  status: 'Backlog' | 'In Progress' | 'Paused' | 'Completed';
+  status: TaskStatus;
   subtasks: Subtask[];
   completionTime?: string;
   totalTimeElapsed?: string;
@@ -49,7 +51,7 @@ export interface Task {
   subtasks: Subtask[];
   
   // Execution & Performance (Phase 2)
-  status: 'Backlog' | 'In Progress' | 'Paused' | 'Completed';
+  status: TaskStatus;
   createdAt: number;
   
   // Archive State
@@ -102,12 +104,19 @@ export class TaskService {
   private notifiedTaskIds = new Set<string>();
   private startedTaskIds = new Set<string>();
 
-  readonly stats = computed(() => {
-    const all = this.tasksSignal();
-    const activeTasks = all.filter(t => !t.archived);
+  readonly stats = computed(() => this.calculateStats(this.tasksSignal()));
+
+  calculateStats(tasks: Task[]) {
+    const activeTasks = tasks.filter(t => !t.archived);
     
     const total = activeTasks.length;
-    const completed = activeTasks.filter(t => t.status === 'Completed').length;
+    const todayStr = new Date().toLocaleDateString('en-CA');
+    
+    const completed = activeTasks.filter(t => {
+      if (t.status === 'Completed') return true;
+      // Include recurring tasks that were completed today (even if status reset to Backlog)
+      return t.recurrence !== 'None' && t.history?.[todayStr]?.status === 'Completed';
+    }).length;
     
     return {
       total,
@@ -120,7 +129,7 @@ export class TaskService {
       mediumEnergy: activeTasks.filter(t => t.energyLevel === 'Medium').length,
       lowEnergy: activeTasks.filter(t => t.energyLevel === 'Low').length,
     };
-  });
+  }
 
   readonly projects = computed(() => {
     const tasks = this.tasksSignal();
@@ -324,8 +333,28 @@ export class TaskService {
     const now = Date.now();
     const fifteenMins = 15 * 60 * 1000;
     const hasNotificationPermission = 'Notification' in window && Notification.permission === 'granted';
+    const updates = new Map<string, Partial<Task>>();
 
     this.tasksSignal().forEach(t => {
+      // --- 1. RECURRING TASK MAINTENANCE ---
+      if (t.recurrence !== 'None' && !t.archived) {
+         // Fix "Stuck Completed" state
+         // Recurring tasks should never remain in 'Completed' status in the main list.
+         // They should be reset to 'Backlog' for the next occurrence.
+         if (t.status === 'Completed') {
+            updates.set(t.id, {
+               status: 'Backlog',
+               subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
+               totalTimeElapsed: '0',
+               timerSessionCount: 0,
+               interruptions: '',
+               focusScore: undefined,
+               reflection: undefined,
+               completionTime: undefined
+            });
+         }
+      }
+
       if (!t.startDate || t.status === 'Completed' || t.archived) return;
 
       const start = new Date(t.startDate).getTime();
@@ -356,6 +385,16 @@ export class TaskService {
         this.notifiedTaskIds.add(t.id);
       }
     });
+
+    // Apply Batch Updates
+    if (updates.size > 0) {
+       this.tasksSignal.update(tasks => tasks.map(t => {
+          if (updates.has(t.id)) {
+             return { ...t, ...updates.get(t.id) };
+          }
+          return t;
+       }));
+    }
   }
 
   private async loadFromStorage() {
@@ -577,60 +616,70 @@ export class TaskService {
   }
 
   completeTask(taskId: string, data: { focusScore?: number; reflection?: string; completionTime: string }) {
+    if (this.activeTaskId() === taskId) {
+      this.stopTimer();
+    }
+
     this.tasksSignal.update(tasks => tasks.map(t => {
       if (t.id !== taskId) return t;
 
       // Handle Recurring Task
       if (t.recurrence !== 'None') {
-        const dateKey = new Date().toLocaleDateString('en-CA');
-        const existingHistory = t.history?.[dateKey];
-        
-        // Ensure subtasks are marked as completed in the history snapshot
-        // We prioritize existing history (actual progress) over the template
-        const rawSubtasks = existingHistory?.subtasks || t.subtasks || [];
-        const completedSubtasks = rawSubtasks.map(s => ({
-          ...s,
-          completed: true,
-          completedAt: s.completedAt || Date.now()
-        }));
-        
-        // 1. Save to History
-        const historyEntry: TaskHistory = {
-          // Defaults from template
-          startDate: t.startDate,
-          deadline: t.deadline,
-          totalTimeElapsed: '0',
-          timerSessionCount: 0,
-          interruptions: '',
-          
-          ...(existingHistory || {}), // Overlay existing progress (time, interruptions, etc.)
-          
-          status: 'Completed',
-          subtasks: completedSubtasks,
-          completionTime: data.completionTime,
-          focusScore: data.focusScore,
-          reflection: data.reflection
-        };
+        const today = new Date();
+        const isOccurrenceToday = this.isTaskOnDate(t, today);
 
-        // 2. Calculate Next Dates
-        const nextStartDate = this.addInterval(t.startDate, t.recurrence);
-        const nextDeadline = t.deadline ? this.addInterval(t.deadline, t.recurrence) : '';
+        if (isOccurrenceToday) {
+          const dateKey = today.toLocaleDateString('en-CA');
+          const existingHistory = t.history?.[dateKey];
+          
+          // Ensure subtasks are marked as completed in the history snapshot
+          // We prioritize existing history (actual progress) over the template
+          const rawSubtasks = existingHistory?.subtasks || t.subtasks || [];
+          const completedSubtasks = rawSubtasks.map(s => ({
+            ...s,
+            completed: true,
+            completedAt: s.completedAt || Date.now()
+          }));
+          
+          // 1. Save to History
+          const historyEntry: TaskHistory = {
+            // Defaults from template
+            startDate: t.startDate,
+            deadline: t.deadline,
+            totalTimeElapsed: '0',
+            timerSessionCount: 0,
+            interruptions: '',
+            
+            ...(existingHistory || {}), // Overlay existing progress (time, interruptions, etc.)
+            
+            status: 'Completed',
+            subtasks: completedSubtasks,
+            completionTime: data.completionTime,
+            focusScore: data.focusScore,
+            reflection: data.reflection
+          };
 
-        return {
-          ...t,
-          // Reset for next occurrence
-          status: 'Backlog',
-          startDate: nextStartDate,
-          deadline: nextDeadline,
-          subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
-          totalTimeElapsed: '0',
-          timerSessionCount: 0,
-          interruptions: '',
-          focusScore: undefined,
-          reflection: undefined,
-          completionTime: undefined,
-          history: { ...(t.history || {}), [dateKey]: historyEntry }
-        };
+          return {
+            ...t,
+            status: 'Backlog', // Reset status immediately for next occurrence
+            subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })), // Reset subtasks
+            totalTimeElapsed: '0', // Reset timer
+            timerSessionCount: 0,
+            interruptions: '',
+            completionTime: undefined, // Clear main task completion details
+            focusScore: undefined,
+            reflection: undefined,
+            history: { ...(t.history || {}), [dateKey]: historyEntry }
+          };
+        } else {
+          return {
+            ...t,
+            status: 'Completed',
+            focusScore: data.focusScore,
+            reflection: data.reflection,
+            completionTime: data.completionTime
+          };
+        }
       }
 
       return {

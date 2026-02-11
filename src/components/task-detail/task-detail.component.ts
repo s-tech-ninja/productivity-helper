@@ -22,6 +22,7 @@ export class TaskDetailComponent {
   private taskService = inject(TaskService);
 
   isHistoryExpanded = signal(false);
+  viewSeriesHistory = signal(false);
 
   // Timer Logic Helpers
   isTimerRunning = computed(() => 
@@ -179,12 +180,123 @@ export class TaskDetailComponent {
 
   historyList = computed(() => {
     const t = this.task();
-    if (!t.history) return [];
+    const historyMap = t.history || {};
     
-    return Object.entries(t.history)
-      .map(([date, data]) => ({ date, ...data }))
-      .filter(entry => entry.status === 'Completed') // Only show completed history to avoid daily noise
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // If not recurring, just return existing history
+    if (!t.recurrence || t.recurrence === 'None' || !t.startDate) {
+      return Object.entries(historyMap)
+        .map(([date, data]) => ({ date, ...data }))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+
+    const entries: any[] = [];
+    const processedDates = new Set<string>();
+
+    // 1. Generate Expected Schedule
+    const start = new Date(t.startDate);
+    const now = new Date();
+    start.setHours(0,0,0,0);
+    now.setHours(0,0,0,0);
+    
+    const todayYear = now.getFullYear();
+    const todayMonth = String(now.getMonth() + 1).padStart(2, '0');
+    const todayDay = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${todayYear}-${todayMonth}-${todayDay}`;
+
+    // Cap generation at the current deadline or today, whichever is earlier
+    let endLimit = now;
+    if (t.deadline) {
+      const deadlineDate = new Date(t.deadline);
+      deadlineDate.setHours(0,0,0,0);
+      if (deadlineDate < endLimit) {
+        endLimit = deadlineDate;
+      }
+    }
+
+    let current = new Date(start);
+    let loops = 0;
+    const MAX_LOOPS = 2000; // Safety cap
+
+    while (current <= endLimit && loops < MAX_LOOPS) {
+       loops++;
+       // Format YYYY-MM-DD manually to avoid timezone shifts
+       const year = current.getFullYear();
+       const month = String(current.getMonth() + 1).padStart(2, '0');
+       const day = String(current.getDate()).padStart(2, '0');
+       const dateKey = `${year}-${month}-${day}`;
+
+       if (historyMap[dateKey]) {
+         entries.push({ date: dateKey, ...historyMap[dateKey] });
+       } else {
+         const isToday = dateKey === todayStr;
+         entries.push({
+           date: dateKey,
+           status: isToday ? 'Backlog' : 'Missed',
+           subtasks: [],
+           totalTimeElapsed: '0',
+           timerSessionCount: 0
+         });
+       }
+       processedDates.add(dateKey);
+
+       switch (t.recurrence) {
+         case 'Daily': current.setDate(current.getDate() + 1); break;
+         case 'Weekly': current.setDate(current.getDate() + 7); break;
+         case 'Bi-Weekly': current.setDate(current.getDate() + 14); break;
+         case 'Monthly': current.setMonth(current.getMonth() + 1); break;
+         default: loops = MAX_LOOPS; break;
+       }
+    }
+
+    // 2. Include extra history (off-schedule work)
+    Object.entries(historyMap).forEach(([date, data]) => {
+       if (!processedDates.has(date)) {
+          const entryDate = new Date(date);
+          entryDate.setHours(0,0,0,0);
+          if (entryDate >= start && entryDate <= endLimit) {
+             entries.push({ date, ...data });
+          }
+       }
+    });
+
+    return entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  });
+
+  sidebarHistoryList = computed(() => {
+    return this.historyList().filter(entry => entry.status !== 'Missed');
+  });
+
+  calendarHistory = computed(() => {
+    const list = this.historyList();
+    const groups = new Map<string, any[]>();
+    
+    list.forEach(entry => {
+      const date = new Date(entry.date);
+      const key = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(entry);
+    });
+    
+    return Array.from(groups.entries()).map(([month, entries]) => ({ month, entries }));
+  });
+
+  seriesStreak = computed(() => {
+    const history = this.historyList();
+    let streak = 0;
+    const today = new Date().toLocaleDateString('en-CA');
+    
+    for (let i = 0; i < history.length; i++) {
+      const entry = history[i];
+      
+      if (entry.status === 'Completed') {
+        streak++;
+      } else {
+        // If the most recent entry is today (or future) and not completed, it doesn't break the streak yet
+        if (i === 0 && entry.date >= today) continue;
+        break;
+      }
+    }
+    return streak;
   });
 
   isLate(entry: any): boolean {

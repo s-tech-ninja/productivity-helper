@@ -301,8 +301,10 @@ export class DashboardAnalyticsService {
 
     let totalSessions = 0;
     let interruptedTasks = 0;
+    let tasksWithSessions = 0;
 
     tasks.forEach(t => {
+      let currentTaskSessions = t.timerSessionCount || 0;
       totalSessions += t.timerSessionCount || 0;
       // Heuristic: If interruption string exists or sessions > 4 for a task, flag it
       if (t.interruptions || (t.timerSessionCount || 0) > 4) {
@@ -311,14 +313,17 @@ export class DashboardAnalyticsService {
       
       if (t.history) {
         Object.values(t.history).forEach(h => {
+          currentTaskSessions += h.timerSessionCount || 0;
           totalSessions += h.timerSessionCount || 0;
           if (h.interruptions || (h.timerSessionCount || 0) > 4) interruptedTasks++;
         });
       }
+
+      if (currentTaskSessions > 0) tasksWithSessions++;
     });
 
     return {
-      avgSessions: (totalSessions / totalTasks).toFixed(1),
+      avgSessions: tasksWithSessions > 0 ? (totalSessions / tasksWithSessions).toFixed(1) : '0.0',
       contextSwitchingScore: interruptedTasks
     };
   });

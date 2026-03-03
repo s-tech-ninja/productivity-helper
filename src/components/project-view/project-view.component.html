@@ -64,6 +64,11 @@
                   >
                     {{ task.category }}
                   </span>
+                  @if (taskService.calculateCompletionScore(task); as score) {
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold {{score.color}}">
+                      {{ score.label }} ({{ score.score }})
+                    </span>
+                  }
                   @if (isOverdue(task)) {
                     <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800">Overdue</span>
                   } @else if (isToday(task)) {

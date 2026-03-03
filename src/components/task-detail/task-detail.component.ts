@@ -314,12 +314,12 @@ export class TaskDetailComponent {
     return !this.taskService.isTaskOnDate(t, today);
   });
 
-  lateScore = computed(() => {
+  combinedStats = computed(() => {
     // Trigger re-calculation every second for ongoing tasks
     if (this.task().status !== 'Completed') {
       this.taskService.tick();
     }
-    return this.taskService.calculateLateScore(this.task());
+    
+    return this.taskService.calculateCompletionScore(this.task());
   });
-
 }

@@ -1139,4 +1139,150 @@ export class TaskService {
     if (score > 0.25) return { score, label: 'Moderately late', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400', delay: delayStr };
     return { score, label: 'Slightly late', color: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400', delay: delayStr };
   }
+
+  calculateScheduleAccuracy(t: Task) {
+    // Only calculate for non-recurring tasks
+    if (t.recurrence && t.recurrence !== 'None') return null;
+
+    const now = Date.now();
+    const endTime = (t.status === 'Completed' && t.completionTime) 
+      ? new Date(t.completionTime).getTime() 
+      : now;
+
+    // 1. Past Deadline (Red)
+    if (t.deadline) {
+      const deadline = new Date(t.deadline).getTime();
+      if (endTime > deadline) {
+         return { 
+           label: 'Past Deadline', 
+           color: 'text-rose-600 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400', 
+           icon: 'alert-circle' 
+         };
+      }
+    }
+
+    // 2. Over Estimate (Yellow)
+    const estimatedMs = this.parseEffort(t.estimatedEffort || '') * 60 * 1000;
+    const actualMs = parseInt(t.totalTimeElapsed || '0', 10);
+    
+    if (estimatedMs > 0 && actualMs > estimatedMs) {
+       return { label: 'Over Estimate', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400', icon: 'clock' };
+    }
+
+    // 3. On Schedule (Blue)
+    return { label: 'On Schedule', color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400', icon: 'calendar' };
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  calculateCompletionScore(t: Task) {
+    if (t.recurrence && t.recurrence !== 'None') return null;
+
+    const now = Date.now();
+    const deadline = t.deadline ? new Date(t.deadline).getTime() : null;
+    const completion = t.status === 'Completed' && t.completionTime ? new Date(t.completionTime).getTime() : null;
+    const estimatedMs = this.parseEffort(t.estimatedEffort || '') * 60 * 1000;
+    const actualMs = parseInt(t.totalTimeElapsed || '0', 10);
+
+    // 1. Completed Task Logic (Performance Score)
+    if (t.status === 'Completed') {
+       let score = 100;
+       let details = 'Perfect execution';
+       
+       // Deadline Penalty
+       if (deadline && completion! > deadline) {
+          const delay = completion! - deadline;
+          // Penalty: -10 pts per hour late, capped at 50
+          const hoursLate = delay / 3600000;
+          score -= Math.min(50, hoursLate * 10);
+          details = `Late by ${this.formatRelativeDelay(delay)}`;
+       }
+
+       // Budget Penalty
+       if (estimatedMs > 0 && actualMs > estimatedMs) {
+          const over = actualMs - estimatedMs;
+          const percentOver = over / estimatedMs;
+          score -= Math.min(40, percentOver * 40);
+          details = details === 'Perfect execution' ? 'Over estimated time' : `${details}, Over time`;
+       }
+       
+       const finalScore = Math.max(0, Math.round(score));
+       return this.formatScoreOutput(finalScore, details, true);
+    }
+
+    // 2. Ongoing Task Logic (Probability Score)
+    if (!deadline) return { score: 100, label: 'Open Ended', color: 'text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-400', icon: 'infinity', details: 'No deadline set' };
+
+    const timeRemaining = deadline - now;
+    const workRemaining = Math.max(0, estimatedMs - actualMs);
+    // If no estimate, assume 1h remaining for calculation safety
+    const projectedWork = (workRemaining === 0 && estimatedMs === 0) ? 3600000 : workRemaining;
+
+    let score = 100;
+    let details = 'On Track';
+
+    if (timeRemaining < 0) {
+       score = 0;
+       details = `Overdue by ${this.formatRelativeDelay(Math.abs(timeRemaining))}`;
+    } else if (projectedWork > timeRemaining) {
+       // Impossible to finish on time at current estimate
+       const ratio = timeRemaining / projectedWork; // e.g. 0.5 means we need double the time
+       score = Math.round(ratio * 100);
+       details = 'Unlikely to finish on time';
+    } else {
+       // We have enough time, but how much buffer?
+       const buffer = timeRemaining - projectedWork;
+       const bufferRatio = buffer / projectedWork;
+       
+       if (bufferRatio < 0.2) {
+          score = 80;
+          details = 'Tight schedule';
+       }
+       
+       if (actualMs > estimatedMs) {
+          score -= 10;
+          details = 'Over estimated time';
+       }
+    }
+
+    return this.formatScoreOutput(Math.max(0, Math.round(score)), details, false);
+  }
+
+  private formatScoreOutput(score: number, details: string, isCompleted: boolean) {
+    let label = '';
+    let color = '';
+    let icon = 'activity';
+
+    if (score >= 90) {
+      label = isCompleted ? 'Excellent' : 'High Probability';
+      color = 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400';
+      icon = isCompleted ? 'award' : 'check-circle';
+    } else if (score >= 70) {
+      label = isCompleted ? 'Good' : 'Likely';
+      color = 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400';
+      icon = 'trending-up';
+    } else if (score >= 50) {
+      label = isCompleted ? 'Fair' : 'At Risk';
+      color = 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400';
+      icon = 'alert-triangle';
+    } else {
+      label = isCompleted ? 'Poor' : 'Critical';
+      color = 'text-rose-600 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400';
+      icon = 'alert-circle';
+    }
+
+    return { score, label, color, icon, details };
+  }
 }

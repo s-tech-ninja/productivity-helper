@@ -166,17 +166,16 @@
       <!-- Scrollable Content -->
       <div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
         
-        <!-- Punctuality / Late Score Indicator -->
-        @if (lateScore(); as score) {
-           <div class="p-4 rounded-xl border border-transparent flex items-center justify-between" [class]="score.color">
+        <!-- Performance Insight (Unified) -->
+        @if (combinedStats(); as stat) {
+           <div class="p-4 rounded-xl border border-transparent flex items-center justify-between" [class]="stat.color">
              <div class="flex items-center gap-3">
-                <app-icon name="clock" [size]="20"></app-icon>
+                <app-icon [name]="stat.icon" [size]="20"></app-icon>
                 <div>
-                   <h3 class="font-bold text-sm">{{ score.label }}</h3>
-                   <p class="text-xs opacity-90">Delay: {{ score.delay }}</p>
+                   <h3 class="font-bold text-sm">{{ stat.label }} <span class="opacity-75 text-xs">({{ stat.score }}/100)</span></h3>
+                   <p class="text-xs opacity-90">{{ stat.details }}</p>
                 </div>
              </div>
-             <div class="text-xs font-bold opacity-75">Score: {{ score.score | number:'1.2-2' }}</div>
            </div>
         }
 

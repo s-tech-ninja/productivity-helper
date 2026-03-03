@@ -322,7 +322,7 @@ export class DashboardViewComponent {
     }
   }
 
-  getLateScore(task: Task) {
-    return this.taskService.calculateLateScore(task);
+  getCompletionScore(task: Task) {
+    return this.taskService.calculateCompletionScore(task);
   }
 }

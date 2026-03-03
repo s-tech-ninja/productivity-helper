@@ -33,6 +33,12 @@ export interface TaskFormPreferences {
   showRecurrence: boolean;
 }
 
+export interface SoundPreferences {
+  startup: boolean;
+  session: boolean;
+  reminder: boolean;
+}
+
 export interface Task {
   id: string;
   // Core & Planning (Phase 1)
@@ -93,6 +99,11 @@ export class TaskService {
 
   // Preferences
   readonly soundEnabled = signal<boolean>(true);
+  readonly soundPreferences = signal<SoundPreferences>({
+    startup: true,
+    session: true,
+    reminder: true
+  });
   readonly formPreferences = signal<TaskFormPreferences>({
     showDescription: true,
     showProject: true,
@@ -281,6 +292,7 @@ export class TaskService {
     effect(() => {
       const config = {
         soundEnabled: this.soundEnabled(),
+        soundPreferences: this.soundPreferences(),
         formPreferences: this.formPreferences()
       };
       localStorage.setItem(this.CONFIG_KEY, JSON.stringify(config));
@@ -321,6 +333,9 @@ export class TaskService {
       try {
         const config = JSON.parse(stored);
         if (config.soundEnabled !== undefined) this.soundEnabled.set(config.soundEnabled);
+        if (config.soundPreferences) {
+          this.soundPreferences.set({ ...this.soundPreferences(), ...config.soundPreferences });
+        }
         if (config.formPreferences) {
           this.formPreferences.set({ ...this.formPreferences(), ...config.formPreferences });
         }
@@ -346,6 +361,10 @@ export class TaskService {
 
   toggleSound() {
     this.soundEnabled.update(v => !v);
+  }
+
+  updateSoundPreference(key: keyof SoundPreferences, value: boolean) {
+    this.soundPreferences.update(p => ({ ...p, [key]: value }));
   }
 
   updateFormPreference(key: keyof TaskFormPreferences, value: boolean) {
@@ -976,16 +995,22 @@ export class TaskService {
   }
 
   private playStartSound() {
-    this.playSound('start-new-notification-022-370046.mp3', 0.5);
+    if (this.soundPreferences().startup) {
+      this.playSound('start-new-notification-022-370046.mp3', 0.5);
+    }
   }
 
   private playReminderSound() {
     console.log('Playing reminder sound');
-    this.playSound('reminder-level-up.mp3', 1.0);
+    if (this.soundPreferences().reminder) {
+      this.playSound('reminder-level-up.mp3', 1.0);
+    }
   }
 
   private playBellSound() {
-    this.playSound('bell-ring.mp3', 0.8); // Assuming a bell sound exists or fallback
+    if (this.soundPreferences().session) {
+      this.playSound('beep.mp3', 0.8); // Assuming a bell sound exists or fallback
+    }
   }
 
   // Helper to format ms into HH:MM:SS

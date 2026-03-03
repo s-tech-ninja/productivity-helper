@@ -75,6 +75,7 @@ export class TaskService {
   private isInitialized = false;
   private STORAGE_KEY = 'productivity_flow_tasks';
   private TIMER_STATE_KEY = 'productivity_flow_timer_state';
+  private CONFIG_KEY = 'productivity_flow_config';
   
   // Initialize with empty, will load in constructor
   private tasksSignal = signal<Task[]>([]);
@@ -278,8 +279,11 @@ export class TaskService {
 
     // Auto-save preferences
     effect(() => {
-      localStorage.setItem('productivity_flow_sound', JSON.stringify(this.soundEnabled()));
-      localStorage.setItem('productivity_flow_form_prefs', JSON.stringify(this.formPreferences()));
+      const config = {
+        soundEnabled: this.soundEnabled(),
+        formPreferences: this.formPreferences()
+      };
+      localStorage.setItem(this.CONFIG_KEY, JSON.stringify(config));
     });
 
     // 1. Secs Timer - for clock on task has started
@@ -311,13 +315,33 @@ export class TaskService {
   }
 
   private loadPreferences() {
-    const sound = localStorage.getItem('productivity_flow_sound');
-    if (sound !== null) this.soundEnabled.set(JSON.parse(sound));
-
-    const formPrefs = localStorage.getItem('productivity_flow_form_prefs');
-    if (formPrefs) {
-      this.formPreferences.set({ ...this.formPreferences(), ...JSON.parse(formPrefs) });
+    const stored = localStorage.getItem(this.CONFIG_KEY);
+    
+    if (stored) {
+      try {
+        const config = JSON.parse(stored);
+        if (config.soundEnabled !== undefined) this.soundEnabled.set(config.soundEnabled);
+        if (config.formPreferences) {
+          this.formPreferences.set({ ...this.formPreferences(), ...config.formPreferences });
+        }
+      } catch (e) {
+        console.error('Config parse error', e);
+      }
+    } else {
+      // Migration: Check for legacy keys and migrate them to new config
+      const sound = localStorage.getItem('productivity_flow_sound');
+      if (sound !== null) {
+        this.soundEnabled.set(JSON.parse(sound));
+      }
+      const formPrefs = localStorage.getItem('productivity_flow_form_prefs');
+      if (formPrefs) {
+        this.formPreferences.set({ ...this.formPreferences(), ...JSON.parse(formPrefs) });
+      }
     }
+
+    // Always clean up legacy keys
+    localStorage.removeItem('productivity_flow_sound');
+    localStorage.removeItem('productivity_flow_form_prefs');
   }
 
   toggleSound() {
@@ -976,6 +1000,31 @@ export class TaskService {
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   }
 
+  private formatRelativeDelay(ms: number): string {
+    if (ms <= 0) return '0m';
+
+    const minutes = ms / (1000 * 60);
+    const hours = minutes / 60;
+    const days = hours / 24;
+    const weeks = days / 7;
+    const months = days / 30.44; // Average days in a month
+    const years = days / 365.25;
+
+    if (hours < 24) {
+        return `${Math.round(hours)}h`;
+    }
+    if (days < 7) {
+        return `${Math.round(days)}d`;
+    }
+    if (weeks < 5) {
+        return `${Math.round(weeks)}w`;
+    }
+    if (months < 12) {
+        return `${Math.round(months)}mo`;
+    }
+    return `${Math.round(years)}y`;
+  }
+
   private addInterval(dateStr: string, recurrence: string): string {
     if (!dateStr) return dateStr;
     const d = new Date(dateStr);
@@ -991,5 +1040,78 @@ export class TaskService {
     // Format back to YYYY-MM-DDTHH:mm (Local time)
     const pad = (n: number) => n < 10 ? '0' + n : n;
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  parseEffort(effort: string): number {
+    if (!effort || typeof effort !== 'string') return 0;
+    let minutes = 0;
+    
+    const hMatch = effort.match(/(\d+)\s*(h|hour|hours)/i);
+    const mMatch = effort.match(/(\d+)\s*(m|min|mins|minute|minutes)/i);
+    
+    if (hMatch) minutes += parseInt(hMatch[1], 10) * 60;
+    if (mMatch) minutes += parseInt(mMatch[1], 10);
+    
+    return minutes;
+  }
+
+  calculateLateScore(t: Task) {
+    // Only calculate for non-recurring tasks
+    if (t.recurrence && t.recurrence !== 'None') return null;
+
+    // Fallback to createdAt if startDate is missing
+    const start = t.startDate ? new Date(t.startDate).getTime() : t.createdAt;
+    
+    // Use completionTime if available, otherwise use current time for ongoing delay
+    let completion = Date.now();
+    if (t.status === 'Completed' && t.completionTime) {
+      completion = new Date(t.completionTime).getTime();
+    }
+    
+    if (isNaN(start) || isNaN(completion)) return null;
+
+    // Parse Estimated Effort to milliseconds
+    const estimatedMs = this.parseEffort(t.estimatedEffort || '') * 60 * 1000;
+    
+    // 1. Planned Duration
+    let plannedDuration = estimatedMs;
+    if (plannedDuration === 0 && t.deadline) {
+      plannedDuration = new Date(t.deadline).getTime() - start;
+    }
+    
+    if (plannedDuration <= 0) return null;
+
+    // 2. Expected Completion
+    const expectedCompletion = start + plannedDuration;
+    
+    // 3. Delay
+    const delay = completion - expectedCompletion;
+    
+    if (delay <= 0) {
+      return { score: 0, label: 'On time', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400', delay: '0m' };
+    }
+
+    // 4. Completion Ratio
+    const actualTimeSpent = parseInt(t.totalTimeElapsed || '0', 10);
+    const estimatedBase = estimatedMs > 0 ? estimatedMs : plannedDuration;
+    const completionRatio = actualTimeSpent / estimatedBase;
+    
+    // 5. Adjusted Delay
+    const adjustedDelay = delay * (1 - completionRatio);
+    
+    if (adjustedDelay <= 0) {
+       return { score: 0, label: 'On time', color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400', delay: '0m' };
+    }
+
+    // 6. Late Score
+    let score = adjustedDelay / plannedDuration;
+    score = Math.min(score, 2);
+    
+    const delayStr = this.formatRelativeDelay(adjustedDelay);
+
+    if (score > 1.5) return { score, label: 'Critically late', color: 'text-rose-600 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400', delay: delayStr };
+    if (score > 0.75) return { score, label: 'Very late', color: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400', delay: delayStr };
+    if (score > 0.25) return { score, label: 'Moderately late', color: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400', delay: delayStr };
+    return { score, label: 'Slightly late', color: 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400', delay: delayStr };
   }
 }

@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../icons/icon.component';
@@ -17,6 +17,14 @@ export class DiaryViewComponent {
   showArchived = signal(false);
   private indexedDbService = inject(IndexedDbService);
 
+  private _editor?: WysiwygEditorComponent;
+  @ViewChild(WysiwygEditorComponent) set editor(editor: WysiwygEditorComponent | undefined) {
+    this._editor = editor;
+    // When the editor is set (or removed), immediately try to apply the correct state.
+    this.updateEditorDisabledState();
+  }
+  get editor(): WysiwygEditorComponent | undefined { return this._editor; }
+
   // Computed list for the sidebar
   filteredEntries = computed(() => {
     return this.entries()
@@ -28,8 +36,18 @@ export class DiaryViewComponent {
     this.entries().find(e => e.id === this.selectedId()) || null
   );
 
+  isEditable = computed(() => {
+    const entry = this.activeEntry();
+    return entry ? this.isToday(entry.date) : false;
+  });
+
   constructor() {
     this.loadEntries();
+    effect(() => {
+      // This effect now simply tracks the active entry and triggers a state update.
+      this.activeEntry(); // Dependency
+      this.updateEditorDisabledState();
+    });
   }
 
   async loadEntries() {
@@ -91,14 +109,26 @@ export class DiaryViewComponent {
   }
 
   updateContent(event: any) {
-    const content = event.target.innerHTML;
-    const id = this.selectedId();
-    if (id) {
-      this.entries.update(list => list.map(e => 
-        e.id === id ? { ...e, content, updatedAt: Date.now() } : e
-      ));
-      const updated = this.entries().find(e => e.id === id);
-      if (updated) this.indexedDbService.saveDiaryEntry(updated);
+    if (!this.isEditable()) {
+      // Fallback: If UI allows editing on read-only entry, revert immediately
+      if (this.editor && this.activeEntry()) {
+        this.editor.writeValue(this.activeEntry()!.content);
+      }
+      return;
+    }
+
+    // The editor component's (input) event emits the content as a markdown string.
+    // We only handle this type of event to ensure data integrity.
+    if (typeof event === 'string') {
+      const content = event;
+      const id = this.selectedId();
+      if (id) {
+        this.entries.update(list => list.map(e => 
+          e.id === id ? { ...e, content, updatedAt: Date.now() } : e
+        ));
+        const updated = this.entries().find(e => e.id === id);
+        if (updated) this.indexedDbService.saveDiaryEntry(updated);
+      }
     }
   }
 
@@ -133,9 +163,14 @@ export class DiaryViewComponent {
   isToday(dateInput: string | Date): boolean {
     const date = new Date(dateInput);
     const today = new Date();
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
+    return date.toDateString() === today.toDateString();
+  }
+
+  private updateEditorDisabledState() {
+    if (this.editor) {
+      const editable = this.isEditable();
+      this.editor.setDisabledState(!editable);
+    }
   }
 
   private autoSelectEntry() {

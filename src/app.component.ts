@@ -15,6 +15,7 @@ import { ThemeService } from './services/theme.service';
 import { TaskDetailComponent } from './components/task-detail/task-detail.component';
 import { Task, TaskService } from './services/task.service';
 import { SettingsModalComponent } from './components/settings-modal/settings-modal.component';
+import { IndexedDbService } from './services/indexed-db.service';
 import { AiFeaturesViewComponent } from './components/ai-view1/ai-features-view.component';
 import { ProjectAnalysisViewComponent } from './components/project-analysis/project-analysis-view.component';
 import { ProjectViewComponent } from './components/project-view/project-view.component';
@@ -28,6 +29,7 @@ import { ProjectViewComponent } from './components/project-view/project-view.com
 export class AppComponent {
   themeService = inject(ThemeService);
   taskService = inject(TaskService);
+  indexedDbService = inject(IndexedDbService);
   
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   
@@ -44,6 +46,7 @@ export class AppComponent {
   isHelpOpen = signal(false);
   isDeleteModalOpen = signal(false);
   isSettingsOpen = signal(false);
+  includeDiaryInExport = signal(false);
   
   // Detail Panel State
   selectedTaskId = signal<string | null>(null);
@@ -207,9 +210,22 @@ export class AppComponent {
   }
   
   // Data Management
-  exportData() {
+  async exportData() {
     try {
-      const data = JSON.stringify(this.taskService.tasks(), null, 2);
+      const tasks = this.taskService.tasks();
+      let data = '';
+
+      if (this.includeDiaryInExport()) {
+        const diary = await this.indexedDbService.getAllDiaryEntries();
+        data = JSON.stringify({
+          tasks,
+          diary,
+          exportedAt: new Date().toISOString()
+        }, null, 2);
+      } else {
+        data = JSON.stringify(tasks, null, 2);
+      }
+
       const blob = new Blob([data], { type: 'application/json' });
       const url = window.URL.createObjectURL(blob);
       
@@ -237,19 +253,40 @@ export class AppComponent {
     reader.onload = (e) => {
       try {
         const result = e.target?.result as string;
-        const tasks = JSON.parse(result);
+        const parsed = JSON.parse(result);
         
-        if (Array.isArray(tasks)) {
+        // Scenario 1: Legacy Export (Array of Tasks)
+        if (Array.isArray(parsed)) {
            // Basic validation: check if items have 'id' and 'title'
-           const isValid = tasks.every(t => t.id && t.title);
+           const isValid = parsed.every(t => t.id && t.title);
            if (isValid) {
-             this.taskService.importTasks(tasks);
-             alert(`Successfully imported ${tasks.length} tasks.`);
+             this.taskService.importTasks(parsed);
+             alert(`Successfully imported ${parsed.length} tasks.`);
            } else {
              alert('Invalid file format. Tasks must contain id and title.');
            }
+        } 
+        // Scenario 2: New Export (Object with tasks and optional diary)
+        else if (parsed.tasks && Array.isArray(parsed.tasks)) {
+           this.taskService.importTasks(parsed.tasks);
+           
+           let message = `Successfully imported ${parsed.tasks.length} tasks`;
+
+           if (parsed.diary && Array.isArray(parsed.diary)) {
+             // Import Diary Entries
+             parsed.diary.forEach((entry: any) => {
+               this.indexedDbService.saveDiaryEntry(entry);
+             });
+             message += ` and ${parsed.diary.length} diary entries`;
+             
+             // If current view is diary, we might want to reload or notify user to refresh
+             if (this.currentView() === 'diary') {
+                message += '.\n\nPlease refresh the page to see imported diary entries.';
+             }
+           }
+           alert(message + '.');
         } else {
-          alert('Invalid file format. Expected an array of tasks.');
+          alert('Invalid file format. Expected an array of tasks or a backup object.');
         }
       } catch(err) {
         console.error(err);

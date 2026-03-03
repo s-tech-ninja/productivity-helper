@@ -1,8 +1,9 @@
-import { Component, Input, forwardRef, signal, computed, SecurityContext, inject, ViewChild, ElementRef, effect } from '@angular/core';
+import { Component, Input, forwardRef, signal, computed, inject, ViewChild, ElementRef, effect, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { IconComponent } from '../../icons/icon.component';
+import { MarkdownService } from '../../../services/markdown.service';
 
 @Component({
   selector: 'app-wysiwyg-editor',
@@ -26,23 +27,25 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
   @Input() readonly: boolean = false;
   @Input() minHeight: string = '140px';
   
+  input = output<string>();
   @ViewChild('textarea') textareaRef!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('editorDiv') editorDivRef!: ElementRef<HTMLDivElement>;
   
   private sanitizer = inject(DomSanitizer);
+  private markdownService = inject(MarkdownService);
 
   mode = signal<'edit' | 'preview'>('preview');
   valueSignal = signal('');
-  previewHtml = signal(''); // Separate signal for innerHTML to control updates
+  previewHtml = signal<SafeHtml | string>(''); // Separate signal for innerHTML to control updates
   private isPreviewFocused = false;
 
   onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};
 
   parsedContent = computed(() => {
-    const html = this.parseMarkdown(this.valueSignal());
-    // Sanitize to prevent XSS attacks from malformed markdown/html
-    return this.sanitizer.sanitize(SecurityContext.HTML, html);
+    const html = this.markdownService.parse(this.valueSignal());
+    // Custom sanitize to allow styles (colors) but prevent scripts
+    return this.sanitizer.bypassSecurityTrustHtml(this.markdownService.stripScripts(html));
   });
 
   constructor() {
@@ -57,8 +60,9 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
 
   writeValue(value: string): void {
     let val = value || '';
-    if (this.mode() === 'edit') {
-      val = this.htmlToMarkdown(val);
+    // Auto-convert legacy HTML to Markdown on load
+    if (val && (val.includes('<p>') || val.includes('<div>') || val.includes('<ul>') || val.includes('<b>') || val.includes('<br>'))) {
+       val = this.markdownService.htmlToMarkdown(val);
     }
     this.valueSignal.set(val);
   }
@@ -80,13 +84,18 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
 
   onInput(event: Event) {
     const target = event.target as HTMLElement;
-    // Handle both Textarea (value) and Div (innerHTML)
-    const value = target.tagName === 'TEXTAREA' 
-      ? (target as HTMLTextAreaElement).value 
-      : target.innerHTML;
+    let value = '';
+
+    if (target.tagName === 'TEXTAREA') {
+      value = (target as HTMLTextAreaElement).value;
+    } else {
+      // In Preview/WYSIWYG mode, convert HTML to Markdown immediately for storage
+      value = this.markdownService.htmlToMarkdown(target.innerHTML);
+    }
       
     this.valueSignal.set(value);
     this.onChange(value);
+    this.input.emit(value);
   }
   
   onPreviewFocus() {
@@ -98,21 +107,20 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
     this.onTouched();
     // Ensure signal is in sync on blur
     if (this.editorDivRef) {
-      this.valueSignal.set(this.editorDivRef.nativeElement.innerHTML);
+      const markdown = this.markdownService.htmlToMarkdown(this.editorDivRef.nativeElement.innerHTML);
+      // Only update if it has changed to avoid unnecessary emissions and effect loops
+      if (markdown !== this.valueSignal()) {
+        this.valueSignal.set(markdown);
+        this.onChange(markdown);
+        this.input.emit(markdown);
+      }
     }
   }
 
   switchMode(newMode: 'edit' | 'preview') {
     if (this.mode() === newMode) return;
 
-    if (newMode === 'edit') {
-      // Converting from Preview (HTML) to Edit (Markdown)
-      const html = this.valueSignal();
-      const markdown = this.htmlToMarkdown(html);
-      this.valueSignal.set(markdown);
-      this.onChange(markdown);
-    }
-    
+    // valueSignal is now always Markdown, so no conversion needed when switching
     this.mode.set(newMode);
   }
 
@@ -263,134 +271,5 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
     range.setStart(node, 0);
     range.setEnd(node, length);
     range.deleteContents();
-  }
-
-  private parseMarkdown(markdown: string): string {
-    if (!markdown) return '';
-
-    // Add newlines to help with regex matching at start/end of blocks
-    let html = '\n' + markdown + '\n';
-
-    // Block Elements
-    html = html.replace(/\n```([\s\S]*?)```/g, (match, code) => `\n<pre><code>${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>\n`);
-    html = html.replace(/\n---/g, '\n<hr>\n');
-    html = html.replace(/\n(#+)\s+(.*)/g, (match, hashes, content) => {
-        const level = hashes.length;
-        return `\n<h${level}>${content}</h${level}>\n`;
-    });
-    html = html.replace(/\n> (.*)/g, '\n<blockquote>$1</blockquote>\n');
-
-    // Lists (UL)
-    html = html.replace(/(\n[\*\-]\s.*)+/g, (match) => {
-        const items = match.trim().split('\n').map(item => `<li>${item.substring(2)}</li>`).join('');
-        return `\n<ul>${items}</ul>\n`;
-    });
-    // Lists (OL)
-    html = html.replace(/(\n\d+\.\s.*)+/g, (match) => {
-        const items = match.trim().split('\n').map(item => `<li>${item.replace(/^\d+\.\s/, '')}</li>`).join('');
-        return `\n<ol>${items}</ol>\n`;
-    });
-
-    // Tables (very basic)
-    html = html.replace(/\n((?:\|.*\|(?:\r?\n|\r)?)+)/g, (match, tableBlock) => {
-        const rows = tableBlock.trim().split('\n');
-        if (rows.length < 2 || !rows[1].includes('---')) return match; // Not a table
-        let table = '<table>';
-        // Header
-        const header = rows.shift();
-        table += '<thead><tr>' + header.split('|').slice(1, -1).map(h => `<th>${h.trim()}</th>`).join('') + '</tr></thead>';
-        // Separator
-        rows.shift();
-        // Body
-        table += '<tbody>';
-        rows.forEach(row => {
-            table += '<tr>' + row.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
-        });
-        table += '</tbody></table>';
-        return `\n${table}\n`;
-    });
-
-    // Inline Elements
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-    html = html.replace(/\*\*([^\*]+)\*\*/g, '<b>$1</b>');
-    html = html.replace(/\*([^\*]+)\*/g, '<i>$1</i>');
-    html = html.replace(/~~([^~]+)~~/g, '<s>$1</s>');
-    // Note: HTML tags like <u>, <sup>, <span style="..."> pass through automatically
-
-    // Paragraphs
-    html = html.trim().split(/\n{2,}/).map(p => {
-        if (p.startsWith('<') && p.endsWith('>')) {
-          // Don't wrap elements that are already blocks
-          if (p.startsWith('<pre') || p.startsWith('<ul') || p.startsWith('<ol') || p.startsWith('<h') || p.startsWith('<table') || p.startsWith('<hr') || p.startsWith('<p') || p.startsWith('<div') || p.startsWith('<blockquote')) {
-            return p;
-          }
-        };
-        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
-    }).join('');
-
-    return html;
-  }
-
-  private htmlToMarkdown(html: string): string {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-
-    const process = (node: Node): string => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent || '';
-      }
-      if (node.nodeType !== Node.ELEMENT_NODE) return '';
-
-      const el = node as HTMLElement;
-      const tagName = el.tagName.toLowerCase();
-
-      // Handle block elements that need specific child processing
-      if (tagName === 'ul') {
-        return '\n' + Array.from(el.children).map(li => `- ${process(li)}`).join('\n') + '\n';
-      }
-      if (tagName === 'ol') {
-        return '\n' + Array.from(el.children).map((li, i) => `${i + 1}. ${process(li)}`).join('\n') + '\n';
-      }
-      if (tagName === 'li') {
-         return Array.from(el.childNodes).map(process).join('');
-      }
-      if (tagName === 'pre') {
-         return `\n\`\`\`\n${el.textContent}\n\`\`\`\n`;
-      }
-      if (tagName === 'blockquote') {
-         return `\n> ${el.textContent}\n`;
-      }
-
-      // Default child processing
-      let content = Array.from(el.childNodes).map(process).join('');
-
-      switch (tagName) {
-        case 'b':
-        case 'strong': return `**${content}**`;
-        case 'i':
-        case 'em': return `*${content}*`;
-        case 'a': return `[${content}](${el.getAttribute('href')})`;
-        case 's':
-        case 'strike': return `~~${content}~~`;
-        case 'u': return `<u>${content}</u>`;
-        case 'sup': return `<sup>${content}</sup>`;
-        case 'sub': return `<sub>${content}</sub>`;
-        case 'p': return `\n${content}\n`;
-        case 'div': return `\n${content}\n`;
-        case 'br': return '\n';
-        case 'hr': return '\n---\n';
-        case 'span': return el.outerHTML; // Preserve color spans
-        case 'h1': return `\n# ${content}\n`;
-        case 'h2': return `\n## ${content}\n`;
-        case 'h3': return `\n### ${content}\n`;
-        case 'h4': return `\n#### ${content}\n`;
-        case 'h5': return `\n##### ${content}\n`;
-        case 'h6': return `\n###### ${content}\n`;
-        case 'table': return `\n${el.textContent}\n`; // Fallback for tables
-        default: return content;
-      }
-    };
-
-    return process(temp).trim().replace(/\n{3,}/g, '\n\n');
   }
 }

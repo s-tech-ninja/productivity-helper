@@ -170,7 +170,7 @@ export class DashboardViewComponent {
         return false;
       });
 
-    } else if (currentView === 'tasks-not-completed') {
+    } else if (currentView === 'tasks-not-completed' || currentView === 'dashboard') {
       tasksInView = tasksInView.filter(t => !t.archived && t.status !== 'Completed');
     }
     else {
@@ -251,7 +251,7 @@ export class DashboardViewComponent {
     });
 
     // Step 5: Filter out completed recurring tasks for Dashboard/Pending views
-    if (currentView === 'tasks-not-completed') {
+    if (currentView === 'tasks-not-completed' || currentView === 'dashboard') {
       tasksInView = tasksInView.filter(t => !(t.recurrence !== 'None' && t.status === 'Completed'));
     }
 
@@ -320,5 +320,9 @@ export class DashboardViewComponent {
       // Small visual delay feedback could be added here, but direct update is faster
       this.taskService.updateTaskCategory(taskId, newCategory);
     }
+  }
+
+  getLateScore(task: Task) {
+    return this.taskService.calculateLateScore(task);
   }
 }

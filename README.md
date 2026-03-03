@@ -80,3 +80,10 @@ Your data never leaves your browser. All tasks, timers, and settings are stored 
 2. Click **Generate new token (classic)**.
 3. Select the `repo` scope (required for pushing to the repository).
 4. Click **Generate token** and copy the string (starts with `ghp_`).
+
+
+
+Credits:
+Sound Effect by <a href="https://pixabay.com/users/make_more_sound-35032787/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=145477">Jesse Grum</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=145477">Pixabay</a>
+
+Sound Effect by <a href="https://pixabay.com/users/soundreality-31074404/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=423717">Jurij</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=423717">Pixabay</a>

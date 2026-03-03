@@ -1,13 +1,14 @@
 {
   "name": "productivityflow",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "ng serve",
     "build": "ng build",
     "preview": "ng serve --configuration=production",
-    "build:prod": "ng build --configuration=production"
+    "build:prod": "ng build --configuration=production",
+    "audit": "npm audit fix"
   },
   "dependencies": {
     "@angular/build": "^21.1.0",
@@ -19,7 +20,9 @@
     "@angular/forms": "^21.1.0",
     "@angular/platform-browser": "^21.1.0",
     "dexie": "^4.3.0",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

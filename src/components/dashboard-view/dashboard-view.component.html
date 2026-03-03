@@ -551,6 +551,11 @@
        <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-medium truncate max-w-[120px]">
          {{ task.project || 'No Project' }}
        </span>
+       @if (getLateScore(task); as score) {
+          <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold {{score.color}}">
+            {{ score.label }} ({{ score.delay }})
+          </span>
+       }
        @if(task.status === 'Completed') {
           <span class="text-emerald-500 text-xs font-bold flex items-center gap-1">
             <app-icon name="check" [size]="14"></app-icon> Done
@@ -630,6 +635,11 @@
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-3 mb-1">
          <h4 class="text-sm font-semibold text-slate-900 dark:text-white truncate" [class.line-through]="task.status === 'Completed'" [class.text-slate-400]="task.status === 'Completed'">{{ task.title }}</h4>
+         @if (getLateScore(task); as score) {
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold {{score.color}}">
+              {{ score.label }} ({{ score.delay }})
+            </span>
+         }
          <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 uppercase tracking-wide">
            {{ task.project || 'No Project' }}
          </span>

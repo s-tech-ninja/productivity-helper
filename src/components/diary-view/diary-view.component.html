@@ -105,8 +105,8 @@
       <!-- Editor Content -->
       <div class="flex-1 px-8 pb-8 overflow-y-auto custom-scrollbar">
         <app-wysiwyg-editor 
-          [ngModel]="entry.content" 
-          (ngModelChange)="entry.content = $event; updateContent({target: {innerHTML: $event}})"
+          [ngModel]="entry.content"
+          (ngModelChange)="updateContent($event)"
           [readonly]="!isToday(entry.date)"
           minHeight="500px"
         ></app-wysiwyg-editor>

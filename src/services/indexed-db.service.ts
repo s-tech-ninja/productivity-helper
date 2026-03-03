@@ -2,13 +2,24 @@ import { Injectable } from '@angular/core';
 import Dexie, { Table } from 'dexie';
 import type { Task } from './task.service';
 
+export interface DiaryEntry {
+  id: string;
+  date: string; // ISO string
+  title: string;
+  content: string;
+  archived: boolean;
+  updatedAt: number;
+}
+
 class ProductivityDb extends Dexie {
   tasks!: Table<Task, string>;
+  diary!: Table<DiaryEntry, string>;
 
   constructor() {
     super('productivity_flow_db');
-    this.version(1).stores({
-      tasks: 'id'
+    this.version(2).stores({
+      tasks: 'id',
+      diary: 'id'
     });
   }
 }
@@ -32,5 +43,17 @@ export class IndexedDbService {
         await this.db.tasks.bulkAdd(tasks);
       }
     });
+  }
+
+  async getAllDiaryEntries(): Promise<DiaryEntry[]> {
+    return await this.db.diary.toArray();
+  }
+
+  async saveDiaryEntry(entry: DiaryEntry): Promise<void> {
+    await this.db.diary.put(entry);
+  }
+
+  async deleteDiaryEntry(id: string): Promise<void> {
+    await this.db.diary.delete(id);
   }
 }

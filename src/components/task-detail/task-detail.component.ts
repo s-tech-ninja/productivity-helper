@@ -1,6 +1,6 @@
 import { Component, input, output, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms'; // <-- 1. Add this import
 import { TaskService, Task } from '../../services/task.service';
 import { IconComponent } from '../icons/icon.component';
 import { MarkdownPipe } from '../pipes/markdown.pipe'; // <--- 1. Add this import
@@ -313,4 +313,13 @@ export class TaskDetailComponent {
     // Disable if today is not a scheduled day for this task
     return !this.taskService.isTaskOnDate(t, today);
   });
+
+  lateScore = computed(() => {
+    // Trigger re-calculation every second for ongoing tasks
+    if (this.task().status !== 'Completed') {
+      this.taskService.tick();
+    }
+    return this.taskService.calculateLateScore(this.task());
+  });
+
 }

@@ -269,6 +269,26 @@ export class TaskService {
     this.loadTimerState();
     this.loadPreferences();
 
+    // Listen for cross-tab updates to preferences
+    window.addEventListener('storage', (event) => {
+      if (event.key === this.CONFIG_KEY && event.newValue) {
+        try {
+          const config = JSON.parse(event.newValue);
+          if (config.soundEnabled !== undefined && config.soundEnabled !== this.soundEnabled()) {
+            this.soundEnabled.set(config.soundEnabled);
+          }
+          if (config.soundPreferences && JSON.stringify(config.soundPreferences) !== JSON.stringify(this.soundPreferences())) {
+            this.soundPreferences.set(config.soundPreferences);
+          }
+          if (config.formPreferences && JSON.stringify(config.formPreferences) !== JSON.stringify(this.formPreferences())) {
+            this.formPreferences.set(config.formPreferences);
+          }
+        } catch (e) {
+          console.error('Sync error', e);
+        }
+      }
+    });
+
     // Auto-save whenever tasks change
     effect(() => {
       const tasks = this.tasksSignal();

@@ -19,6 +19,7 @@ import { IndexedDbService } from './services/indexed-db.service';
 import { AiFeaturesViewComponent } from './components/ai-view1/ai-features-view.component';
 import { ProjectAnalysisViewComponent } from './components/project-analysis/project-analysis-view.component';
 import { ProjectViewComponent } from './components/project-view/project-view.component';
+import packageJson from '../package.json';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +35,10 @@ export class AppComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   
   currentYear = new Date().getFullYear();
+  
+  constructor() {
+    console.log(`ProductivityFlow Version: ${packageJson.version}`);
+  }
   
   // View State for routing
   currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis' | 'project-view'>('dashboard');

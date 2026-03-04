@@ -1,4 +1,4 @@
-import { Component, Input, forwardRef, signal, computed, inject, ViewChild, ElementRef, effect, output } from '@angular/core';
+import { Component, Input, forwardRef, signal, computed, inject, ViewChild, ElementRef, effect, output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -22,9 +22,10 @@ import { MarkdownService } from '../../../services/markdown.service';
     // Note: Ensure your tailwind.config.js has the typography plugin enabled.
   ]
 })
-export class WysiwygEditorComponent implements ControlValueAccessor {
+export class WysiwygEditorComponent implements ControlValueAccessor, OnInit {
   @Input() label: string = '';
   @Input() readonly: boolean = false;
+  @Input() defaultView: 'edit' | 'preview' = 'preview';
   @Input() minHeight: string = '140px';
   
   input = output<string>();
@@ -56,6 +57,10 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
         this.previewHtml.set(content || '');
       }
     });
+  }
+
+  ngOnInit() {
+    this.mode.set(this.defaultView);
   }
 
   writeValue(value: string): void {

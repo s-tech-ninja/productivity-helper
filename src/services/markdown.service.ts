@@ -118,7 +118,13 @@ export class MarkdownService {
     html = html.trim().split(/\n{2,}/).map(block => {
         block = block.trim();
         if (!block) return '';
-        if (/^<(div|table|ul|ol|h\d|blockquote|pre|hr|p|!--)/i.test(block)) return block;
+        
+        // Allow inline parsing for div and p blocks (often used for styling), but don't wrap in <p>
+        if (/^<(div|p)\b/i.test(block)) {
+           return this.parseInline(block.replace(/\n/g, '<br>'));
+        }
+
+        if (/^<(table|ul|ol|h\d|blockquote|pre|hr|!--)/i.test(block)) return block;
         return `<p>${this.parseInline(block.replace(/\n/g, '<br>'))}</p>`;
     }).join('\n\n');
 
@@ -191,7 +197,7 @@ export class MarkdownService {
     text = text.replace(/<kbd>(.*?)<\/kbd>/g, '<kbd>$1</kbd>');
 
     // Custom Color
-    text = text.replace(/\[color=(.*?)\](.*?)\[\/color\]/g, '<span style="color:$1">$2</span>');
+    text = text.replace(/\[color=(.*?)\]([\s\S]*?)\[\/color\]/g, '<span style="color:$1">$2</span>');
 
     return text;
   }
@@ -237,8 +243,14 @@ export class MarkdownService {
       let content = Array.from(el.childNodes).map(process).join('');
 
       switch (tagName) {
-        case 'b': case 'strong': return `**${content}**`;
-        case 'i': case 'em': return `*${content}*`;
+        case 'b': 
+        case 'strong': 
+          if (el.hasAttributes()) return `<${tagName} ${this.getAttrs(el)}>${content}</${tagName}>`;
+          return `**${content}**`;
+        case 'i': 
+        case 'em': 
+          if (el.hasAttributes()) return `<${tagName} ${this.getAttrs(el)}>${content}</${tagName}>`;
+          return `*${content}*`;
         case 'a': return `${content} || ''})`;
         case 'img': return `!${el.getAttribute('alt') || ''} || ''})`;
         case 'input':
@@ -246,11 +258,23 @@ export class MarkdownService {
              return el.hasAttribute('checked') ? '[x] ' : '[ ] ';
           }
           return '';
-        case 's': case 'strike': return `~~${content}~~`;
-        case 'u': return `<u>${content}</u>`;
-        case 'sup': return `^${content}^`;
-        case 'sub': return `~${content}~`;
-        case 'mark': return `==${content}==`;
+        case 's': 
+        case 'strike': 
+          if (el.hasAttributes()) return `<${tagName} ${this.getAttrs(el)}>${content}</${tagName}>`;
+          return `~~${content}~~`;
+        case 'u': 
+          // u is always HTML in markdown, but we preserve attrs
+          if (el.hasAttributes()) return `<u ${this.getAttrs(el)}>${content}</u>`;
+          return `<u>${content}</u>`;
+        case 'sup': 
+          if (el.hasAttributes()) return `<sup ${this.getAttrs(el)}>${content}</sup>`;
+          return `^${content}^`;
+        case 'sub': 
+          if (el.hasAttributes()) return `<sub ${this.getAttrs(el)}>${content}</sub>`;
+          return `~${content}~`;
+        case 'mark': 
+          if (el.hasAttributes()) return `<mark ${this.getAttrs(el)}>${content}</mark>`;
+          return `==${content}==`;
         case 'code': return `\`${content}\``;
         case 'p': 
         case 'div':
@@ -265,8 +289,7 @@ export class MarkdownService {
           }
 
           if (el.hasAttributes()) {
-             const attrs = Array.from(el.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
-             return `\n<${tagName} ${attrs}>${content}</${tagName}>\n`;
+             return `\n<${tagName} ${this.getAttrs(el)}>${content}</${tagName}>\n`;
           }
           return `\n${content}\n`;
         case 'br': return '\n';
@@ -274,8 +297,7 @@ export class MarkdownService {
         case 'span': 
           if (el.style.color && el.style.length === 1) return `[color=${el.style.color}]${content}[/color]`;
           if (el.hasAttributes()) {
-             const attrs = Array.from(el.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
-             return `<span ${attrs}>${content}</span>`;
+             return `<span ${this.getAttrs(el)}>${content}</span>`;
           }
           return content;
         case 'font':
@@ -308,5 +330,9 @@ export class MarkdownService {
     };
 
     return process(temp).trim().replace(/\n{3,}/g, '\n\n');
+  }
+
+  private getAttrs(el: HTMLElement): string {
+    return Array.from(el.attributes).map(a => `${a.name}="${a.value}"`).join(' ');
   }
 }

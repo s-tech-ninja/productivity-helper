@@ -66,10 +66,11 @@ export class WysiwygEditorComponent implements ControlValueAccessor, OnInit {
   writeValue(value: string): void {
     let val = value || '';
     // Auto-convert legacy HTML to Markdown on load
-    if (val && (val.includes('<p>') || val.includes('<div>') || val.includes('<ul>') || val.includes('<b>') || val.includes('<br>'))) {
-       val = this.markdownService.htmlToMarkdown(val);
+    if (val && (val.includes('<p>') || val.includes('<div>') || val.includes('<ul>') || val.includes('<b>') || val.includes('<br>') || val.includes('<span'))) {
+      val = this.markdownService.htmlToMarkdown(val);
     }
     this.valueSignal.set(val);
+    this.previewHtml.set(this.parsedContent());
   }
 
   registerOnChange(fn: any): void {

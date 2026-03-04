@@ -1,4 +1,4 @@
-import { Component, output, inject, signal } from '@angular/core';
+import { Component, output, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../icons/icon.component';
 import { ThemeService } from '../../services/theme.service';
@@ -36,6 +36,17 @@ export class SettingsModalComponent {
 
   get notificationStatus() {
     return 'Notification' in window ? Notification.permission : 'unsupported';
+  }
+
+  constructor() {
+    const storedTab = localStorage.getItem('settings_active_tab');
+    if (storedTab === 'general' || storedTab === 'sounds') {
+      this.activeTab.set(storedTab);
+    }
+
+    effect(() => {
+      localStorage.setItem('settings_active_tab', this.activeTab());
+    });
   }
 
   requestPermission() {

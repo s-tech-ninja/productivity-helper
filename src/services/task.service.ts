@@ -1,5 +1,7 @@
 import { Injectable, signal, computed, effect, inject } from '@angular/core';
 import { IndexedDbService } from './indexed-db.service';
+import { MarkdownService } from './markdown.service';
+import packageJson from '../../package.json';
 
 export interface Subtask {
   id: string;
@@ -37,6 +39,7 @@ export interface SoundPreferences {
   startup: boolean;
   session: boolean;
   reminder: boolean;
+  eyeProtection: boolean;
 }
 
 export interface Task {
@@ -78,10 +81,12 @@ export interface Task {
 })
 export class TaskService {
   private indexedDbService = inject(IndexedDbService);
+  private markdownService = inject(MarkdownService);
   private isInitialized = false;
   private STORAGE_KEY = 'productivity_flow_tasks';
   private TIMER_STATE_KEY = 'productivity_flow_timer_state';
   private CONFIG_KEY = 'productivity_flow_config';
+  readonly appVersion = packageJson.version;
   
   // Initialize with empty, will load in constructor
   private tasksSignal = signal<Task[]>([]);
@@ -93,16 +98,19 @@ export class TaskService {
   readonly activeTimerStart = signal<number | null>(null);
   private secondsTimer: any;
   private minutesTimer: any;
+  private eyeProtectionTimer: any;
   private lastSessionHour = 0;
   // A signal that updates every second to trigger UI refresh for the timer
   readonly tick = signal<number>(Date.now());
+  private timerStateLoaded = signal(false);
 
   // Preferences
   readonly soundEnabled = signal<boolean>(true);
   readonly soundPreferences = signal<SoundPreferences>({
     startup: true,
     session: true,
-    reminder: true
+    reminder: true,
+    eyeProtection: false
   });
   readonly formPreferences = signal<TaskFormPreferences>({
     showDescription: true,
@@ -266,8 +274,12 @@ export class TaskService {
 
   constructor() {
     this.loadFromStorage();
-    this.loadTimerState();
     this.loadPreferences();
+    
+    // Store version in localStorage for potential migration checks
+    if (localStorage.getItem('app_version') !== this.appVersion) {
+      localStorage.setItem('app_version', this.appVersion);
+    }
 
     // Listen for cross-tab updates to preferences
     window.addEventListener('storage', (event) => {
@@ -287,6 +299,9 @@ export class TaskService {
           console.error('Sync error', e);
         }
       }
+      if (event.key === this.TIMER_STATE_KEY) {
+        this.loadTimerState();
+      }
     });
 
     // Auto-save whenever tasks change
@@ -299,6 +314,7 @@ export class TaskService {
 
     // Auto-save timer state
     effect(() => {
+      if (!this.timerStateLoaded()) return;
       const taskId = this.activeTaskId();
       const start = this.activeTimerStart();
       if (taskId && start) {
@@ -480,6 +496,11 @@ export class TaskService {
       if (rawTasks.length > 0) {
         // Data Migration: Convert legacy string subtasks to Subtask[]
         const processedTasks = rawTasks.map((t: any) => {
+           // Migration: Convert Markdown description to HTML
+           if (t.description && !this.isHtml(t.description)) {
+             t.description = this.markdownService.parse(t.description);
+           }
+
            if (typeof t.subtasks === 'string') {
              return {
                ...t,
@@ -513,10 +534,18 @@ export class TaskService {
       this.seedInitialData();
     } finally {
       this.isInitialized = true;
+      this.loadTimerState();
     }
   }
 
+  private isHtml(str: string): boolean {
+    const trimmed = str.trim();
+    return trimmed.startsWith('<') && trimmed.endsWith('>');
+  }
+
   private loadTimerState() {
+    if (!this.isInitialized) return;
+
     const stored = localStorage.getItem(this.TIMER_STATE_KEY);
     if (stored) {
       try {
@@ -531,7 +560,14 @@ export class TaskService {
       } catch (e) {
         console.error('Failed to parse timer state', e);
       }
+    } else {
+      // Clear if stopped elsewhere
+      if (this.activeTaskId()) {
+        this.activeTaskId.set(null);
+        this.activeTimerStart.set(null);
+      }
     }
+    this.timerStateLoaded.set(true);
   }
 
   private migrateSubtasksString(raw: string): Subtask[] {
@@ -877,6 +913,7 @@ export class TaskService {
     this.activeTimerStart.set(Date.now());
     this.lastSessionHour = 0;
     this.playStartSound();
+    this.startEyeProtectionTimer();
     
     // Increment session count and set status to In Progress
     this.tasksSignal.update(tasks => tasks.map(t => {
@@ -914,8 +951,36 @@ export class TaskService {
           timerSessionCount: (t.timerSessionCount || 0) + 1
         };
       }
+      // Ensure only one task is In Progress at a time
+      if (t.status === 'In Progress') {
+        // Handle Recurring Task: Update History for Today
+        if (t.recurrence !== 'None') {
+           const dateKey = new Date().toLocaleDateString('en-CA');
+           const existingHistory = t.history?.[dateKey];
+           if (existingHistory && existingHistory.status === 'In Progress') {
+              return { ...t, history: { ...(t.history || {}), [dateKey]: { ...existingHistory, status: 'Paused' } } };
+           }
+        }
+        return { ...t, status: 'Paused' };
+      }
       return t;
     }));
+  }
+
+  private startEyeProtectionTimer() {
+    this.stopEyeProtectionTimer();
+    if (this.soundPreferences().eyeProtection) {
+      this.eyeProtectionTimer = setInterval(() => {
+        this.playBellSound(); // Reusing bell sound for now, could be distinct
+      }, 20 * 60 * 1000); // 20 minutes
+    }
+  }
+
+  private stopEyeProtectionTimer() {
+    if (this.eyeProtectionTimer) {
+      clearInterval(this.eyeProtectionTimer);
+      this.eyeProtectionTimer = null;
+    }
   }
 
   stopTimer() {
@@ -968,6 +1033,7 @@ export class TaskService {
 
     this.activeTaskId.set(null);
     this.activeTimerStart.set(null);
+    this.stopEyeProtectionTimer();
   }
 
   private playSound(fileName: string, volume: number = 0.5) {
@@ -1028,7 +1094,7 @@ export class TaskService {
   }
 
   private playBellSound() {
-    if (this.soundPreferences().session) {
+    if (this.soundPreferences().session || this.soundPreferences().eyeProtection) {
       this.playSound('beep.mp3', 0.8); // Assuming a bell sound exists or fallback
     }
   }

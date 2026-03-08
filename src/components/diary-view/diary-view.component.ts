@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IconComponent } from '../icons/icon.component';
 import { WysiwygEditorComponent } from '../sub-components/wysiwyg-editor/wysiwyg-editor.component';
 import { IndexedDbService, DiaryEntry } from '../../services/indexed-db.service';
+import { MarkdownService } from '../../services/markdown.service';
 
 @Component({
   selector: 'app-diary-view',
@@ -16,6 +17,7 @@ export class DiaryViewComponent {
   selectedId = signal<string | null>(null);
   showArchived = signal(false);
   private indexedDbService = inject(IndexedDbService);
+  private markdownService = inject(MarkdownService);
 
   private _editor?: WysiwygEditorComponent;
   @ViewChild(WysiwygEditorComponent) set editor(editor: WysiwygEditorComponent | undefined) {
@@ -69,10 +71,23 @@ export class DiaryViewComponent {
       }
     }
     
+    // Migration: Convert Markdown content to HTML
+    entries = entries.map(e => {
+      if (e.content && !this.isHtml(e.content)) {
+        return { ...e, content: this.markdownService.parse(e.content) };
+      }
+      return e;
+    });
+
     this.entries.set(entries);
     
     // Auto-select logic moved here after data load
     this.autoSelectEntry();
+  }
+
+  private isHtml(str: string): boolean {
+    const trimmed = str.trim();
+    return trimmed.startsWith('<') && trimmed.endsWith('>');
   }
 
   createToday() {

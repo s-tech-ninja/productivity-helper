@@ -226,7 +226,7 @@ export class MarkdownService {
 
     const process = (node: Node): string => {
       if (node.nodeType === Node.TEXT_NODE) {
-        return node.textContent || '';
+        return (node.textContent || '').replace(/[\n\r\t ]+/g, ' ');
       }
       if (node.nodeType !== Node.ELEMENT_NODE) return '';
 
@@ -238,7 +238,7 @@ export class MarkdownService {
       if (tagName === 'ol') return '\n' + Array.from(el.children).map((li, i) => `${i + 1}. ${process(li)}`).join('\n') + '\n';
       if (tagName === 'li') return Array.from(el.childNodes).map(process).join('');
       if (tagName === 'pre') return `\n\`\`\`\n${el.textContent}\n\`\`\`\n`;
-      if (tagName === 'blockquote') return `\n> ${el.textContent}\n`;
+      if (tagName === 'blockquote') return `\n> ${(el.textContent || '').trim()}\n`;
 
       let content = Array.from(el.childNodes).map(process).join('');
 
@@ -289,9 +289,9 @@ export class MarkdownService {
           }
 
           if (el.hasAttributes()) {
-             return `\n<${tagName} ${this.getAttrs(el)}>${content}</${tagName}>\n`;
+             return `\n<${tagName} ${this.getAttrs(el)}>${content.trim()}</${tagName}>\n`;
           }
-          return `\n${content}\n`;
+          return `\n${content.trim()}\n`;
         case 'br': return '\n';
         case 'hr': return '\n---\n';
         case 'span': 
@@ -329,7 +329,7 @@ export class MarkdownService {
       }
     };
 
-    return process(temp).trim().replace(/\n{3,}/g, '\n\n');
+    return process(temp).replace(/\n(\s*\n)+/g, '\n\n').trim();
   }
 
   private getAttrs(el: HTMLElement): string {

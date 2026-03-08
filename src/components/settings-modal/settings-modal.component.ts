@@ -32,6 +32,7 @@ export class SettingsModalComponent {
     { key: 'startup', label: 'Timer Start' },
     { key: 'session', label: 'Session Interval (Bell)' },
     { key: 'reminder', label: 'Task Reminders' },
+    { key: 'eyeProtection', label: 'Eye Protection (20m) - Look away' },
   ];
 
   get notificationStatus() {

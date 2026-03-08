@@ -1,0 +1,326 @@
+@import 'ckeditor5/ckeditor5.css';
+
+/* Content typography */
+.ck-content {
+  @apply prose max-w-none;
+}
+
+.dark .ck-content {
+  @apply prose prose-invert max-w-none;
+}
+
+/* Base editor font */
+.ck-editor__editable {
+  font-family: theme('fontFamily.sans');
+  min-height: 420px;
+  line-height: 1.7;
+  padding: 20px;
+}
+
+/* =========================
+   Editor Container
+========================= */
+
+.editor-wrapper .ck-editor {
+  margin-top: 30px;
+  border-radius: 0.75rem;
+  /* overflow: hidden; */
+  border: 1px solid #e5e7eb;
+}
+
+.dark .editor-wrapper .ck-editor {
+  border-color: #1e293b;
+}
+
+/* =========================
+   Toolbar
+========================= */
+
+.editor-wrapper .ck-toolbar {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background-color: #f9fafb;
+}
+
+.dark .editor-wrapper .ck-toolbar {
+  background: #111a2e;
+  border-bottom: 1px solid #1e293b;
+}
+
+/* Toolbar buttons */
+
+.editor-wrapper .ck-button {
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  margin: 0.125rem;
+  color: #111827;
+}
+
+.editor-wrapper .ck-button:hover {
+  background-color: #e5e7eb;
+}
+
+.dark .editor-wrapper .ck-button {
+  color: #9ca3af;
+}
+
+.dark .editor-wrapper .ck-button:hover {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+
+.dark .editor-wrapper .ck-button.ck-on {
+  background: #4f46e5;
+  color: white;
+}
+
+/* =========================
+   Dropdown Panels
+========================= */
+
+.dark .ck.ck-dropdown__panel {
+  background: #111a2e;
+  border: 1px solid #1e293b;
+  color: #f9fafb;
+}
+
+/* =========================
+   Editable Area
+========================= */
+
+.ck-editor-wrapper .ck-editor__main > .ck-editor__editable {
+  border-radius: 0 0 0.75rem 0.75rem;
+  border-color: #e5e7eb;
+}
+
+.dark .ck.ck-editor__main > .ck-editor__editable {
+  background: #0b1324;
+  color: #e5e7eb;
+  border-color: #1e293b;
+}
+
+/* Remove focus border */
+
+.ck.ck-editor__editable:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* =========================
+   Lists
+========================= */
+
+.ck-content ul {
+  list-style: disc;
+  margin-left: 1.5rem;
+}
+
+.ck-content ol {
+  list-style: decimal;
+  margin-left: 1.5rem;
+}
+
+.ck-content li {
+  display: list-item;
+}
+
+.ck-content ul ul {
+  list-style: circle;
+}
+
+.ck-content ul ul ul {
+  list-style: square;
+}
+
+/* =========================
+   Headings
+========================= */
+
+.ck-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.ck-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.ck-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.ck-content h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.ck-content h5 {
+  font-size: 1.125rem;
+}
+
+.ck-content h6 {
+  font-size: 1rem;
+}
+
+/* =========================
+   CKEditor Variables
+========================= */
+
+.editor-wrapper {
+  --ck-border-radius: 0.75rem;
+  --ck-color-toolbar-background: #f9fafb;
+  --ck-color-toolbar-border: #e5e7eb;
+}
+
+.dark .editor-wrapper {
+  --ck-color-base-background: #0b1324;
+  --ck-color-toolbar-background: #111a2e;
+  --ck-color-toolbar-border: #1e293b;
+  --ck-color-text: #e5e7eb;
+}
+
+/* =========================
+   Scrollbar (optional)
+========================= */
+
+.ck-editor__editable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ck-editor__editable::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+.ck-editor__editable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* =========================
+   2 Lines
+========================= */
+
+/* Code block styling */
+.ck-content pre {
+  background: #1e293b;
+  color: #e5e7eb;
+  padding: 12px 14px;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+/* Dark mode */
+.dark .ck-content pre {
+  background: #020617;
+  color: #e2e8f0;
+  border: 1px solid #1e293b;
+}
+
+/* Inline code */
+.ck-content code {
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dark .ck-content code {
+  background: #020617;
+}
+
+
+
+/* Code block styling */
+.ck-content pre {
+  background: #1e293b;
+  color: #e5e7eb;
+  padding: 12px 14px;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+/* Dark mode */
+.dark .ck-content pre {
+  background: #020617;
+  color: #e2e8f0;
+  border: 1px solid #1e293b;
+}
+
+/* Inline code */
+.ck-content code {
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dark .ck-content code {
+  background: #020617;
+}
+
+.editor-wrapper .ck-toolbar__separator {
+  margin: 0 4px;
+}
+
+
+.editor-wrapper .ng-pristine .ck.ck-editor__top {
+  display: none;
+}
+.editor-wrapper .ng-valid.ng-pristine .ck.ck-editor__top {
+  display: block;
+}
+.editor-wrapper {
+  width: 100%;
+  max-width: 100%;
+}
+
+.ck-editor {
+  width: 100%;
+}
+.ck-button {
+  padding: 2px 6px;
+}
+
+/* Dropdown panel background */
+.dark .ck.ck-dropdown__panel {
+  background: #111a2e;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+}
+
+/* Dropdown list buttons */
+.dark .ck.ck-list__item .ck-button {
+  color: #cbd5f5;
+  border-radius: 4px;
+}
+
+/* Hover state */
+.dark .ck.ck-list__item .ck-button:hover {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+/* Active selected item */
+.dark .ck.ck-list__item .ck-button.ck-on {
+  background: #4338ca;
+  color: white;
+}
+
+/* Focus state */
+.dark .ck.ck-list__item .ck-button:focus {
+  background: #312e81;
+}
+
+.editor-wrapper .ck-list-item-button {
+  margin: 0px;
+}
+
+.editor-wrapper .ck-insert-table-dropdown__grid button {
+  width:5px;
+  padding: 0px;
+  margin: 1px;
+}

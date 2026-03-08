@@ -1095,7 +1095,7 @@ export class TaskService {
 
   private playBellSound() {
     if (this.soundPreferences().session || this.soundPreferences().eyeProtection) {
-      this.playSound('beep.mp3', 0.8); // Assuming a bell sound exists or fallback
+      this.playSound('blink-cartoon', 0.8); // Assuming a bell sound exists or fallback
     }
   }
 

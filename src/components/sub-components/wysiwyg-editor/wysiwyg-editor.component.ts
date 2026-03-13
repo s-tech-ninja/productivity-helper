@@ -49,8 +49,11 @@ import {
   Autoformat,
   PasteFromOffice,
   TextTransformation,
+  CodeBlock,
   SourceEditing,
-  Autosave
+  Base64UploadAdapter,
+  Autosave,
+  WordCount
 } from 'ckeditor5';
 @Component({
   selector: 'app-wysiwyg-editor',
@@ -129,8 +132,11 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
      Autoformat,
      PasteFromOffice,
      TextTransformation,
+     CodeBlock,
      SourceEditing,
+     Base64UploadAdapter,
      Autosave,
+     WordCount
    ],
 
    toolbar: {

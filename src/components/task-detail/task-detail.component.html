@@ -256,7 +256,7 @@
         <!-- Description (Rich Text) -->
         @if (task().description) {
           <section>
-            <div class="rich-text-content prose prose-sm prose-slate dark:prose-invert max-w-none" [innerHTML]="task().description | markdown"></div>
+            <div class="rich-text-content prose prose-sm prose-slate dark:prose-invert max-w-none max-h-[400px] overflow-y-auto custom-scrollbar pr-2" [innerHTML]="task().description | markdown"></div>
           </section>
         }
 

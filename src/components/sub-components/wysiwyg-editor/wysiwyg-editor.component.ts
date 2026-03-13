@@ -1,9 +1,8 @@
-import { Component, Input, forwardRef, output, ViewEncapsulation } from '@angular/core';
+import { Component, Input, forwardRef, output, ViewEncapsulation, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import { CustomEditor } from './custom-editor';
-
+import 'ckeditor5/ckeditor5.css';
 import {
  ClassicEditor,
  Essentials,
@@ -56,7 +55,6 @@ import {
  Autosave,
  WordCount
 } from 'ckeditor5';
-
 @Component({
   selector: 'app-wysiwyg-editor',
   standalone: true,
@@ -77,11 +75,11 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
   @Input() readonly: boolean = false;
   @Input() defaultView: 'edit' | 'preview' = 'preview';
   @Input() minHeight: string = '140px';
+  @Input() height?: string;
   
   input = output<string>();
   
-  public Editor = CustomEditor;
-  public editorConfig = CustomEditor.config;
+  public Editor = ClassicEditor;
   editorReady  = true;
 
 
@@ -193,30 +191,14 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
     }
  };
 
-  // public config = {
-  //   toolbar: [
-  //     'heading', '|',
-  //     'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|',
-  //     'insertTable', 'mediaEmbed', 'codeBlock', 'removeFormat', '|',
-  //     'undo', 'redo'
-  //   ],
-  //   language: 'en',
-  //   link: {
-  //     decorators: {
-  //       openInNewTab: {
-  //         mode: 'automatic',
-  //         callback: (url: string) => true,
-  //         attributes: {
-  //           target: '_blank',
-  //           rel: 'noopener noreferrer'
-  //         }
-  //       }
-  //     }
-  //   }
-  // };
-
   editorData = '';
   
+  @HostBinding('style.--editor-height') get editorHeightVar() {
+    return this.height;
+  }
+  @HostBinding('style.--editor-min-height') get editorMinHeightVar() {
+    return this.minHeight;
+  }
 
   onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};

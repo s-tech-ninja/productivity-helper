@@ -1,7 +1,8 @@
-import { Component, Input, forwardRef, output, ViewEncapsulation } from '@angular/core';
+import { Component, Input, forwardRef, output, ViewEncapsulation, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import 'ckeditor5/ckeditor5.css';
 import { CustomEditor } from './custom-editor';
 
 import {
@@ -62,7 +63,13 @@ import {
   standalone: true,
   imports: [CommonModule, CKEditorModule, FormsModule],
   templateUrl: './wysiwyg-editor.component.html',
-  styleUrls: ['./wysiwyg-editor.component.css'],
+  styles: [`
+    .ck.ck-editor__editable_inline {
+      min-height: var(--editor-min-height, 140px) !important;
+      height: var(--editor-height, auto) !important;
+      overflow-y: auto;
+    }
+  `],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -77,6 +84,7 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
   @Input() readonly: boolean = false;
   @Input() defaultView: 'edit' | 'preview' = 'preview';
   @Input() minHeight: string = '140px';
+  @Input() height?: string;
   
   input = output<string>();
   
@@ -217,6 +225,12 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
 
   editorData = '';
   
+  @HostBinding('style.--editor-height') get editorHeightVar() {
+    return this.height;
+  }
+  @HostBinding('style.--editor-min-height') get editorMinHeightVar() {
+    return this.minHeight;
+  }
 
   onChange: (value: string) => void = () => {};
   onTouched: () => void = () => {};

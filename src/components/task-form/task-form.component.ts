@@ -9,7 +9,13 @@ import { WysiwygEditorComponent } from '../sub-components/wysiwyg-editor/wysiwyg
   selector: 'app-task-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule, IconComponent, WysiwygEditorComponent],
-  templateUrl: './task-form.component.html'
+  templateUrl: './task-form.component.html',
+  styles: [`
+    app-wysiwyg-editor {
+      --editor-height: 400px;
+      display: block;
+    }
+  `]
 })
 export class TaskFormComponent implements OnInit {
   cancel = output<void>();

@@ -3,73 +3,61 @@ import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import 'ckeditor5/ckeditor5.css';
-import { CustomEditor } from './custom-editor';
-
 import {
- ClassicEditor,
- Essentials,
- Paragraph,
- Bold,
- Italic,
- Underline,
- Strikethrough,
- Code,
- Subscript,
- Superscript,
- RemoveFormat,
- Heading,
- BlockQuote,
- HorizontalLine,
- PageBreak,
- List,
- ListProperties,
- TodoList,
- FontFamily,
- FontSize,
- FontColor,
- FontBackgroundColor,
- Highlight,
- Alignment,
- Indent,
- IndentBlock,
- Link,
- AutoLink,
- Image,
- ImageToolbar,
- ImageCaption,
- ImageStyle,
- ImageResize,
- ImageUpload,
- ImageInsert,
- Table,
- TableToolbar,
- TableCaption,
- TableProperties,
- TableCellProperties,
- TableColumnResize,
- MediaEmbed,
- Autoformat,
- PasteFromOffice,
- TextTransformation,
- CodeBlock,
- SourceEditing,
- Base64UploadAdapter,
- Autosave,
- WordCount
+  ClassicEditor,
+  Essentials,
+  Paragraph,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Code,
+  Subscript,
+  Superscript,
+  RemoveFormat,
+  Heading,
+  BlockQuote,
+  HorizontalLine,
+  PageBreak,
+  List,
+  ListProperties,
+  TodoList,
+  FontFamily,
+  FontSize,
+  FontColor,
+  FontBackgroundColor,
+  Highlight,
+  Alignment,
+  Indent,
+  IndentBlock,
+  Link,
+  AutoLink,
+  Image,
+  ImageToolbar,
+  ImageCaption,
+  ImageStyle,
+  ImageResize,
+  ImageUpload,
+  ImageInsert,
+  Table,
+  TableToolbar,
+  TableCaption,
+  TableProperties,
+  TableCellProperties,
+  TableColumnResize,
+  MediaEmbed,
+  Autoformat,
+  PasteFromOffice,
+  TextTransformation,
+  SourceEditing,
+  Autosave
 } from 'ckeditor5';
-
 @Component({
   selector: 'app-wysiwyg-editor',
   standalone: true,
   imports: [CommonModule, CKEditorModule, FormsModule],
   templateUrl: './wysiwyg-editor.component.html',
-  styles: [`
-    .ck.ck-editor__editable_inline {
-      min-height: var(--editor-min-height, 140px) !important;
-      height: var(--editor-height, auto) !important;
-      overflow-y: auto;
-    }
-  `],
+  styleUrls: ['./wysiwyg-editor.component.css'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -88,8 +76,7 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
   
   input = output<string>();
   
-  public Editor = CustomEditor;
-  public editorConfig = CustomEditor.config;
+  public Editor = ClassicEditor;
   editorReady  = true;
 
 
@@ -142,11 +129,8 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
      Autoformat,
      PasteFromOffice,
      TextTransformation,
-     CodeBlock,
      SourceEditing,
-     Base64UploadAdapter,
      Autosave,
-     WordCount
    ],
 
    toolbar: {
@@ -200,28 +184,6 @@ export class WysiwygEditorComponent implements ControlValueAccessor {
       }
     }
  };
-
-  // public config = {
-  //   toolbar: [
-  //     'heading', '|',
-  //     'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|',
-  //     'insertTable', 'mediaEmbed', 'codeBlock', 'removeFormat', '|',
-  //     'undo', 'redo'
-  //   ],
-  //   language: 'en',
-  //   link: {
-  //     decorators: {
-  //       openInNewTab: {
-  //         mode: 'automatic',
-  //         callback: (url: string) => true,
-  //         attributes: {
-  //           target: '_blank',
-  //           rel: 'noopener noreferrer'
-  //         }
-  //       }
-  //     }
-  //   }
-  // };
 
   editorData = '';
   

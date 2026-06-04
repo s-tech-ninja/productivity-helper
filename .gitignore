@@ -11,6 +11,9 @@ pnpm-debug.log*
 /tmp/
 /docs/
 
+/BKP_node_modules/
+/old-dashboard/
+
 # Compiled files
 *.js
 *.js.map

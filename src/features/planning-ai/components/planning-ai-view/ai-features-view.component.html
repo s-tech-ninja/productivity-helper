@@ -75,41 +75,53 @@
        </div>
     </div>
 
-    <!-- Right Column: Prompts -->
+    <!-- Right Column: Prompts and AI Test Console -->
     <div class="lg:col-span-2 lg:overflow-y-auto custom-scrollbar pr-2 h-auto lg:h-full">
-      <div class="grid gap-6">
-        @for (prompt of prompts(); track $index) {
-          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-all hover:shadow-md">
-            <div class="flex items-start justify-between gap-4 mb-3">
-              <h3 
-                (click)="togglePrompt($index)"
-                class="font-bold text-slate-800 dark:text-white flex items-center gap-2 cursor-pointer select-none group flex-1"
-              >
-                <div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold">{{ $index + 1 }}</div>
-                <span>{{ prompt.name }}</span>
-                <app-icon name="chevron-right" [size]="16" class="text-slate-400 transition-transform duration-200 group-hover:text-indigo-500" [class.rotate-90]="prompt.expanded"></app-icon>
-              </h3>
-
-              <button 
-                (click)="copyToClipboard(prompt.text, $index)" 
-                class="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors shrink-0"
-                [class.bg-emerald-50]="copiedIndex() === $index"
-                [class.text-emerald-600]="copiedIndex() === $index"
-                [class.bg-slate-100]="copiedIndex() !== $index"
-                [class.dark:bg-slate-700]="copiedIndex() !== $index"
-                [class.text-slate-600]="copiedIndex() !== $index"
-                [class.dark:text-slate-300]="copiedIndex() !== $index"
-              >
-                <app-icon [name]="copiedIndex() === $index ? 'check' : 'copy'" [size]="14"></app-icon>
-                {{ copiedIndex() === $index ? 'Copied!' : 'Copy' }}
-              </button>
-            </div>
-            @if (prompt.expanded) {
-              <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 text-sm font-mono text-slate-600 dark:text-slate-300 whitespace-pre-wrap border border-slate-100 dark:border-slate-800 overflow-x-auto animate-in fade-in slide-in-from-top-1 duration-200">{{ prompt.text }}</div>
-            }
-          </div>
-        }
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <div class="flex flex-wrap gap-2">
+          <button 
+            (click)="setAiTab('task-builder')"
+            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
+            [class.bg-indigo-600]="activeTab() === 'task-builder'"
+            [class.text-white]="activeTab() === 'task-builder'"
+            [class.bg-slate-100]="activeTab() !== 'task-builder'"
+            [class.text-slate-700]="activeTab() !== 'task-builder'"
+          >Task Builder</button>
+          <button 
+            (click)="setAiTab('prompts')"
+            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
+            [class.bg-indigo-600]="activeTab() === 'prompts'"
+            [class.text-white]="activeTab() === 'prompts'"
+            [class.bg-slate-100]="activeTab() !== 'prompts'"
+            [class.text-slate-700]="activeTab() !== 'prompts'"
+          >Prompt Builder</button>
+          <button 
+            (click)="setAiTab('test-console')"
+            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
+            [class.bg-indigo-600]="activeTab() === 'test-console'"
+            [class.text-white]="activeTab() === 'test-console'"
+            [class.bg-slate-100]="activeTab() !== 'test-console'"
+            [class.text-slate-700]="activeTab() !== 'test-console'"
+          >AI Test Console</button>
+        </div>
+        <div class="text-sm text-slate-500 dark:text-slate-400">
+          @if(activeTab() === 'task-builder') { Create tasks step-by-step using AI. }
+          @if(activeTab() === 'prompts') { Generating prompts from selected tasks. }
+          @if(activeTab() === 'test-console') { Running schema validation tests against AI output. }
+        </div>
       </div>
+
+      @if (activeTab() === 'task-builder') {
+        <app-task-builder-tab></app-task-builder-tab>
+      }
+
+      @if (activeTab() === 'prompts') {
+        <app-prompt-builder-tab [prompts]="prompts()"></app-prompt-builder-tab>
+      }
+
+      @if (activeTab() === 'test-console') {
+        <app-ai-test-console-tab></app-ai-test-console-tab>
+      }
     </div>
   </div>
 </div>

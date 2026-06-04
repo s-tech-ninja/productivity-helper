@@ -2,19 +2,16 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../../../core/services/task.service';
-import { AiPromptService, AiPrompt } from '@/src/ai/services/prompt.service'; // Import AiPrompt
+import { AiPromptService } from '@/src/ai/services/prompt.service';
 import { IconComponent } from '../../../../shared/components/icons/icon.component';
-
-interface PromptItem {
-  name: string;
-  text: string;
-  expanded: boolean;
-}
+import { TaskBuilderTabComponent } from './task-builder-tab.component';
+import { PromptBuilderTabComponent, PromptItem } from './prompt-builder-tab.component';
+import { AiTestConsoleTabComponent } from './ai-test-console-tab.component';
 
 @Component({
   selector: 'app-ai-features-view',
   standalone: true,
-  imports: [CommonModule, IconComponent, FormsModule],
+  imports: [CommonModule, IconComponent, FormsModule, TaskBuilderTabComponent, PromptBuilderTabComponent, AiTestConsoleTabComponent],
   templateUrl: './ai-features-view.component.html'
 })
 export class AiFeaturesViewComponent {
@@ -26,8 +23,9 @@ export class AiFeaturesViewComponent {
   selectedTaskIds = signal<Set<string>>(new Set());
   
   prompts = signal<PromptItem[]>([]);
-  copiedIndex = signal<number | null>(null);
   isGenerated = signal(false);
+
+  activeTab = signal<'prompts' | 'test-console' | 'task-builder'>('task-builder');
   
   filteredTasks = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -94,17 +92,7 @@ export class AiFeaturesViewComponent {
     }
   }
 
-  togglePrompt(index: number) {
-    this.prompts.update(items => items.map((item, i) => 
-      i === index ? { ...item, expanded: !item.expanded } : item
-    ));
-  }
-
-  copyToClipboard(text: string, index: number) {
-    navigator.clipboard.writeText(text);
-    this.copiedIndex.set(index);
-    setTimeout(() => {
-      this.copiedIndex.set(null);
-    }, 2000);
+  setAiTab(tab: 'prompts' | 'test-console' | 'task-builder') {
+    this.activeTab.set(tab);
   }
 }

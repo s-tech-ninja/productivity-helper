@@ -8,7 +8,7 @@ export const goalSchema = z.object({
 });
 
 export const milestoneSchema = z.object({
-  id: z.string().uuid().or(z.string()), // accept uuid or simple id
+  id: z.string(), // accept uuid or simple id
   title: z.string().min(3),
   description: z.string().optional(),
   deadline: z.string().optional(),
@@ -16,22 +16,24 @@ export const milestoneSchema = z.object({
 });
 
 export const subtaskSchema = z.object({
-  text: z.string().min(1),
+  id: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
   completed: z.boolean().optional(),
   notes: z.string().optional()
 });
 
 export const taskSchema = z.object({
-  id: z.string().uuid().or(z.string()),
+  id: z.string(),
   title: z.string().min(3),
-  description: z.string().optional(),
-  category: z.enum(['Super Important', 'Important', 'Less Important']).optional(),
-  project: z.string().optional(),
-  deadline: z.string().optional(),
-  estimatedEffort: z.string().optional(),
-  energyLevel: z.enum(['High', 'Medium', 'Low']).optional(),
-  tags: z.array(z.string()).optional(),
-  subtasks: z.array(subtaskSchema).optional()
+  description: z.string(),
+  category: z.enum(['Super Important', 'Important', 'Less Important']),
+  project: z.string(),
+  deadline: z.string(),
+  estimatedEffort: z.number().min(1).max(240),
+  energyLevel: z.enum(['High', 'Medium', 'Low']),
+  tags: z.array(z.string()),
+  // subtasks: z.array(subtaskSchema)
 });
 
 export const planSchema = z.object({

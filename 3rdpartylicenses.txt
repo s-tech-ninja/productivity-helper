@@ -1,5 +1,194 @@
 
 --------------------------------------------------------------------------------
+Package: @angular/router
+License: "MIT"
+
+The MIT License
+
+Copyright (c) 2010-2026 Google LLC. https://angular.dev/license
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+Package: zod
+License: "MIT"
+
+MIT License
+
+Copyright (c) 2025 Colin McDonnell
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+Package: @angular/platform-browser
+License: "MIT"
+
+The MIT License
+
+Copyright (c) 2010-2026 Google LLC. https://angular.dev/license
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+Package: @ckeditor/ckeditor5-build-classic
+License: "SEE LICENSE IN LICENSE.md"
+
+Software License Agreement
+==========================
+
+**CKEditor&nbsp;5 Classic editor build** (https://github.com/ckeditor/ckeditor5)<br>
+Copyright (c) 2003–2025, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
+
+Licensed under a dual-license model, this software is available under:
+
+* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
+* or commercial license terms from CKSource Holding sp. z o.o.
+
+For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
+
+Sources of Intellectual Property Included in CKEditor
+-----------------------------------------------------
+
+Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
+
+The following libraries are included in CKEditor under the [MIT license](https://opensource.org/licenses/MIT):
+
+* Lodash - Copyright (c) JS Foundation and other contributors https://js.foundation/. Based on Underscore.js, copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors http://underscorejs.org/.
+
+Trademarks
+----------
+
+**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
+
+--------------------------------------------------------------------------------
+Package: @ckeditor/ckeditor5-integrations-common
+License: "SEE LICENSE IN LICENSE.md"
+
+Software License Agreement
+==========================
+
+**CKEditor 5 Common Integration Utils** – https://github.com/ckeditor/ckeditor5-integrations-common <br>
+Copyright (c) 2003-2026, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.
+
+Licensed under a dual-license model, this software is available under:
+
+* the [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html),
+* or commercial license terms from CKSource Holding sp. z o.o.
+
+For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
+
+Sources of Intellectual Property Included in CKEditor
+-----------------------------------------------------
+
+Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
+
+Trademarks
+----------
+
+**CKEditor** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o. All other brand and product names are trademarks, registered trademarks or service marks of their respective holders.
+
+--------------------------------------------------------------------------------
+Package: @ckeditor/ckeditor5-angular
+License: "SEE LICENSE IN LICENSE.md"
+
+Software License Agreement
+==========================
+
+**CKEditor 5 component for Angular** – https://github.com/ckeditor/ckeditor5-angular <br>
+Copyright (c) 2003-2026, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.
+
+Licensed under a dual-license model, this software is available under:
+
+* the [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html),
+* or commercial license terms from CKSource Holding sp. z o.o.
+
+For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
+
+Sources of Intellectual Property Included in CKEditor
+-----------------------------------------------------
+
+Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
+
+Trademarks
+----------
+
+**CKEditor** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o. All other brand and product names are trademarks, registered trademarks or service marks of their respective holders.
+
+--------------------------------------------------------------------------------
+Package: @angular/forms
+License: "MIT"
+
+The MIT License
+
+Copyright (c) 2010-2026 Google LLC. https://angular.dev/license
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--------------------------------------------------------------------------------
 Package: dexie
 License: "Apache-2.0"
 
@@ -205,38 +394,6 @@ Apache License
    See the License for the specific language governing permissions and
    limitations under the License.
 
-
---------------------------------------------------------------------------------
-Package: es-toolkit
-License: "MIT"
-
-MIT License
-
-Copyright (c) 2024 Viva Republica, Inc
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
----
-
-Some of the test code in this software comes from the lodash library (https://github.com/lodash/lodash).
-
-The copyright for this imported test code from lodash is owned by the JS Foundation and other contributors <https://js.foundation/>.
 
 --------------------------------------------------------------------------------
 Package: @angular/core
@@ -514,1239 +671,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 --------------------------------------------------------------------------------
-Package: @angular/platform-browser
-License: "MIT"
-
-The MIT License
-
-Copyright (c) 2010-2026 Google LLC. https://angular.dev/license
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
---------------------------------------------------------------------------------
-Package: @angular/forms
-License: "MIT"
-
-The MIT License
-
-Copyright (c) 2010-2026 Google LLC. https://angular.dev/license
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-integrations-common
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor 5 Common Integration Utils** – https://github.com/ckeditor/ckeditor5-integrations-common <br>
-Copyright (c) 2003-2026, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor
------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o. All other brand and product names are trademarks, registered trademarks or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-angular
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor 5 component for Angular** – https://github.com/ckeditor/ckeditor5-angular <br>
-Copyright (c) 2003-2026, [CKSource](http://cksource.com) Holding sp. z o.o. All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](http://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor
------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource](http://cksource.com) Holding sp. z o.o. All other brand and product names are trademarks, registered trademarks or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-utils
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Utilities** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-engine
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Editing engine** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-watchdog
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Watchdog feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-core
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Core editor architecture** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-icons
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Icon pack** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: color-name
-License: "MIT"
-
-The MIT License (MIT)
-Copyright (c) 2015 Dmitry Ivanov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
---------------------------------------------------------------------------------
-Package: color-parse
-License: "MIT"
-
-The MIT License (MIT)
-
-Copyright (c) 2015 Dmitry Ivanov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
---------------------------------------------------------------------------------
-Package: color-convert
-License: "MIT"
-
-Copyright (c) 2011-2016 Heather Arthur <fayearthur@gmail.com>.
-Copyright (c) 2016-2021 Josh Junon <josh@junon.me>.
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
---------------------------------------------------------------------------------
-Package: vanilla-colorful
-License: "MIT"
-
-MIT License
-
-Copyright (c) 2020 Serhii Kulykov <iamkulykov@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-ui
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 UI framework** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* @types/color-convert - Copyright (c) Microsoft Corporation.
-* color-convert - Copyright (c) 2011-2016 Heather Arthur <fayearthur@gmail.com> and Copyright (c) 2016-2021 Josh Junon <josh@junon.me>.
-* color-parse - Copyright (c) 2015 Dmitry Ivanov.
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-* vanilla-colorful - Copyright (c) 2020 Serhii Kulykov <iamkulykov@gmail.com>.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-alignment
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Text alignment feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-typing
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Typing feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-autoformat
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Autoformat feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-autosave
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Autosave feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-basic-styles
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Basic styles feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-enter
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Enter feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-block-quote
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Block quote feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-widget
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Widget API** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-clipboard
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Clipboard feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-editor-classic
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Classic editor** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-select-all
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Select all feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-undo
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Undo feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-essentials
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 essentials plugin** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-font
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Font feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-paragraph
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Paragraph feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-heading
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Headings feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-highlight
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Highlight feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-horizontal-line
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Horizontal line feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-upload
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Upload feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-image
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Image feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-list
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 List feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-indent
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Block indentation feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-link
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Link feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-* Regular expression for URL validation - Copyright (c) 2010-2018 Diego Perini.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-media-embed
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Media embed feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-mention
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Mention feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-page-break
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Page break feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-paste-from-office
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Paste from Office feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-remove-format
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Remove format feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-source-editing
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Source editing feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
-Package: @ckeditor/ckeditor5-table
-License: "SEE LICENSE IN LICENSE.md"
-
-Software License Agreement
-==========================
-
-**CKEditor&nbsp;5 Table feature** (https://github.com/ckeditor/ckeditor5)<br>
-Copyright (c) 2003–2026, [CKSource Holding sp. z o.o.](https://cksource.com) All rights reserved.
-
-Licensed under a dual-license model, this software is available under:
-
-* the [GNU General Public License Version 2 or later](https://www.gnu.org/licenses/gpl.html),
-* or commercial license terms from CKSource Holding sp. z o.o.
-
-For more information, see: [https://ckeditor.com/legal/ckeditor-licensing-options](https://ckeditor.com/legal/ckeditor-licensing-options).
-
-Sources of Intellectual Property Included in CKEditor&nbsp;5
-------------------------------------------------------------
-
-Where not otherwise indicated, all CKEditor&nbsp;5 content is authored by CKSource engineers and consists of CKSource-owned intellectual property. In some specific instances, CKEditor&nbsp;5 will incorporate work done by developers outside of CKSource with their express permission.
-
-The following libraries are included in CKEditor&nbsp;5 under the [MIT license](https://opensource.org/licenses/MIT):
-
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
-
-Trademarks
-----------
-
-**CKEditor** is a trademark of [CKSource Holding sp. z o.o.](https://cksource.com) All other brand and product names are trademarks, registered trademarks, or service marks of their respective holders.
-
---------------------------------------------------------------------------------
 Package: ckeditor5
 License: "SEE LICENSE IN LICENSE.md"
 
@@ -1784,7 +708,7 @@ The following libraries are included in CKEditor&nbsp;5 under the [MIT license](
 * color-convert - Copyright (c) 2011-2016 Heather Arthur <fayearthur@gmail.com> and Copyright (c) 2016-2021 Josh Junon <josh@junon.me>.
 * color-parse - Copyright (c) 2015 Dmitry Ivanov.
 * emojibase-data - Copyright (c) 2017-2019 Miles Johnson.
-* es-toolkit - Copyright (c) 2024 Viva Republica, Inc.
+* es-toolkit - Copyright (c) 2024 Viva Republica, Inc and Copyright OpenJS Foundation and other contributors.
 * fuzzysort - Copyright (c) 2018 Stephen Kamenar.
 * hast-util-to-html - Copyright (c) Titus Wormer <tituswormer@gmail.com>.
 * hast-util-to-mdast - Copyright (c) Titus Wormer <tituswormer@gmail.com> and Copyright (c) Seth Vincent <sethvincent@gmail.com>.

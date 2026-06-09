@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { OLLAMA_CONFIG } from '../config/ollama.config';
+import { TaskService } from '../../core/services/task.service';
 
 export interface OllamaResponse {
   raw: string;
@@ -7,16 +8,19 @@ export interface OllamaResponse {
 
 @Injectable({ providedIn: 'root' })
 export class OllamaClient {
-  baseUrl = OLLAMA_CONFIG.baseUrl;
-  model = OLLAMA_CONFIG.model;
+  private taskService = inject(TaskService);
 
   async generate(
-    prompt: string,
+    messages: { role: 'user' | 'system' | 'assistant'; content: string }[], // Changed to accept an array of messages
     opts?: { streaming?: boolean; timeoutMs?: number; onProgress?: (chunk: string) => void; temperature?: number; topK?: number; topP?: number }
   ): Promise<string> {
-    const url = `${this.baseUrl}/api/chat`;
+    const prefs = this.taskService.aiPreferences();
+    const baseUrl = (prefs.ollamaBaseUrl || OLLAMA_CONFIG.baseUrl).replace(/\/$/, '');
+    const model = prefs.ollamaModel || OLLAMA_CONFIG.model;
+
+    const url = `${baseUrl}/api/chat`;
     const payloadBase = {
-      model: this.model,
+      model: model,
       parameters: {
         temperature: opts?.temperature ?? OLLAMA_CONFIG.temperature,
         top_k: opts?.topK ?? OLLAMA_CONFIG.topK,
@@ -24,9 +28,8 @@ export class OllamaClient {
         stream: opts?.streaming ?? true
       }
     };
-    const payload = url.endsWith('/api/chat')
-      ? { ...payloadBase, messages: [{ role: 'user', content: prompt }] }
-      : { ...payloadBase, prompt };
+    // For /api/chat, directly use the provided messages array. The endpoint is always /api/chat for structured output.
+    const payload = { ...payloadBase, messages: messages };
 
     const timeout = opts?.timeoutMs ?? OLLAMA_CONFIG.timeout;
 

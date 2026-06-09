@@ -19,7 +19,7 @@
       <!-- Tabs -->
       <div class="flex px-6 gap-6">
         <button 
-          (click)="activeTab.set('general')" 
+          (click)="setActiveTab('general')" 
           class="pb-3 text-sm font-medium transition-colors relative"
           [class.text-indigo-600]="activeTab() === 'general'"
           [class.dark:text-indigo-400]="activeTab() === 'general'"
@@ -32,7 +32,7 @@
           }
         </button>
         <button 
-          (click)="activeTab.set('sounds')" 
+          (click)="setActiveTab('sounds')" 
           class="pb-3 text-sm font-medium transition-colors relative"
           [class.text-indigo-600]="activeTab() === 'sounds'"
           [class.dark:text-indigo-400]="activeTab() === 'sounds'"
@@ -41,6 +41,19 @@
         >
           Sounds
           @if (activeTab() === 'sounds') {
+            <div class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full"></div>
+          }
+        </button>
+        <button 
+          (click)="setActiveTab('ai')" 
+          class="pb-3 text-sm font-medium transition-colors relative"
+          [class.text-indigo-600]="activeTab() === 'ai'"
+          [class.dark:text-indigo-400]="activeTab() === 'ai'"
+          [class.text-slate-500]="activeTab() !== 'ai'"
+          [class.dark:text-slate-400]="activeTab() !== 'ai'"
+        >
+          AI
+          @if (activeTab() === 'ai') {
             <div class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full"></div>
           }
         </button>
@@ -202,6 +215,106 @@
               </div>
             </button>
           }
+        </div>
+      }
+
+      @if (activeTab() === 'ai') {
+        <!-- Ollama AI Configuration -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Ollama Configuration</h3>
+          <div class="space-y-4">
+            <!-- Base URL Input -->
+            <div>
+              <label for="ollamaBaseUrl" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ollama Base URL</label>
+              <input
+                type="url"
+                id="ollamaBaseUrl"
+                [ngModel]="taskService.aiPreferences().ollamaBaseUrl"
+                (ngModelChange)="updateAiPref('ollamaBaseUrl', $event)"
+                (blur)="fetchOllamaModels()"
+                placeholder="http://localhost:11434"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ensure Ollama is running at this address. e.g., <code>http://localhost:11434</code></p>
+            </div>
+
+            <!-- Fetch Models Button & Status -->
+            <div class="flex items-center gap-2">
+              <button
+                (click)="fetchOllamaModels()"
+                [disabled]="isFetchingModels()"
+                class="flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors"
+                [class.bg-indigo-600]="!isFetchingModels()"
+                [class.hover:bg-indigo-700]="!isFetchingModels()"
+                [class.text-white]="!isFetchingModels()"
+                [class.bg-indigo-200]="isFetchingModels()"
+                [class.text-indigo-700]="isFetchingModels()"
+              >
+                @if (isFetchingModels()) {
+                  <app-icon name="loader" [size]="16" class="animate-spin"></app-icon>
+                  Fetching Models...
+                } @else {
+                  <app-icon name="refresh-cw" [size]="16"></app-icon>
+                  Fetch Models
+                }
+              </button>
+              @if (fetchError()) {
+                <span class="text-rose-500 text-sm flex items-center gap-1">
+                  <app-icon name="alert-triangle" [size]="16"></app-icon>
+                  {{ fetchError() }}
+                </span>
+              } @else if (ollamaModels().length > 0) {
+                <span class="text-emerald-600 text-sm flex items-center gap-1">
+                  <app-icon name="check-circle" [size]="16"></app-icon>
+                  {{ ollamaModels().length }} models found.
+                </span>
+              }
+            </div>
+
+            <!-- Model Selection Dropdown -->
+            <div>
+              <label for="ollamaModel" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Select Ollama Model</label>
+              <select
+                id="ollamaModel"
+                [ngModel]="taskService.aiPreferences().ollamaModel"
+                (ngModelChange)="updateAiPref('ollamaModel', $event)"
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                [disabled]="ollamaModels().length === 0 || isFetchingModels()"
+              >
+                @if (ollamaModels().length === 0) {
+                  <option value="" disabled>No models available (Fetch first)</option>
+                } @else {
+                  <option value="" disabled selected>-- Select a model --</option>
+                  @for (modelName of ollamaModels(); track modelName) {
+                    <option [value]="modelName">{{ modelName }}</option>
+                  }
+                }
+              </select>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">The AI model used for planning and decomposition.</p>
+            </div>
+          </div>
+
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-6 mb-3">AI Capabilities</h3>
+          <div class="space-y-3">
+            <button 
+              (click)="toggleAiFeature('enableMonetizationFeature')"
+              class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+            >
+              <div class="text-left">
+                <span class="text-sm font-medium text-slate-700 dark:text-slate-200 block">Monetization AI Generation</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">Allow AI to generate revenue strategies and tags for tasks</span>
+              </div>
+              <div class="w-8 h-4 rounded-full relative transition-colors shrink-0"
+                   [class.bg-indigo-500]="taskService.aiPreferences().enableMonetizationFeature"
+                   [class.bg-slate-200]="!taskService.aiPreferences().enableMonetizationFeature"
+                   [class.dark:bg-slate-600]="!taskService.aiPreferences().enableMonetizationFeature"
+              >
+                <div class="absolute top-1 left-1 w-2 h-2 bg-white rounded-full shadow-sm transition-transform duration-200"
+                     [class.translate-x-4]="taskService.aiPreferences().enableMonetizationFeature"
+                ></div>
+              </div>
+            </button>
+          </div>
         </div>
       }
 

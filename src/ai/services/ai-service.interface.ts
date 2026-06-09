@@ -13,6 +13,7 @@ export interface AiServiceOptions {
 }
 
 export interface AiServiceRequest<T> {
+  systemPrompt?: string;
   context: string;
   schema: ZodSchema<T>;
   options?: AiServiceOptions;

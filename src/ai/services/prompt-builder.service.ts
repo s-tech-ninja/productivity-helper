@@ -15,18 +15,16 @@ export class PromptBuilder {
     return `${context}\n\n${instructions ?? ''}`;
   }
 
-  buildFullPrompt(system: string, user: string) {
-    return `${system}\n\n${user}`;
-  }
-
-  buildRepairPrompt(basePrompt: string, raw: string, validation: any) {
+  // New method to generate only the content for a repair message
+  buildRepairPromptContent(validation: any) {
     const issues = Array.isArray(validation.flatErrors)
       ? validation.flatErrors.map((issue: any) => `- ${issue.path}: ${issue.message}`).join('\n')
       : typeof validation.errors === 'string'
       ? validation.errors
       : JSON.stringify(validation.errors, null, 2);
 
-    return `${basePrompt}\n\nThe previous JSON output did not validate against the schema. Please fix the JSON below so it matches the expected schema exactly and return only valid JSON.\n\nPrevious output:\n${raw}\n\nValidation issues:\n${issues}`;
+    return `The previous JSON output did not validate against the schema. Please fix the JSON so it matches the expected schema exactly and return only valid JSON.
+Validation issues:\n${issues}`;
   }
 
   private generateExampleFromSchema(schema: ZodSchema<any>): any {

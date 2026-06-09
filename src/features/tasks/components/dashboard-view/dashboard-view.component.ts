@@ -88,16 +88,31 @@ export class DashboardViewComponent {
           // Null deadlines go last
           if (!a.deadline) return 1;
           if (!b.deadline) return -1;
-          return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+          const dDiff = new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+          if (dDiff !== 0) return dDiff;
+          // Tie-breaker: Category
+          const pMapD: Record<string, number> = { 'Super Important': 3, 'Important': 2, 'Less Important': 1 };
+          const pDiffD = (pMapD[b.category] || 0) - (pMapD[a.category] || 0);
+          if (pDiffD !== 0) return pDiffD;
+          // Tie-breaker: Energy
+          const eMapD: Record<string, number> = { 'High': 3, 'Medium': 2, 'Low': 1 };
+          return (eMapD[b.energyLevel || 'Medium'] || 2) - (eMapD[a.energyLevel || 'Medium'] || 2);
 
         case 'priority':
           const pMap: Record<string, number> = { 'Super Important': 3, 'Important': 2, 'Less Important': 1 };
-          return (pMap[b.category] || 0) - (pMap[a.category] || 0);
+          const pDiff = (pMap[b.category] || 0) - (pMap[a.category] || 0);
+          if (pDiff !== 0) return pDiff;
+          // Tie-breaker: Energy
+          const eMapP: Record<string, number> = { 'High': 3, 'Medium': 2, 'Low': 1 };
+          return (eMapP[b.energyLevel || 'Medium'] || 2) - (eMapP[a.energyLevel || 'Medium'] || 2);
 
         case 'energy':
           const eMap: Record<string, number> = { 'High': 3, 'Medium': 2, 'Low': 1 };
-          // Default to Medium (2) if undefined
-          return (eMap[b.energyLevel || 'Medium'] || 2) - (eMap[a.energyLevel || 'Medium'] || 2);
+          const eDiff = (eMap[b.energyLevel || 'Medium'] || 2) - (eMap[a.energyLevel || 'Medium'] || 2);
+          if (eDiff !== 0) return eDiff;
+          // Tie-breaker: Priority
+          const pMapE: Record<string, number> = { 'Super Important': 3, 'Important': 2, 'Less Important': 1 };
+          return (pMapE[b.category] || 0) - (pMapE[a.category] || 0);
 
         case 'newest':
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
@@ -127,6 +142,12 @@ export class DashboardViewComponent {
           const pMapSmart: Record<string, number> = { 'Super Important': 3, 'Important': 2, 'Less Important': 1 };
           if (a.category !== b.category) {
               return (pMapSmart[b.category] || 0) - (pMapSmart[a.category] || 0);
+          }
+          
+          // C2. Energy Tie-breaker
+          const eMapSmart: Record<string, number> = { 'High': 3, 'Medium': 2, 'Low': 1 };
+          if (a.energyLevel !== b.energyLevel) {
+              return (eMapSmart[b.energyLevel || 'Medium'] || 2) - (eMapSmart[a.energyLevel || 'Medium'] || 2);
           }
 
           // D. Created Date (Newest first)

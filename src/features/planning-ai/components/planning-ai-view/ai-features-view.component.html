@@ -77,38 +77,54 @@
 
     <!-- Right Column: Prompts and AI Test Console -->
     <div class="lg:col-span-2 lg:overflow-y-auto custom-scrollbar pr-2 h-auto lg:h-full">
-      <div class="flex items-center justify-between gap-4 mb-4">
-        <div class="flex flex-wrap gap-2">
-          <button 
-            (click)="setAiTab('task-builder')"
-            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
-            [class.bg-indigo-600]="activeTab() === 'task-builder'"
-            [class.text-white]="activeTab() === 'task-builder'"
-            [class.bg-slate-100]="activeTab() !== 'task-builder'"
-            [class.text-slate-700]="activeTab() !== 'task-builder'"
-          >Task Builder</button>
-          <button 
-            (click)="setAiTab('prompts')"
-            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
-            [class.bg-indigo-600]="activeTab() === 'prompts'"
-            [class.text-white]="activeTab() === 'prompts'"
-            [class.bg-slate-100]="activeTab() !== 'prompts'"
-            [class.text-slate-700]="activeTab() !== 'prompts'"
-          >Prompt Builder</button>
-          <button 
-            (click)="setAiTab('test-console')"
-            class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors"
-            [class.bg-indigo-600]="activeTab() === 'test-console'"
-            [class.text-white]="activeTab() === 'test-console'"
-            [class.bg-slate-100]="activeTab() !== 'test-console'"
-            [class.text-slate-700]="activeTab() !== 'test-console'"
-          >AI Test Console</button>
+      <div class="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4 mb-4">
+        <div class="flex items-center gap-2 min-w-0 flex-1">
+          <button (click)="scrollTabs(-1)" class="shrink-0 p-2 rounded-full bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200 dark:text-slate-300">◀</button>
+          <div id="ai-tabs-scroll" class="flex gap-2 overflow-x-auto no-scrollbar py-1 flex-1 min-w-0 scroll-smooth">
+            <button 
+              (click)="setAiTab('task-builder')"
+              class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors whitespace-nowrap"
+              [class.bg-indigo-600]="activeTab() === 'task-builder'"
+              [class.text-white]="activeTab() === 'task-builder'"
+              [class.bg-slate-100]="activeTab() !== 'task-builder'"
+              [class.text-slate-700]="activeTab() !== 'task-builder'"
+            >Task Builder</button>
+
+            <button
+              (click)="setAiTab('decompose')"
+              class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors whitespace-nowrap"
+              [class.bg-indigo-600]="activeTab() === 'decompose'"
+              [class.text-white]="activeTab() === 'decompose'"
+              [class.bg-slate-100]="activeTab() !== 'decompose'"
+              [class.text-slate-700]="activeTab() !== 'decompose'"
+            >Decompose Task</button>
+            <button
+              (click)="setAiTab('planning-project')"
+              class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors whitespace-nowrap"
+              [class.bg-indigo-600]="activeTab() === 'planning-project'"
+              [class.text-white]="activeTab() === 'planning-project'"
+              [class.bg-slate-100]="activeTab() !== 'planning-project'"
+              [class.text-slate-700]="activeTab() !== 'planning-project'"
+            >Planning: Project / Tasks</button>
+
+            <button 
+              (click)="setAiTab('prompts')"
+              class="px-4 py-2 rounded-2xl text-sm font-semibold transition-colors whitespace-nowrap"
+              [class.bg-indigo-600]="activeTab() === 'prompts'"
+              [class.text-white]="activeTab() === 'prompts'"
+              [class.bg-slate-100]="activeTab() !== 'prompts'"
+              [class.text-slate-700]="activeTab() !== 'prompts'"
+            >Prompt Builder</button>
+
+          </div>
+          <button (click)="scrollTabs(1)" class="shrink-0 p-2 rounded-full bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200 dark:text-slate-300">▶</button>
         </div>
-        <div class="text-sm text-slate-500 dark:text-slate-400">
+        <!-- <div class="text-sm text-slate-500 dark:text-slate-400 shrink-0">
           @if(activeTab() === 'task-builder') { Create tasks step-by-step using AI. }
           @if(activeTab() === 'prompts') { Generating prompts from selected tasks. }
-          @if(activeTab() === 'test-console') { Running schema validation tests against AI output. }
-        </div>
+          @if(activeTab() === 'decompose') { Decomposing selected tasks into smaller subtasks. }
+          @if(activeTab() === 'planning-project') { Planning and organizing projects with AI assistance. }
+        </div> -->
       </div>
 
       @if (activeTab() === 'task-builder') {
@@ -119,8 +135,12 @@
         <app-prompt-builder-tab [prompts]="prompts()"></app-prompt-builder-tab>
       }
 
-      @if (activeTab() === 'test-console') {
-        <app-ai-test-console-tab></app-ai-test-console-tab>
+      @if (activeTab() === 'decompose') {
+        <app-decompose-task-tab [task]="selectedSingleTask()"></app-decompose-task-tab>
+      }
+
+      @if (activeTab() === 'planning-project') {
+        <app-planning-project-tab [selectedTaskIds]="selectedTaskIds()"></app-planning-project-tab>
       }
     </div>
   </div>

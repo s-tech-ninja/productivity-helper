@@ -5,7 +5,8 @@ import packageJson from '../../../package.json';
 
 export interface Subtask {
   id: string;
-  text: string;
+  title: string; // Changed from 'text' to 'title'
+  description?: string; // New field
   completed: boolean;
   notes?: string;
   completedAt?: number; // Timestamp
@@ -40,6 +41,13 @@ export interface SoundPreferences {
   session: boolean;
   reminder: boolean;
   eyeProtection: boolean;
+}
+
+export interface AiPreferences {
+  provider: 'ollama' | 'openai' | 'groq' | 'anthropic';
+  ollamaBaseUrl: string;
+  ollamaModel: string;
+  enableMonetizationFeature: boolean;
 }
 
 export interface Task {
@@ -119,6 +127,13 @@ export class TaskService {
     showEffort: true,
     showEnergy: true,
     showRecurrence: true
+  });
+
+  readonly aiPreferences = signal<AiPreferences>({
+    provider: 'ollama',
+    ollamaBaseUrl: 'http://localhost:11434',
+    ollamaModel: '', // Will be populated dynamically by the user
+    enableMonetizationFeature: false
   });
 
   private notifiedTaskIds = new Set<string>();
@@ -295,6 +310,9 @@ export class TaskService {
           if (config.formPreferences && JSON.stringify(config.formPreferences) !== JSON.stringify(this.formPreferences())) {
             this.formPreferences.set(config.formPreferences);
           }
+          if (config.aiPreferences && JSON.stringify(config.aiPreferences) !== JSON.stringify(this.aiPreferences())) {
+            this.aiPreferences.set(config.aiPreferences);
+          }
         } catch (e) {
           console.error('Sync error', e);
         }
@@ -329,7 +347,8 @@ export class TaskService {
       const config = {
         soundEnabled: this.soundEnabled(),
         soundPreferences: this.soundPreferences(),
-        formPreferences: this.formPreferences()
+        formPreferences: this.formPreferences(),
+        aiPreferences: this.aiPreferences()
       };
       localStorage.setItem(this.CONFIG_KEY, JSON.stringify(config));
     });
@@ -375,6 +394,9 @@ export class TaskService {
         if (config.formPreferences) {
           this.formPreferences.set({ ...this.formPreferences(), ...config.formPreferences });
         }
+        if (config.aiPreferences) {
+          this.aiPreferences.set({ ...this.aiPreferences(), ...config.aiPreferences });
+        }
       } catch (e) {
         console.error('Config parse error', e);
       }
@@ -405,6 +427,10 @@ export class TaskService {
 
   updateFormPreference(key: keyof TaskFormPreferences, value: boolean) {
     this.formPreferences.update(p => ({ ...p, [key]: value }));
+  }
+
+  updateAiPreferences(prefs: Partial<AiPreferences>) {
+    this.aiPreferences.update(p => ({ ...p, ...prefs }));
   }
 
   private checkUpcomingTasks() {
@@ -501,16 +527,27 @@ export class TaskService {
              t.description = this.markdownService.parse(t.description);
            }
 
+           let subtasksToMigrate: Subtask[] = [];
            if (typeof t.subtasks === 'string') {
-             return {
-               ...t,
-               subtasks: this.migrateSubtasksString(t.subtasks)
+             subtasksToMigrate = this.migrateSubtasksString(t.subtasks);
+           } else if (Array.isArray(t.subtasks)) {
+             subtasksToMigrate = t.subtasks;
+           }
+           
+           // Data Migration (V0.0.3+): Ensure subtasks have 'title', 'description', 'notes'
+           t.subtasks = subtasksToMigrate.map((s: any) => {
+             const newSubtask: Subtask = {
+               id: s.id || crypto.randomUUID(),
+               title: s.title || s.text || 'Untitled Subtask',
+               completed: s.completed ?? false,
+               description: s.description ?? '',
+               notes: s.notes ?? '',
+               completedAt: s.completedAt
              };
-           }
-           // Ensure it is an array even if undefined
-           if (!t.subtasks) {
-             return { ...t, subtasks: [] };
-           }
+             delete (newSubtask as any).text;
+             return newSubtask;
+           });
+
            // Data Migration: Convert legacy location to tags
            if ((t as any).location) {
              if (!t.tags || t.tags.length === 0) {
@@ -522,6 +559,24 @@ export class TaskService {
            if (!t.recurrence) t.recurrence = 'None';
            if (!t.history || Array.isArray(t.history)) t.history = {};
            
+           // Ensure history subtasks are also migrated to use 'title'
+           for (const dateKey in t.history) {
+             if (Array.isArray(t.history[dateKey].subtasks)) {
+               t.history[dateKey].subtasks = t.history[dateKey].subtasks.map((s: any) => {
+                 const newSubtask: Subtask = {
+                   id: s.id || crypto.randomUUID(),
+                   title: s.title || s.text || 'Untitled Subtask',
+                   completed: s.completed ?? false,
+                   description: s.description ?? '',
+                   notes: s.notes ?? '',
+                   completedAt: s.completedAt
+                 };
+                 delete (newSubtask as any).text;
+                 return newSubtask;
+               });
+             }
+           }
+
            return t;
         });
 
@@ -577,12 +632,13 @@ export class TaskService {
       .map(line => {
          const trimmed = line.trim();
          const isChecked = trimmed.startsWith('[x] ');
-         const cleanText = trimmed.replace(/^\[[ x]\]\s+/, '');
+         const cleanTitle = trimmed.replace(/^\[[ x]\]\s+/, '');
          
          return {
            id: crypto.randomUUID(),
-           text: cleanText,
+           title: cleanTitle,
            completed: isChecked,
+           description: '', // Default empty description for migrated subtasks
            completedAt: isChecked ? Date.now() : undefined,
            notes: ''
          };
@@ -602,10 +658,10 @@ export class TaskService {
         estimatedEffort: '4h',
         energyLevel: 'High',
         recurrence: 'None',
-        tags: ['Deep Work', 'Core'],
-        subtasks: [
-          { id: '1a', text: 'Define Interfaces', completed: true, completedAt: Date.now() },
-          { id: '1b', text: 'Create Service', completed: false }
+        tags: ['Deep Work', 'Core'], // Updated to use 'title'
+        subtasks: [ 
+          { id: '1a', title: 'Define Interfaces', completed: true, completedAt: Date.now() },
+          { id: '1b', title: 'Create Service', completed: false }
         ],
         status: 'In Progress',
         createdAt: Date.now(),
@@ -642,7 +698,7 @@ export class TaskService {
            const dateKey = dateContext || new Date().toLocaleDateString('en-CA');
            
            // Separate Global (Template) vs Instance (History) updates
-           const globalKeys = ['title', 'description', 'category', 'project', 'energyLevel', 'tags', 'estimatedEffort', 'recurrence', 'archived'];
+           const globalKeys = ['title', 'description', 'category', 'project', 'energyLevel', 'tags', 'estimatedEffort', 'recurrence', 'archived', 'startDate', 'deadline'];
            
            // Heuristic: If updating global keys, it's a form save -> Preserve history state.
            // If NOT updating global keys (just subtasks), it's a detail view toggle -> Overwrite history state.
@@ -660,7 +716,7 @@ export class TaskService {
                // Merge Logic: Preserve completion/notes from history if ID matches
                // This allows editing the template (text/order) without resetting daily progress
                const incomingSubtasks = (updates as any)[key] as Subtask[];
-               const existingHistory = t.history?.[dateKey];
+               const existingHistory = t.history?.[dateKey]; // Check if history exists for today
                
                // Only merge (preserve existing completion) if it's a structural update (Edit Form)
                // Otherwise (Detail View), trust the incoming subtasks which have the new toggled state.
@@ -681,7 +737,8 @@ export class TaskService {
                  globalUpdates[key] = (updates as any)[key].map((s: Subtask) => ({
                    ...s,
                    completed: false,
-                   completedAt: undefined
+                   completedAt: undefined,
+                   notes: undefined // Reset notes too for the template
                  }));
                }
              } else {
@@ -697,7 +754,7 @@ export class TaskService {
              historyEntry = { ...existingHistory, ...instanceUpdates };
            } else {
              // Create Fresh Entry (Reset status/subtasks for the new day)
-             historyEntry = {
+             historyEntry = { // Use template's subtasks but reset their state
                status: 'Backlog',
                subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
                totalTimeElapsed: '0',
@@ -734,7 +791,7 @@ export class TaskService {
           // Ensure subtasks are marked as completed in the history snapshot
           // We prioritize existing history (actual progress) over the template
           const rawSubtasks = existingHistory?.subtasks || t.subtasks || [];
-          const completedSubtasks = rawSubtasks.map(s => ({
+          const completedSubtasks = rawSubtasks.map(s => ({ // Ensure title and description are preserved
             ...s,
             completed: true,
             completedAt: s.completedAt || Date.now()
@@ -810,9 +867,24 @@ export class TaskService {
   importTasks(tasks: any[]) {
     // Migration for imported tasks
     const migrated = tasks.map(t => {
+      let subtasksToMigrate: Subtask[] = [];
       if (typeof t.subtasks === 'string') {
-        return { ...t, subtasks: this.migrateSubtasksString(t.subtasks) };
+        subtasksToMigrate = this.migrateSubtasksString(t.subtasks);
+      } else if (Array.isArray(t.subtasks)) {
+        subtasksToMigrate = t.subtasks;
       }
+      t.subtasks = subtasksToMigrate.map((s: any) => {
+        const newSubtask: Subtask = {
+          id: s.id || crypto.randomUUID(),
+          title: s.title || s.text || 'Untitled Subtask',
+          completed: s.completed ?? false,
+          description: s.description ?? '',
+          notes: s.notes ?? '',
+          completedAt: s.completedAt
+        };
+        delete (newSubtask as any).text;
+        return newSubtask;
+      });
       return t;
     });
 
@@ -934,7 +1006,7 @@ export class TaskService {
              // Create Fresh Entry if starting timer for the first time today
              historyEntry = {
                startDate: t.startDate,
-               deadline: t.deadline,
+               deadline: t.deadline, // Use template's start/deadline for history
                status: 'In Progress',
                subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
                totalTimeElapsed: '0',
@@ -1010,7 +1082,7 @@ export class TaskService {
                historyEntry = {
                  startDate: t.startDate,
                  deadline: t.deadline,
-                 status: 'Paused',
+                 status: 'Paused', // Status on this day
                  subtasks: (t.subtasks || []).map(s => ({ ...s, completed: false, completedAt: undefined })),
                  totalTimeElapsed: delta.toString(),
                  timerSessionCount: 0,

@@ -30,20 +30,24 @@ export class AiService implements AiServiceContract {
         ? { context: contextOrRequest, schema: schema as ZodSchema<T>, options }
         : contextOrRequest;
 
-    const system = this.promptBuilder.buildSystemPrompt();
+    const system = request.systemPrompt || this.promptBuilder.buildSystemPrompt();
     const user = this.promptBuilder.buildUserPromptWithExample(request.context, request.schema, {
       skipExample: request.options?.skipExample
     });
-    const prompt = this.promptBuilder.buildFullPrompt(system, user);
+    
+    const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+      { role: 'system', content: system },
+      { role: 'user', content: user }
+    ];
 
     const attempts = request.options?.attempts ?? OLLAMA_CONFIG.retryAttempts ?? 3;
     let lastErr: any = null;
     let lastRaw: string | null = null;
-    let promptToSend = prompt;
+    let messagesToSend = messages;
 
     for (let i = 0; i < attempts; i++) {
       try {
-        const raw = await this.ollama.generate(promptToSend, {
+        const raw = await this.ollama.generate(messagesToSend, {
           timeoutMs: request.options?.timeoutMs ?? OLLAMA_CONFIG.timeout,
           onProgress: request.options?.onProgress,
           temperature: request.options?.temperature,
@@ -62,7 +66,11 @@ export class AiService implements AiServiceContract {
           if (!parsed) {
             lastErr = { error: 'Failed to parse or repair JSON', raw, details: e };
             if (i < attempts - 1) {
-              promptToSend = this.promptBuilder.buildRepairPrompt(prompt, raw, lastErr);
+              messagesToSend = [
+                ...messages,
+                { role: 'assistant', content: raw },
+                { role: 'user', content: this.promptBuilder.buildRepairPromptContent(lastErr) }
+              ];
               continue;
             }
             break;
@@ -84,7 +92,7 @@ export class AiService implements AiServiceContract {
 
         lastErr = validation;
         if (i < attempts - 1) {
-          promptToSend = this.promptBuilder.buildRepairPrompt(prompt, raw, validation);
+          messagesToSend = [...messages, { role: 'assistant', content: raw }, { role: 'user', content: this.promptBuilder.buildRepairPromptContent(validation) }];
           continue;
         }
       } catch (err) {
@@ -136,14 +144,24 @@ export class AiService implements AiServiceContract {
   }
 
   private normalizeEntity(entity: any): any {
-    if (this.isLikelyTask(entity)) return this.normalizeTask(entity);
+    // The order matters here. A task is a superset of a subtask.
+    // Check for the more specific 'Task' properties first.
+    if (this.isLikelyTask(entity)) {
+      return this.normalizeTask(entity);
+    }
+    if (this.isLikelySubtask(entity)) {
+      return this.normalizeSubtask(entity);
+    }
     if (entity.tasks && Array.isArray(entity.tasks)) return { ...entity, tasks: entity.tasks.map((t: any) => this.normalizeTask(t)) };
     return entity;
   }
 
   private isLikelyTask(obj: any): boolean {
     if (!obj || typeof obj !== 'object') return false;
-    return Boolean(obj.title || obj.name) && Boolean(obj.id || obj.task_id || obj.taskId || obj._id || obj.title);
+    // A task is more complex. It usually has properties that a subtask lacks.
+    const hasTitle = obj.title || obj.name;
+    const hasTaskSpecificFields = obj.project || obj.category || obj.estimatedEffort || obj.energyLevel || obj.deadline;
+    return Boolean(hasTitle && hasTaskSpecificFields);
   }
 
   private normalizeTask(t: any): any {
@@ -179,14 +197,22 @@ export class AiService implements AiServiceContract {
     };
   }
 
+  private isLikelySubtask(obj: any): boolean {
+    if (!obj || typeof obj !== 'object') return false;
+    // A subtask is simpler. It has a title but lacks the more complex fields of a full task.
+    const hasTitle = obj.title || obj.name || obj.sub_title;
+    const isComplexTask = obj.project || obj.category || obj.estimatedEffort || obj.energyLevel || obj.deadline;
+    return Boolean(hasTitle && !isComplexTask);
+  }
+
   private normalizeSubtask(s: any): any {
     if (!s || typeof s !== 'object') return null;
     const id = s.id ?? s.sub_id ?? s.subId ?? s._id ?? undefined;
     const title = s.title ?? s.sub_title ?? s.subTitle ?? s.name ?? 'Untitled Subtask';
-    const text = s.text ?? s.description ?? s.desc ?? '';
+    const description = s.description ?? s.desc ?? s.text ?? '';
     const completed = this.coerceBoolean(s.completed ?? s.done ?? s.isComplete ?? s.complete);
-    const notes = s.notes ?? s.note ?? undefined;
-    return { id: id ? String(id) : undefined, title: String(title), text, completed, notes };
+    const notes = s.notes ?? s.note ?? s.context ?? s.tips ?? s.details ?? undefined;
+    return { id: id ? String(id) : undefined, title: String(title), description, completed, notes };
   }
 
   private coerceNumber(value: any, fallback = 1): number {

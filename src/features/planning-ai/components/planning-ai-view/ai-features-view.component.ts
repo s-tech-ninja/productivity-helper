@@ -4,14 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { TaskService } from '../../../../core/services/task.service';
 import { AiPromptService } from '@/src/ai/services/prompt.service';
 import { IconComponent } from '../../../../shared/components/icons/icon.component';
-import { TaskBuilderTabComponent } from './task-builder-tab.component';
-import { PromptBuilderTabComponent, PromptItem } from './prompt-builder-tab.component';
-import { AiTestConsoleTabComponent } from './ai-test-console-tab.component';
+import { TaskBuilderTabComponent } from '../task-builder-tab/task-builder-tab.component';
+import { PromptBuilderTabComponent, PromptItem } from '../prompt-builder-tab/prompt-builder-tab.component';
+import { DecomposeTaskTabComponent } from '../decompose-task-tab/decompose-task-tab.component';
+import { PlanningProjectTabComponent } from '../planning-project-tab/planning-project-tab.component';
 
 @Component({
   selector: 'app-ai-features-view',
   standalone: true,
-  imports: [CommonModule, IconComponent, FormsModule, TaskBuilderTabComponent, PromptBuilderTabComponent, AiTestConsoleTabComponent],
+  imports: [CommonModule, IconComponent, FormsModule, TaskBuilderTabComponent, PromptBuilderTabComponent, DecomposeTaskTabComponent, PlanningProjectTabComponent],
   templateUrl: './ai-features-view.component.html'
 })
 export class AiFeaturesViewComponent {
@@ -25,7 +26,9 @@ export class AiFeaturesViewComponent {
   prompts = signal<PromptItem[]>([]);
   isGenerated = signal(false);
 
-  activeTab = signal<'prompts' | 'test-console' | 'task-builder'>('task-builder');
+  activeTab = signal<'prompts' | 'task-builder' | 'decompose' | 'planning-project'>('task-builder');
+
+  scrollAmount = 240;
   
   filteredTasks = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -35,6 +38,13 @@ export class AiFeaturesViewComponent {
       t.title.toLowerCase().includes(query) || 
       t.project?.toLowerCase().includes(query)
     );
+  });
+
+  selectedSingleTask = computed(() => {
+    const ids = this.selectedTaskIds();
+    if (ids.size !== 1) return null;
+    const id = Array.from(ids)[0];
+    return this.tasks().find(t => t.id === id) || null;
   });
 
   constructor() {
@@ -92,7 +102,13 @@ export class AiFeaturesViewComponent {
     }
   }
 
-  setAiTab(tab: 'prompts' | 'test-console' | 'task-builder') {
+  setAiTab(tab: 'prompts' | 'task-builder' | 'decompose' | 'planning-project') {
     this.activeTab.set(tab);
+  }
+
+  scrollTabs(direction: number) {
+    const el = document.getElementById('ai-tabs-scroll');
+    if (!el) return;
+    el.scrollBy({ left: direction * this.scrollAmount, behavior: 'smooth' });
   }
 }

@@ -16,6 +16,8 @@ export class AiPromptService {
    * These prompts are formatted to be sent to an LLM (like ChatGPT/Claude) for analysis.
    */
   generatePrompts(tasks: Task[]): AiPrompt[] {
+    const today = new Date().toLocaleDateString();
+
     // 1. Pre-process data to be token-efficient and readable for the AI
     const contextData = tasks.map(t => ({
       id: t.id.substring(0, 4), // Short ID
@@ -36,7 +38,7 @@ export class AiPromptService {
       // Prompt 1: Strategic Scheduling (Eisenhower Matrix style)
       {
         name: 'Strategic Scheduling',
-        prompt: `You are a productivity coach. Here is my current task list in JSON format:
+        prompt: `You are a productivity coach. Today's date is ${today}. Here is my current task list in JSON format:
 ${jsonContext}
 
 Based on this list, please:

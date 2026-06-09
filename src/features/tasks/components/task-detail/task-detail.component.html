@@ -276,7 +276,7 @@
              </div>
              <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
                <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">{{ task().recurrence !== 'None' ? 'End Date' : 'Deadline' }}</p>
-               <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().deadline | date:'MMM d, h:mm a' }}</p>
+               <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().deadline | date:'MMM d, yy, h:mm a' }}</p>
              </div>
              <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
                <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Est. Effort</p>
@@ -286,13 +286,13 @@
              @if (task().startDate) {
                <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
                  <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Start Date</p>
-                 <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().startDate | date:'MMM d, h:mm a' }}</p>
+                 <p class="font-medium text-slate-900 dark:text-slate-100">{{ task().startDate | date:'MMM d, yy, h:mm a' }}</p>
                </div>
              }
              @if (nextOccurrence()) {
                <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
                  <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Next Occurrence</p>
-                 <p class="font-medium text-indigo-600 dark:text-indigo-400">{{ nextOccurrence() | date:'MMM d, h:mm a' }}</p>
+                 <p class="font-medium text-indigo-600 dark:text-indigo-400">{{ nextOccurrence() | date:'MMM d, yy, h:mm a' }}</p>
                </div>
              }
              <div class="bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg col-span-2">
@@ -403,13 +403,17 @@
                            [class.text-slate-400]="item.completed"
                            [class.dark:text-slate-500]="item.completed"
                          >
-                           {{ item.text }}
+                           {{ item.title }}
                          </span>
+                         <!-- The new conditional description -->
+                          <span *ngIf="item.description" class="text-sm text-slate-500 mt-1">
+                            {{ item.description }}
+                          </span>
                          
                          @if (item.completedAt) {
                             <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                                <app-icon name="check" [size]="10"></app-icon>
-                               Completed {{ item.completedAt | date:'MMM d, h:mm a' }}
+                               Completed {{ item.completedAt | date:'MMM d, yy, h:mm a' }}
                             </div>
                          }
                        </div>
@@ -567,7 +571,7 @@
                                         [class.border-slate-400]="!sub.completed">
                                       @if(sub.completed) { <app-icon name="check" [size]="10" class="text-white"></app-icon> }
                                    </div>
-                                   <span [class.line-through]="sub.completed" [class.opacity-75]="sub.completed">{{ sub.text }}</span>
+                                   <span [class.line-through]="sub.completed" [class.opacity-75]="sub.completed">{{ sub.title }}</span>
                                  </div>
                                  @if (sub.notes) {
                                     <p class="pl-5 mt-0.5 text-[10px] text-slate-500 dark:text-slate-500 italic">{{ sub.notes }}</p>

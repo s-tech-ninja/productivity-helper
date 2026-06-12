@@ -40,7 +40,11 @@ export interface TaskOutput {
   estimatedEffort?: string; // e.g., "2h 30m"
   energyLevel?: 'High' | 'Medium' | 'Low';
   tags?: string[];
-  subtasks?: { text: string }[]; // Simplified subtask structure
+  subtasks?: {
+    title: string;
+    description?: string;
+    notes?: string;
+  }[]; // Updated subtask structure
 }
 
 /**

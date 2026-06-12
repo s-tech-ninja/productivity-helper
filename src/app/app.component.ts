@@ -1,13 +1,10 @@
 import { Component, signal, inject, ViewChild, ElementRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 import { IconComponent } from '../shared/components/icons/icon.component';
 import { AuthModalComponent } from '../shared/components/modals/auth-modal/auth-modal.component';
 import { TaskFormComponent } from '../features/tasks/components/task-form/task-form.component';
-import { DashboardViewComponent } from '../features/tasks/components/dashboard-view/dashboard-view.component';
-import { CalendarViewComponent } from '../features/scheduler/components/calendar-view/calendar-view.component';
 import { DatePipe } from '@angular/common';
-import { AnalyticsViewComponent } from '../features/analytics/components/analytics-view/analytics-view.component';
-import { DiaryViewComponent } from '../features/diary/components/diary-view/diary-view.component';
 import { HelpComponent } from '../shared/components/modals/help-modal/help-modal.component';
 import { CompletionModalComponent } from '../features/tasks/components/completion-modal/completion-modal.component';
 import { ConfirmationModalComponent } from '../shared/components/modals/confirmation-modal/confirmation-modal.component';
@@ -16,21 +13,22 @@ import { TaskDetailComponent } from '../features/tasks/components/task-detail/ta
 import { Task, TaskService } from '../core/services/task.service';
 import { SettingsModalComponent } from '../shared/components/modals/settings-modal/settings-modal.component';
 import { IndexedDbService } from '../storage/dexie/indexed-db.service';
-import { AiFeaturesViewComponent } from '../features/planning-ai/components/planning-ai-view/ai-features-view.component';
-import { ProjectAnalysisViewComponent } from '../features/projects/components/project-analysis/project-analysis-view.component';
-import { ProjectViewComponent } from '../features/projects/components/project-view/project-view.component';
+import { UiStateService } from '../core/services/ui-state.service';
 import packageJson from '../../package.json';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, IconComponent, AuthModalComponent, TaskFormComponent, DashboardViewComponent, AnalyticsViewComponent, CalendarViewComponent, DiaryViewComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent, AiFeaturesViewComponent, ProjectAnalysisViewComponent, ProjectViewComponent],
+  imports: [CommonModule, RouterModule, IconComponent, AuthModalComponent, TaskFormComponent, HelpComponent, CompletionModalComponent, ConfirmationModalComponent, TaskDetailComponent, DatePipe, SettingsModalComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
   themeService = inject(ThemeService);
   taskService = inject(TaskService);
   indexedDbService = inject(IndexedDbService);
+  uiStateService = inject(UiStateService);
+  private router = inject(Router);
   
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   
@@ -40,30 +38,19 @@ export class AppComponent {
     console.log(`ProductivityFlow Version: ${packageJson.version}`);
   }
   
-  // View State for routing
-  currentView = signal<'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis' | 'project-view'>('dashboard');
-
   isSidebarOpen = signal(false);
   showNotifications = signal(false);
   notificationCloseTimer: any = null;
-  isAuthModalOpen = signal(false);
-  isTaskFormOpen = signal(false);
-  isHelpOpen = signal(false);
-  isDeleteModalOpen = signal(false);
-  isSettingsOpen = signal(false);
+  private outletSubs: Subscription[] = [];
   includeDiaryInExport = signal(false);
   
-  // Detail Panel State
-  selectedTaskId = signal<string | null>(null);
-  selectedTaskDate = signal<string | null>(null); // Context date for the selected task
-
   activeTask = computed(() => {
-    const selectedId = this.selectedTaskId();
+    const selectedId = this.uiStateService.selectedTaskId();
     if (!selectedId) return null;
     const task = this.taskService.tasks().find(t => t.id === selectedId) || null;
 
     if (task) {
-      const dateKey = this.selectedTaskDate() || new Date().toLocaleDateString('en-CA');
+      const dateKey = this.uiStateService.selectedTaskDate() || new Date().toLocaleDateString('en-CA');
       
       // 1. Try to load existing history for this date
       if (task.history && task.history[dateKey]) {
@@ -95,15 +82,6 @@ export class AppComponent {
     return task;
   });
 
-  // Edit State
-  taskToEdit = signal<Task | null>(null);
-  
-  // Completion State
-  taskToComplete = signal<Task | null>(null);
-  
-  // Delete State
-  taskToDelete = signal<Task | null>(null);
-  
   isAnalysisExpanded = signal(true);
   isTasksExpanded = signal(true);
 
@@ -134,86 +112,78 @@ export class AppComponent {
     }, 200);
   }
 
-  setView(view: 'dashboard' | 'tasks' | 'history' | 'analytics' | 'calendar' | 'diary' | 'tasks-completed' | 'tasks-not-completed' | 'ai-features' | 'project-analysis' | 'project-view') {
-    this.currentView.set(view);
-    // On mobile, close sidebar after navigation
-    if (window.innerWidth < 768) {
-      this.isSidebarOpen.set(false);
-    }
-  }
-
-  openCreateTask() {
-    this.selectedTaskId.set(null);
-    this.taskToEdit.set(null); // Clear edit mode
-    this.isTaskFormOpen.set(true);
-    
-  }
-
-  openTaskDetail(data: { id: string; date?: string } | null) {
-    this.isTaskFormOpen.set(false);
-    if (data) {
-      this.selectedTaskId.set(data.id);
-      this.selectedTaskDate.set(data.date || null);
-    } else {
-      this.selectedTaskId.set(null);
-      this.selectedTaskDate.set(null);
-    }
-  }
-
-  openEditTask(task: Task) {
-    this.selectedTaskId.set(null); // Close detail view
-    
-    let taskToEdit = task;
-    // Find main task to ensure we have the full object
-    const mainTask = this.taskService.tasks().find(t => t.id === task.id) || task;
-    taskToEdit = mainTask;
-
-    this.taskToEdit.set(taskToEdit);
-    this.isTaskFormOpen.set(true);
-  }
-
-  closeTaskForm() {
-    this.isTaskFormOpen.set(false);
-    this.taskToEdit.set(null);
-  }
-
   // Completion Logic
-  openCompletionModal(task: Task) {
-    this.taskToComplete.set(task);
-  }
-
-  closeCompletionModal() {
-    this.taskToComplete.set(null);
-  }
-
   onCompleteTask(data: { focusScore: number; reflection: string }) {
-    const task = this.taskToComplete();
+    const task = this.uiStateService.taskToComplete();
     if (task) {
       this.taskService.completeTask(task.id, {
         focusScore: data.focusScore,
         reflection: data.reflection,
         completionTime: new Date().toISOString()
       });
-      this.closeCompletionModal();
+      this.uiStateService.closeCompletionModal();
     }
   }
 
   // Delete Logic
-  openDeleteModal(task: Task) {
-    this.taskToDelete.set(task);
-    this.isDeleteModalOpen.set(true);
-  }
-
   confirmDelete() {
-    const task = this.taskToDelete();
+    const task = this.uiStateService.taskToDelete();
     if (task) {
       this.taskService.deleteTask(task.id);
-      this.isDeleteModalOpen.set(false);
-      this.taskToDelete.set(null);
-      // Ensure DashboardView closes detail if open
+      this.uiStateService.closeDeleteModal();
+      this.uiStateService.selectedTaskId.set(null);
     }
   }
   
+  // Listen to router-outlet events to catch @Output from legacy components (Dashboard, Calendar, etc.)
+  onOutletComponentActivate(componentRef: any) {
+    this.outletSubs.forEach(sub => sub.unsubscribe());
+    this.outletSubs = [];
+
+    if (componentRef.triggerDetail) {
+      this.outletSubs.push(
+        componentRef.triggerDetail.subscribe((event: any) => {
+          const id = typeof event === 'string' ? event : event?.id;
+          const date = typeof event === 'string' ? undefined : event?.date;
+          this.uiStateService.openTaskDetail(id, date);
+        })
+      );
+    }
+    if (componentRef.triggerEdit) {
+      this.outletSubs.push(
+        componentRef.triggerEdit.subscribe((event: any) => {
+          this.uiStateService.openTaskForm(event);
+        })
+      );
+    }
+    if (componentRef.triggerComplete) {
+      this.outletSubs.push(
+        componentRef.triggerComplete.subscribe((event: any) => {
+          this.uiStateService.openCompletionModal(event);
+        })
+      );
+    }
+    if (componentRef.triggerDelete) {
+      this.outletSubs.push(
+        componentRef.triggerDelete.subscribe((event: any) => {
+          this.uiStateService.openDeleteModal(event);
+        })
+      );
+    }
+    if (componentRef.triggerNavigate) {
+      this.outletSubs.push(
+        componentRef.triggerNavigate.subscribe((event: string) => {
+          this.router.navigate([`/${event}`]);
+        })
+      );
+    }
+  }
+
+  onOutletComponentDeactivate() {
+    this.outletSubs.forEach(sub => sub.unsubscribe());
+    this.outletSubs = [];
+  }
+
   // Data Management
   async exportData() {
     try {
@@ -285,7 +255,7 @@ export class AppComponent {
              message += ` and ${parsed.diary.length} diary entries`;
              
              // If current view is diary, we might want to reload or notify user to refresh
-             if (this.currentView() === 'diary') {
+             if (this.router.url.includes('diary')) {
                 message += '.\n\nPlease refresh the page to see imported diary entries.';
              }
            }

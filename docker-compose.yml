@@ -14,6 +14,7 @@ services:
       sh -c "
         npm set fetch-timeout 60000 &&
         npm set fetch-retries 2 &&
+        npm install -g @angular/cli &&
         npm install &&
         npm run dev -- --host 0.0.0.0 --poll=2000
       "

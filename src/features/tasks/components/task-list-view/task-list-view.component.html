@@ -1,0 +1,169 @@
+<div class="p-6 h-full flex flex-col bg-slate-50 dark:bg-slate-900 custom-scrollbar overflow-y-auto">
+  <!-- Header & Toolbar -->
+  <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All Tasks List</h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">Manage and perform bulk operations on your tasks.</p>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+      <!-- Search -->
+      <div class="relative flex-1 sm:w-64">
+        <app-icon name="search" [size]="16" class="absolute left-[0.4rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+        <input 
+          type="text" 
+          [ngModel]="searchQuery()" 
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search tasks..." 
+          class="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-700 dark:text-slate-200 text-sm"
+        >
+      </div>
+      
+      <!-- Filters -->
+      <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none">
+        <option value="all">All Statuses</option>
+        <option value="Backlog">Backlog</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Paused">Paused</option>
+        <option value="Completed">Completed</option>
+      </select>
+
+      <select [ngModel]="filterCategory()" (ngModelChange)="filterCategory.set($event)" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 focus:outline-none">
+        <option value="all">All Categories</option>
+        <option value="Super Important">Super Important</option>
+        <option value="Important">Important</option>
+        <option value="Less Important">Less Important</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Bulk Actions Bar -->
+  @if (selectedTaskIds().size > 0) {
+    <div class="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+        {{ selectedTaskIds().size }} task(s) selected
+      </span>
+      <div class="flex items-center gap-2">
+        <button (click)="bulkUpdateStatus('Completed')" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition">Mark Completed</button>
+        <button (click)="bulkUpdateStatus('Backlog')" class="px-3 py-1.5 bg-slate-600 text-white text-xs font-semibold rounded-lg hover:bg-slate-700 transition">Move to Backlog</button>
+        <button (click)="bulkDelete()" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700 transition">Delete</button>
+        <button (click)="bulkArchive(true)" class="px-3 py-1.5 bg-slate-600 text-white text-xs font-semibold rounded-lg hover:bg-slate-700 transition">Archive</button>
+        <button (click)="bulkArchive(false)" class="px-3 py-1.5 bg-slate-600 text-white text-xs font-semibold rounded-lg hover:bg-slate-700 transition">Un Archive</button>
+      </div>
+    </div>
+  }
+
+  <!-- Data Table -->
+  <div class="flex-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
+    <div class="overflow-x-auto custom-scrollbar flex-1">
+      <table class="w-full text-left text-sm whitespace-nowrap">
+        <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 z-10">
+          <tr>
+            <th class="p-4 w-12 text-center">
+              <input type="checkbox" 
+                     [checked]="filteredAndSortedTasks().length > 0 && selectedTaskIds().size === filteredAndSortedTasks().length"
+                     [indeterminate]="selectedTaskIds().size > 0 && selectedTaskIds().size < filteredAndSortedTasks().length"
+                     (change)="toggleAll()"
+                     class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+            </th>
+            <th class="p-4 font-semibold cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none" (click)="toggleSort('title')">
+              Title
+              @if (sortColumn() === 'title') { <span class="inline-block ml-1">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span> }
+            </th>
+            <th class="p-4 font-semibold cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none" (click)="toggleSort('status')">
+              Status
+              @if (sortColumn() === 'status') { <span class="inline-block ml-1">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span> }
+            </th>
+            <th class="p-4 font-semibold cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none" (click)="toggleSort('category')">
+              Category
+              @if (sortColumn() === 'category') { <span class="inline-block ml-1">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span> }
+            </th>
+            <th class="p-4 font-semibold cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none" (click)="toggleSort('project')">
+              Project
+              @if (sortColumn() === 'project') { <span class="inline-block ml-1">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span> }
+            </th>
+            <th class="p-4 font-semibold cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none" (click)="toggleSort('deadline')">
+              Deadline
+              @if (sortColumn() === 'deadline') { <span class="inline-block ml-1">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span> }
+            </th>
+            <th class="p-4 font-semibold cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none" (click)="toggleSort('energyLevel')">
+              Energy
+              @if (sortColumn() === 'energyLevel') { <span class="inline-block ml-1">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span> }
+            </th>
+            <th class="p-4 font-semibold text-right select-none">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+          @for (task of paginatedTasks(); track task.id) {
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer" 
+                [class.bg-indigo-50]="selectedTaskIds().has(task.id)"
+                [class.dark:bg-indigo-900/20]="selectedTaskIds().has(task.id)"
+                (click)="toggleSelection(task.id)">
+              <td class="p-4 text-center" (click)="$event.stopPropagation()">
+                <input type="checkbox" 
+                       [checked]="selectedTaskIds().has(task.id)"
+                       (change)="toggleSelection(task.id)"
+                       class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+              </td>
+              <td class="p-4">
+                <p class="font-medium text-slate-800 dark:text-slate-200">{{ task.title }}</p>
+              </td>
+              <td class="p-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold"
+                      [class.bg-slate-100]="task.archived || task.status === 'Backlog'" [class.text-slate-600]="task.archived || task.status === 'Backlog'"
+                      [class.dark:bg-slate-700]="task.archived || task.status === 'Backlog'" [class.dark:text-slate-300]="task.archived || task.status === 'Backlog'"
+                      [class.bg-indigo-100]="!task.archived && task.status === 'In Progress'" [class.text-indigo-600]="!task.archived && task.status === 'In Progress'"
+                      [class.bg-emerald-100]="!task.archived && task.status === 'Completed'" [class.text-emerald-600]="!task.archived && task.status === 'Completed'"
+                      [class.bg-amber-100]="!task.archived && task.status === 'Paused'" [class.text-amber-600]="!task.archived && task.status === 'Paused'">
+                  {{ task.archived ? 'Archived' : task.status }}
+                </span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs font-medium text-slate-600 dark:text-slate-400">{{ task.category }}</span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs text-slate-600 dark:text-slate-400">{{ task.project || '-' }}</span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs text-slate-600 dark:text-slate-400">{{ task.deadline | date:'MMM d, y, h:mm a' }}</span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs text-slate-600 dark:text-slate-400">{{ task.energyLevel }}</span>
+              </td>
+              <td class="p-4 text-right">
+                <button (click)="$event.stopPropagation(); uiStateService.openTaskDetail(task.id)" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-xs px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 transition-colors">Details</button>
+              </td>
+            </tr>
+          }
+          @if (paginatedTasks().length === 0) {
+            <tr>
+              <td colspan="8" class="p-8 text-center text-slate-500 dark:text-slate-400">
+                No tasks found matching your criteria.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+      <span>Showing {{ paginatedTasks().length }} of {{ filteredAndSortedTasks().length }} tasks</span>
+      
+      @if (totalPages() > 1) {
+        <div class="flex items-center gap-2">
+          <button (click)="prevPage()" [disabled]="currentPage() === 1" class="px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            Prev
+          </button>
+          <span class="font-medium text-slate-700 dark:text-slate-300">
+            Page {{ currentPage() }} of {{ totalPages() }}
+          </span>
+          <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            Next
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

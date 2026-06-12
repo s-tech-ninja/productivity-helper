@@ -29,10 +29,11 @@ export class CalendarViewComponent {
     const year = date.getFullYear();
     const month = date.getMonth();
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
+    // Use 12:00:00 (noon) to avoid daylight saving time (DST) midnight skipping bugs 
+    // which can cause duplicate days and crash Angular's @for loop tracking
+    const firstDayOfMonth = new Date(year, month, 1, 12, 0, 0, 0);
+    const lastDayOfMonth = new Date(year, month + 1, 0, 12, 0, 0, 0);
 
     const days: CalendarDay[] = [];
     const tasks = this.taskService.tasks();
@@ -40,7 +41,7 @@ export class CalendarViewComponent {
     // Days from previous month
     const startDayOfWeek = firstDayOfMonth.getDay();
     for (let i = startDayOfWeek; i > 0; i--) {
-      const prevMonthDate = new Date(year, month, 1 - i);
+      const prevMonthDate = new Date(year, month, 1 - i, 12, 0, 0, 0);
       days.push({
         date: prevMonthDate,
         isCurrentMonth: false,
@@ -51,20 +52,22 @@ export class CalendarViewComponent {
 
     // Days of current month
     for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
-      const currentDay = new Date(year, month, i);
+      const currentDay = new Date(year, month, i, 12, 0, 0, 0);
       days.push({
         date: currentDay,
         isCurrentMonth: true,
-        isToday: currentDay.getTime() === today.getTime(),
+        isToday: currentDay.getFullYear() === today.getFullYear() && 
+                 currentDay.getMonth() === today.getMonth() && 
+                 currentDay.getDate() === today.getDate(),
         tasks: tasks.filter(t => this.taskService.isTaskOnDate(t, currentDay))
       });
     }
 
-    // Days from next month (Fill the grid)
-    const endDayOfWeek = lastDayOfMonth.getDay();
-    const remainingDays = 6 - endDayOfWeek;
-    for (let i = 1; i <= remainingDays; i++) {
-      const nextMonthDate = new Date(year, month + 1, i);
+    // Days from next month (Fill the grid to exactly 42 days / 6 weeks to prevent CSS grid collapsing)
+    const totalDaysSoFar = days.length;
+    const daysNeeded = 42 - totalDaysSoFar;
+    for (let i = 1; i <= daysNeeded; i++) {
+      const nextMonthDate = new Date(year, month + 1, i, 12, 0, 0, 0);
       days.push({
         date: nextMonthDate,
         isCurrentMonth: false,

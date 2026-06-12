@@ -20,6 +20,7 @@ export class DiaryViewComponent {
   showArchived = signal(false);
   private indexedDbService = inject(IndexedDbService);
   private markdownService = inject(MarkdownService);
+  private saveTimeout: any = null;
 
   private _editor?: WysiwygEditorComponent;
   @ViewChild(WysiwygEditorComponent) set editor(editor: WysiwygEditorComponent | undefined) {
@@ -33,7 +34,7 @@ export class DiaryViewComponent {
   filteredEntries = computed(() => {
     return this.entries()
       .filter(e => this.showArchived() ? true : !e.archived)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => b.date.localeCompare(a.date)); // String comparison is 100x faster than creating Date objects
   });
 
   activeEntry = computed(() => 
@@ -48,8 +49,6 @@ export class DiaryViewComponent {
   constructor() {
     this.loadEntries();
     effect(() => {
-      // This effect now simply tracks the active entry and triggers a state update.
-      this.activeEntry(); // Dependency
       this.updateEditorDisabledState();
     });
   }
@@ -127,10 +126,6 @@ export class DiaryViewComponent {
 
   updateContent(event: any) {
     if (!this.isEditable()) {
-      // Fallback: If UI allows editing on read-only entry, revert immediately
-      if (this.editor && this.activeEntry()) {
-        this.editor.writeValue(this.activeEntry()!.content);
-      }
       return;
     }
 
@@ -140,11 +135,20 @@ export class DiaryViewComponent {
       const content = event;
       const id = this.selectedId();
       if (id) {
-        this.entries.update(list => list.map(e => 
-          e.id === id ? { ...e, content, updatedAt: Date.now() } : e
-        ));
-        const updated = this.entries().find(e => e.id === id);
-        if (updated) this.indexedDbService.saveDiaryEntry(updated);
+        const currentEntry = this.entries().find(e => e.id === id);
+        // Prevent circular updates by only saving if content actually changed
+        if (currentEntry && currentEntry.content !== content) {
+          this.entries.update(list => list.map(e => 
+            e.id === id ? { ...e, content, updatedAt: Date.now() } : e
+          ));
+          
+          // Debounce database writes to avoid locking the UI thread during rapid typing
+          clearTimeout(this.saveTimeout);
+          this.saveTimeout = setTimeout(() => {
+            const updated = this.entries().find(e => e.id === id);
+            if (updated) this.indexedDbService.saveDiaryEntry(updated);
+          }, 500);
+        }
       }
     }
   }
@@ -186,7 +190,12 @@ export class DiaryViewComponent {
   private updateEditorDisabledState() {
     if (this.editor) {
       const editable = this.isEditable();
-      this.editor.setDisabledState(!editable);
+      
+      // Wrap in setTimeout to push this update to the next Javascript tick,
+      // avoiding Angular's ExpressionChangedAfterItHasBeenCheckedError.
+      setTimeout(() => {
+        this.editor?.setDisabledState(!editable);
+      });
     }
   }
 

@@ -20,7 +20,7 @@
   </div>
 
   <!-- Calendar Grid -->
-  <div class="flex-1 grid grid-cols-7 grid-rows-[auto_1fr] gap-px bg-slate-200 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
+  <div class="flex-1 grid grid-cols-7 gap-px bg-slate-200 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden">
     <!-- Day Headers -->
     @for (day of daysOfWeek; track day) {
       <div class="py-3 text-center font-semibold text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800">
@@ -29,9 +29,9 @@
     }
 
     <!-- Calendar Days -->
-    @for (day of daysInMonth(); track day.date) {
+    @for (day of daysInMonth(); track day.date.toISOString()) {
       <div 
-        class="p-2 flex flex-col bg-white dark:bg-slate-800/50 transition-colors"
+        class="p-2 flex flex-col bg-white dark:bg-slate-800/50 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 min-h-[100px] lg:min-h-[120px]"
         [class.opacity-50]="!day.isCurrentMonth"
       >
         <div 

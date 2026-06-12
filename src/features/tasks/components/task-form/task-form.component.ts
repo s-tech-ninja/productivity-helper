@@ -207,8 +207,9 @@ export class TaskFormComponent implements OnInit {
     if (val) {
       const newSubtask: Subtask = {
         id: crypto.randomUUID(),
-        text: val,
+        title: val,
         completed: false,
+        description: '',
         notes: ''
       };
       this.subtasksList.update(list => [...list, newSubtask]);
@@ -236,6 +237,12 @@ export class TaskFormComponent implements OnInit {
   updateSubtaskNote(index: number, note: string) {
     this.subtasksList.update(list => list.map((item, i) => 
       i === index ? { ...item, notes: note } : item
+    ));
+  }
+
+  updateSubtaskDescription(index: number, description: string) {
+    this.subtasksList.update(list => list.map((item, i) => 
+      i === index ? { ...item, description: description } : item
     ));
   }
 

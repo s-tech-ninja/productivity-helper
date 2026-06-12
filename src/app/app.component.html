@@ -31,24 +31,17 @@
 
     <!-- Nav Items -->
     <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-      <button 
-        (click)="setView('dashboard')"
-        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group text-left"
-        [class.bg-indigo-50]="currentView() === 'dashboard'"
-        [class.text-indigo-600]="currentView() === 'dashboard'"
-        [class.dark:bg-indigo-900/30]="currentView() === 'dashboard'"
-        [class.dark:text-indigo-400]="currentView() === 'dashboard'"
-        [class.text-slate-600]="currentView() !== 'dashboard'"
-        [class.dark:text-slate-300]="currentView() !== 'dashboard'"
-        [class.hover:bg-slate-50]="currentView() !== 'dashboard'"
-        [class.dark:hover:bg-slate-700/50]="currentView() !== 'dashboard'"
+      <a 
+        routerLink="/dashboard"
+        routerLinkActive="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+        [routerLinkActiveOptions]="{exact: true}"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
       >
         <app-icon name="layout-dashboard" [size]="20" 
-          [class.text-indigo-600]="currentView() === 'dashboard'"
-          [class.dark:text-indigo-400]="currentView() === 'dashboard'"
+          class="group-[.text-indigo-600]:text-indigo-600 group-[.dark\:text-indigo-400]:dark:text-indigo-400"
         ></app-icon>
         <span class="font-medium">Dashboard</span>
-      </button>
+      </a>
 
       <!-- Analysis Group -->
       <div class="pt-2">
@@ -67,48 +60,30 @@
 
         @if (isAnalysisExpanded()) {
           <div class="mt-1 ml-4 pl-4 border-l-2 border-slate-100 dark:border-slate-700 space-y-1">
-             <button 
-               (click)="setView('analytics')"
-               class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-               [class.text-indigo-600]="currentView() === 'analytics'"
-               [class.dark:text-indigo-400]="currentView() === 'analytics'"
-               [class.font-medium]="currentView() === 'analytics'"
-               [class.text-slate-500]="currentView() !== 'analytics'"
-               [class.dark:text-slate-400]="currentView() !== 'analytics'"
-               [class.hover:text-slate-900]="currentView() !== 'analytics'"
-               [class.dark:hover:text-white]="currentView() !== 'analytics'"
+             <a 
+               routerLink="/analytics"
+               routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+               class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
              >
                <app-icon name="trending-up" [size]="16" class="text-slate-400"></app-icon>
                Analytics Suite
-             </button>
-             <button
-                (click)="setView('project-analysis')"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-                [class.text-indigo-600]="currentView() === 'project-analysis'"
-                [class.dark:text-indigo-400]="currentView() === 'project-analysis'"
-                [class.font-medium]="currentView() === 'project-analysis'"
-                [class.text-slate-500]="currentView() !== 'project-analysis'"
-                [class.dark:text-slate-400]="currentView() !== 'project-analysis'"
-                [class.hover:text-slate-900]="currentView() !== 'project-analysis'"
-                [class.dark:hover:text-white]="currentView() !== 'project-analysis'"
-              >
+             </a>
+             <a
+                routerLink="/project-analysis"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+             >
                <app-icon name="pie-chart" [size]="16" class="text-slate-400"></app-icon>
                Projects
-             </button>
-             <button
-                (click)="setView('ai-features')"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-                [class.text-indigo-600]="currentView() === 'ai-features'"
-                [class.dark:text-indigo-400]="currentView() === 'ai-features'"
-                [class.font-medium]="currentView() === 'ai-features'"
-                [class.text-slate-500]="currentView() !== 'ai-features'"
-                [class.dark:text-slate-400]="currentView() !== 'ai-features'"
-                [class.hover:text-slate-900]="currentView() !== 'ai-features'"
-                [class.dark:hover:text-white]="currentView() !== 'ai-features'"
-              >
+             </a>
+             <a
+                routerLink="/ai-features"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+             >
                <app-icon name="sparkles" [size]="16" class="text-slate-400"></app-icon>
                AI Insights
-             </button>
+             </a>
           </div>
         }
       </div>
@@ -130,120 +105,92 @@
 
         @if (isTasksExpanded()) {
           <div class="mt-1 ml-4 pl-4 border-l-2 border-slate-100 dark:border-slate-700 space-y-1">
-             <button 
-               (click)="setView('tasks')"
-               class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-               [class.text-indigo-600]="currentView() === 'tasks'"
-               [class.dark:text-indigo-400]="currentView() === 'tasks'"
-               [class.font-medium]="currentView() === 'tasks'"
-               [class.text-slate-500]="currentView() !== 'tasks'"
-               [class.dark:text-slate-400]="currentView() !== 'tasks'"
-               [class.hover:text-slate-900]="currentView() !== 'tasks'"
-               [class.dark:hover:text-white]="currentView() !== 'tasks'"
+             <a 
+               routerLink="/tasks"
+               routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+               class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
              >
                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                All Tasks
-             </button>
-             <button
-                (click)="setView('tasks-not-completed')"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-                [class.text-indigo-600]="currentView() === 'tasks-not-completed'"
-                [class.dark:text-indigo-400]="currentView() === 'tasks-not-completed'"
-                [class.font-medium]="currentView() === 'tasks-not-completed'"
-                [class.text-slate-500]="currentView() !== 'tasks-not-completed'"
-                [class.dark:text-slate-400]="currentView() !== 'tasks-not-completed'"
-                [class.hover:text-slate-900]="currentView() !== 'tasks-not-completed'"
-                [class.dark:hover:text-white]="currentView() !== 'tasks-not-completed'"
+             </a>
+             <a
+                routerLink="/tasks-not-completed"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               >
                <app-icon name="circle" [size]="16" class="text-slate-400"></app-icon>
                Not Completed
-             </button>
-             <button
-                (click)="setView('tasks-completed')"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-                [class.text-indigo-600]="currentView() === 'tasks-completed'"
-                [class.dark:text-indigo-400]="currentView() === 'tasks-completed'"
-                [class.font-medium]="currentView() === 'tasks-completed'"
-                [class.text-slate-500]="currentView() !== 'tasks-completed'"
-                [class.dark:text-slate-400]="currentView() !== 'tasks-completed'"
-                [class.hover:text-slate-900]="currentView() !== 'tasks-completed'"
-                [class.dark:hover:text-white]="currentView() !== 'tasks-completed'"
+             </a>
+             <a
+                routerLink="/tasks-completed"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               >
                <app-icon name="check-circle" [size]="16" class="text-green-500"></app-icon>
                Completed
-             </button>
-             <button
-                (click)="setView('history')"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-                [class.text-indigo-600]="currentView() === 'history'"
-                [class.dark:text-indigo-400]="currentView() === 'history'"
-                [class.font-medium]="currentView() === 'history'"
-                [class.text-slate-500]="currentView() !== 'history'"
-                [class.dark:text-slate-400]="currentView() !== 'history'"
-                [class.hover:text-slate-900]="currentView() !== 'history'"
-                [class.dark:hover:text-white]="currentView() !== 'history'"
+             </a>
+             <a
+                routerLink="/history"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               >
                <app-icon name="history" [size]="16" class="text-slate-400"></app-icon>
                History
-             </button>
-             <button
-                (click)="setView('project-view')"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left"
-                [class.text-indigo-600]="currentView() === 'project-view'"
-                [class.dark:text-indigo-400]="currentView() === 'project-view'"
-                [class.font-medium]="currentView() === 'project-view'"
-                [class.text-slate-500]="currentView() !== 'project-view'"
-                [class.dark:text-slate-400]="currentView() !== 'project-view'"
-                [class.hover:text-slate-900]="currentView() !== 'project-view'"
-                [class.dark:hover:text-white]="currentView() !== 'project-view'"
-              >
+             </a>
+             <a
+                routerLink="/project-view"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+             >
                <app-icon name="layout-dashboard" [size]="16" class="text-slate-400"></app-icon>
                Project Board
-             </button>
+             </a>
+             <a
+                routerLink="/project-list"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+             >
+               <app-icon name="layout-dashboard" [size]="16" class="text-slate-400"></app-icon>
+               Project List
+             </a>
+             <a
+                routerLink="/tasks-all"
+                routerLinkActive="text-indigo-600 dark:text-indigo-400 font-medium"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors text-left text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+             >
+               <app-icon name="table" [size]="16" class="text-slate-400"></app-icon>
+                Task View (Grid)
+             </a>
           </div>
         }
       </div>
 
-      <button 
-        (click)="setView('calendar')"
-        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left"
-        [class.bg-indigo-50]="currentView() === 'calendar'"
-        [class.text-indigo-600]="currentView() === 'calendar'"
-        [class.text-slate-600]="currentView() !== 'calendar'"
-        [class.dark:text-slate-300]="currentView() !== 'calendar'"
-        [class.hover:bg-slate-50]="currentView() !== 'calendar'"
-        [class.dark:hover:bg-slate-700/50]="currentView() !== 'calendar'"
+      <a 
+        routerLink="/calendar"
+        routerLinkActive="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
       >
         <app-icon name="calendar" [size]="20"
-          [class.group-hover:text-indigo-600]="currentView() !== 'calendar'"
-          [class.dark:group-hover:text-indigo-400]="currentView() !== 'calendar'"
+          class="group-[.text-indigo-600]:text-indigo-600 group-[.dark\:text-indigo-400]:dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
         ></app-icon>
         <span class="font-medium">Calendar</span>
-      </button>
+      </a>
 
       <!-- Diary Link -->
-      <button 
-        (click)="setView('diary')"
-        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left"
-        [class.bg-indigo-50]="currentView() === 'diary'"
-        [class.text-indigo-600]="currentView() === 'diary'"
-        [class.dark:bg-indigo-900/30]="currentView() === 'diary'"
-        [class.dark:text-indigo-400]="currentView() === 'diary'"
-        [class.text-slate-600]="currentView() !== 'diary'"
-        [class.dark:text-slate-300]="currentView() !== 'diary'"
-        [class.hover:bg-slate-50]="currentView() !== 'diary'"
-        [class.dark:hover:bg-slate-700/50]="currentView() !== 'diary'"
+      <a 
+        routerLink="/diary"
+        routerLinkActive="bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
       >
         <app-icon name="book-open" [size]="20"
-          [class.group-hover:text-indigo-600]="currentView() !== 'diary'"
-          [class.dark:group-hover:text-indigo-400]="currentView() !== 'diary'"
+          class="group-[.text-indigo-600]:text-indigo-600 group-[.dark\:text-indigo-400]:dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
         ></app-icon>
         <span class="font-medium">Diary</span>
-      </button>
+      </a>
 
       <!-- Help Menu -->
       <button 
-        (click)="isHelpOpen.set(true)"
+        (click)="uiStateService.isHelpOpen.set(true)"
         class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group mt-2 text-left text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50"
       >
         <div class="flex items-center justify-center w-5 h-5">
@@ -308,7 +255,7 @@
       </button>
 
       <button 
-        (click)="isSettingsOpen.set(true)"
+        (click)="uiStateService.isSettingsOpen.set(true)"
         class="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300"
       >
         <app-icon name="settings" [size]="20"></app-icon>
@@ -339,26 +286,14 @@
           <app-icon name="menu" [size]="24"></app-icon>
         </button>
         <h1 class="text-2xl font-bold text-slate-800 dark:text-white hidden sm:block tracking-tight">
-           @switch (currentView()) {
-             @case ('dashboard') { Dashboard }
-             @case ('tasks') { Tasks }
-             @case ('tasks-completed') { Tasks }
-             @case ('tasks-not-completed') { Tasks }
-             @case ('history') { Tasks }
-             @case ('analytics') { Analytics Suite }
-             @case ('ai-features') { AI Insights }
-             @case ('project-analysis') { Project Analysis }
-             @case ('project-view') { Project Tasks }
-             @case ('diary') { Diary }
-             @case ('calendar') { Calendar }
-           }
+           ProductivityFlow
         </h1>
       </div>
 
       <div class="flex items-center gap-4">
         <!-- Create Task Button (Styled to match modal inputs) -->
         <button 
-          (click)="openCreateTask()"
+          (click)="uiStateService.openTaskForm()"
           class="hidden sm:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all active:scale-95"
         >
           <app-icon name="plus" [size]="20"></app-icon>
@@ -393,7 +328,7 @@
                  @if (taskService.notifications().overdue.length > 0) {
                    <div class="px-2 py-1 text-[10px] font-bold text-rose-500 uppercase tracking-wider">Overdue</div>
                    @for (task of taskService.notifications().overdue; track task.id) {
-                     <button (click)="openEditTask(task); showNotifications.set(false)" class="w-full text-left p-2 hover:bg-rose-50 dark:hover:bg-rose-900/10 rounded-lg transition-colors group">
+                     <button (click)="uiStateService.openTaskForm(task); showNotifications.set(false)" class="w-full text-left p-2 hover:bg-rose-50 dark:hover:bg-rose-900/10 rounded-lg transition-colors group">
                        <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-rose-600 dark:group-hover:text-rose-400">{{ task.title }}</div>
                        <div class="text-xs text-rose-500 mt-0.5">Due {{ task.deadline | date:'MMM d, h:mm a' }}</div>
                      </button>
@@ -403,7 +338,7 @@
                  @if (taskService.notifications().endingToday.length > 0) {
                    <div class="px-2 py-1 text-[10px] font-bold text-amber-500 uppercase tracking-wider mt-2">Scheduled Today</div>
                    @for (task of taskService.notifications().endingToday; track task.id) {
-                     <button (click)="openEditTask(task); showNotifications.set(false)" class="w-full text-left p-2 hover:bg-amber-50 dark:hover:bg-amber-900/10 rounded-lg transition-colors group">
+                     <button (click)="uiStateService.openTaskForm(task); showNotifications.set(false)" class="w-full text-left p-2 hover:bg-amber-50 dark:hover:bg-amber-900/10 rounded-lg transition-colors group">
                        <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate group-hover:text-amber-600 dark:group-hover:text-amber-400">{{ task.title }}</div>
                        @if (task.startDate) {
                          <div class="text-xs text-amber-500 mt-0.5">Starts {{ task.startDate | date:'shortTime' }}</div>
@@ -438,32 +373,12 @@
 
     <!-- Scrollable Content Area -->
     <main class="flex-1 overflow-y-auto custom-scrollbar relative bg-slate-50 dark:bg-slate-900/50">
-      @if (currentView().startsWith('tasks') || currentView() === 'dashboard' || currentView() === 'history') {
-         <app-dashboard-view 
-            [view]="currentView()"
-            (triggerEdit)="openEditTask($event)"
-            (triggerComplete)="openCompletionModal($event)"
-            (triggerDelete)="openDeleteModal($event)"
-            (triggerDetail)="openTaskDetail($event)"
-            (triggerNavigate)="setView($any($event))"
-         ></app-dashboard-view>
-      } @else if (currentView() === 'analytics') {
-         <app-analytics-view></app-analytics-view>
-      } @else if (currentView() === 'ai-features') {
-         <app-ai-features-view class="block h-full"></app-ai-features-view>
-      } @else if (currentView() === 'project-analysis') {
-         <app-project-analysis-view></app-project-analysis-view>
-      } @else if (currentView() === 'project-view') {
-         <app-project-view (triggerDetail)="openTaskDetail($event)" class="block h-full"></app-project-view>
-      } @else if (currentView() === 'diary') {
-         <app-diary-view class="block h-full"></app-diary-view>
-      } @else if (currentView() === 'calendar') {
-         <app-calendar-view (triggerDetail)="openTaskDetail($event)"></app-calendar-view>
-      }
+      <!-- Routed Views Render Here -->
+      <router-outlet (activate)="onOutletComponentActivate($event)" (deactivate)="onOutletComponentDeactivate()"></router-outlet>
       
       <!-- FAB for Mobile Task Creation (Updated Style) -->
       <button 
-        (click)="openCreateTask()"
+        (click)="uiStateService.openTaskForm()"
         class="sm:hidden fixed bottom-6 right-6 w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-xl shadow-indigo-500/40 flex items-center justify-center z-40 active:scale-95 transition-transform"
       >
         <app-icon name="plus" [size]="28"></app-icon>
@@ -478,36 +393,36 @@
   </div>
 
   <!-- Modals -->
-  @if (isAuthModalOpen()) {
-    <app-auth-modal (close)="isAuthModalOpen.set(false)"></app-auth-modal>
+  @if (uiStateService.isAuthModalOpen()) {
+    <app-auth-modal (close)="uiStateService.isAuthModalOpen.set(false)"></app-auth-modal>
   }
   
-  @if (isHelpOpen()) {
-    <app-help-modal (close)="isHelpOpen.set(false)"></app-help-modal>
+  @if (uiStateService.isHelpOpen()) {
+    <app-help-modal (close)="uiStateService.isHelpOpen.set(false)"></app-help-modal>
   }
 
-  @if (isSettingsOpen()) {
+  @if (uiStateService.isSettingsOpen()) {
     <app-settings-modal 
-      (close)="isSettingsOpen.set(false)"
+      (close)="uiStateService.isSettingsOpen.set(false)"
       (exportData)="exportData()"
       (importData)="triggerImport()"
     ></app-settings-modal>
   }
 
-  @if (taskToComplete()) {
+  @if (uiStateService.isCompletionModalOpen() && uiStateService.taskToComplete()) {
     <app-completion-modal 
-       [task]="taskToComplete()!" 
-       (cancel)="closeCompletionModal()"
+       [task]="uiStateService.taskToComplete()!" 
+       (cancel)="uiStateService.closeCompletionModal()"
        (confirm)="onCompleteTask($event)"
     ></app-completion-modal>
   }
 
-  @if (isDeleteModalOpen() && taskToDelete()) {
+  @if (uiStateService.isDeleteModalOpen() && uiStateService.taskToDelete()) {
     <app-confirmation-modal
       [title]="'Delete Task?'"
-      [message]="'Are you sure you want to delete \'' + taskToDelete()?.title + '\'? This action cannot be undone.'"
+      [message]="'Are you sure you want to delete \'' + uiStateService.taskToDelete()?.title + '\'? This action cannot be undone.'"
       [actionText]="'Delete Forever'"
-      (cancel)="isDeleteModalOpen.set(false)"
+      (cancel)="uiStateService.isDeleteModalOpen.set(false)"
       (confirm)="confirmDelete()"
     ></app-confirmation-modal>
   }
@@ -516,19 +431,19 @@
   @if (activeTask()) {
     <app-task-detail 
       [task]="activeTask()!" 
-      [dateContext]="selectedTaskDate()"
-      (close)="openTaskDetail(null)"
-      (edit)="openEditTask($event)"
-      (complete)="openCompletionModal($event)"
-      (delete)="openDeleteModal($event)"
+      [dateContext]="uiStateService.selectedTaskDate()"
+      (close)="uiStateService.openTaskDetail(null)"
+      (edit)="uiStateService.openTaskForm($event)"
+      (complete)="uiStateService.openCompletionModal($event)"
+      (delete)="uiStateService.openDeleteModal($event)"
     ></app-task-detail>
   }
 
   <!-- Task Form Modal (Placed last to ensure it overlays everything) -->
-  @if (isTaskFormOpen()) {
+  @if (uiStateService.isTaskFormOpen()) {
     <app-task-form 
-       [taskToEdit]="taskToEdit()"
-       (cancel)="closeTaskForm()"
+       [taskToEdit]="uiStateService.taskToEdit()"
+       (cancel)="uiStateService.closeTaskForm()"
     ></app-task-form>
   }
 

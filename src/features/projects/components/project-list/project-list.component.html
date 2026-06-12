@@ -1,0 +1,139 @@
+<div class="p-6 h-full flex flex-col bg-slate-50 dark:bg-slate-900 custom-scrollbar overflow-y-auto">
+  <!-- Header & Toolbar -->
+  <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white">All Projects List</h2>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">Manage and perform bulk operations on your projects.</p>
+    </div>
+    
+    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+      <!-- Search -->
+      <div class="relative flex-1 sm:w-64">
+        <app-icon name="search" [size]="16" class="absolute left-[0.4rem] top-1/2 -translate-y-1/2 text-slate-400"></app-icon>
+        <input 
+          type="text" 
+          [ngModel]="searchQuery()" 
+          (ngModelChange)="searchQuery.set($event)"
+          placeholder="Search projects..." 
+          class="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-700 dark:text-slate-200 text-sm"
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions Bar -->
+  @if (selectedProjects().size > 0) {
+    <div class="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+        {{ selectedProjects().size }} project(s) selected
+      </span>
+      <div class="flex items-center gap-2">
+        <button (click)="bulkToggleArchive(false)" class="px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition">Enable (Unarchive)</button>
+        <button (click)="bulkToggleArchive(true)" class="px-3 py-1.5 bg-slate-600 text-white text-xs font-semibold rounded-lg hover:bg-slate-700 transition">Disable (Archive)</button>
+        <button (click)="bulkDelete()" class="px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700 transition">Delete All Tasks</button>
+      </div>
+    </div>
+  }
+
+  <!-- Data Table -->
+  <div class="flex-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden flex flex-col">
+    <div class="overflow-x-auto custom-scrollbar flex-1">
+      <table class="w-full text-left text-sm whitespace-nowrap">
+        <thead class="sticky top-0 bg-slate-50 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 z-10">
+          <tr>
+            <th class="p-4 w-12 text-center">
+              <input type="checkbox" 
+                     [checked]="projectList().length > 0 && selectedProjects().size === projectList().length"
+                     [indeterminate]="selectedProjects().size > 0 && selectedProjects().size < projectList().length"
+                     (change)="toggleAll()"
+                     class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+            </th>
+            <th class="p-4 font-semibold select-none">
+              Project Name
+            </th>
+            <th class="p-4 font-semibold select-none">
+              Status
+            </th>
+            <th class="p-4 font-semibold select-none">
+              Active Tasks
+            </th>
+            <th class="p-4 font-semibold select-none">
+              Completed Tasks
+            </th>
+            <th class="p-4 font-semibold select-none">
+              Total Tasks
+            </th>
+            <th class="p-4 font-semibold text-right select-none">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
+          @for (project of paginatedProjects(); track project.name) {
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group cursor-pointer" 
+                [class.bg-indigo-50]="selectedProjects().has(project.name)"
+                [class.dark:bg-indigo-900/20]="selectedProjects().has(project.name)"
+                (click)="toggleSelection(project.name)">
+              <td class="p-4 text-center" (click)="$event.stopPropagation()">
+                <input type="checkbox" 
+                       [checked]="selectedProjects().has(project.name)"
+                       (change)="toggleSelection(project.name)"
+                       class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+              </td>
+              <td class="p-4">
+                <p class="font-medium text-slate-800 dark:text-slate-200">{{ project.name }}</p>
+              </td>
+              <td class="p-4">
+                <span class="px-2.5 py-1 rounded-full text-xs font-semibold"
+                      [class.bg-slate-100]="project.isArchived" [class.text-slate-600]="project.isArchived"
+                      [class.dark:bg-slate-700]="project.isArchived" [class.dark:text-slate-300]="project.isArchived"
+                      [class.bg-emerald-100]="!project.isArchived" [class.text-emerald-600]="!project.isArchived">
+                  {{ project.isArchived ? 'Archived' : 'Active' }}
+                </span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs font-medium text-slate-600 dark:text-slate-400">{{ project.activeCount }}</span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs text-slate-600 dark:text-slate-400">{{ project.completedCount }}</span>
+              </td>
+              <td class="p-4">
+                <span class="text-xs text-slate-600 dark:text-slate-400">{{ project.tasks.length }}</span>
+              </td>
+              <td class="p-4 text-right">
+                <button (click)="$event.stopPropagation(); viewProjectTasks(project.name)" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-xs px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 transition-colors">
+                  View Tasks
+                </button>
+              </td>
+            </tr>
+          }
+          @if (paginatedProjects().length === 0) {
+            <tr>
+              <td colspan="7" class="p-8 text-center text-slate-500 dark:text-slate-400">
+                No projects found matching your criteria.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between">
+      <span>Showing {{ paginatedProjects().length }} of {{ projectList().length }} projects</span>
+      
+      @if (totalPages() > 1) {
+        <div class="flex items-center gap-2">
+          <button (click)="prevPage()" [disabled]="currentPage() === 1" class="px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            Prev
+          </button>
+          <span class="font-medium text-slate-700 dark:text-slate-300">
+            Page {{ currentPage() }} of {{ totalPages() }}
+          </span>
+          <button (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="px-3 py-1 rounded-md border border-slate-300 dark:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            Next
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

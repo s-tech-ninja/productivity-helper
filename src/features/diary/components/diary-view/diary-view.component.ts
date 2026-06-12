@@ -186,7 +186,12 @@ export class DiaryViewComponent {
   private updateEditorDisabledState() {
     if (this.editor) {
       const editable = this.isEditable();
-      this.editor.setDisabledState(!editable);
+      
+      // Wrap in setTimeout to push this update to the next Javascript tick,
+      // avoiding Angular's ExpressionChangedAfterItHasBeenCheckedError.
+      setTimeout(() => {
+        this.editor?.setDisabledState(!editable);
+      });
     }
   }
 

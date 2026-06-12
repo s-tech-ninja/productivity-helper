@@ -101,6 +101,7 @@ public config = {
 };
 
   editorData = '';
+  private lastEmittedData: string | null = null;
   
   @HostBinding('style.--editor-height') get editorHeightVar() {
     return this.height;
@@ -126,7 +127,11 @@ public config = {
   writeValue(value: string): void {
     this.editorData = value || '';
     if (this.editorInstance) {
-      this.editorInstance.setData(this.editorData);
+      // Prevent expensive getData() calls on large documents by caching the last emitted value
+      if (this.editorData !== this.lastEmittedData) {
+        this.editorInstance.setData(this.editorData);
+        this.lastEmittedData = this.editorData;
+      }
     }
   }
 
@@ -150,8 +155,18 @@ public config = {
     this.elementRef.nativeElement.classList.toggle('ck-disabled', isDisabled);
   }
 
-  onEditorChange(html: string) {
-    this.onChange(html);
-    this.input.emit(html);
+  onEditorChange(event: any) {
+    // Extract the actual HTML string. 
+    // The CKEditor Angular wrapper emits an object { event, editor } on change.
+    let htmlString = '';
+    if (event && typeof event === 'object' && event.editor) {
+      htmlString = event.editor.getData();
+    } else if (typeof event === 'string') {
+      htmlString = event;
+    }
+    
+    this.lastEmittedData = htmlString;
+    this.onChange(htmlString);
+    this.input.emit(htmlString);
   }
 }
